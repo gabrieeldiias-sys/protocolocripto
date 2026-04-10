@@ -37,8 +37,8 @@
         /* DASHBOARD */
         #dashboard{display:none;}
         .live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 7px var(--green);animation:blink-led 1.5s infinite;flex-shrink:0;}
-        /* SIDEBAR — começa fechada em qualquer tamanho de tela */
-        .sidebar{position:fixed;top:0;left:-220px;bottom:0;width:200px;background:#080808;border-right:1px solid var(--border);z-index:1000;display:flex;flex-direction:column;transition:left 0.3s ease;box-shadow:2px 0 12px rgba(0,0,0,0.6);}
+        /* SIDEBAR — começa completamente fora da tela */
+        .sidebar{position:fixed;top:0;left:-201px;bottom:0;width:200px;background:#080808;border-right:1px solid var(--border);z-index:1000;display:flex;flex-direction:column;transition:left 0.3s ease;box-shadow:2px 0 12px rgba(0,0,0,0.6);}
         .sidebar.active{left:0;}
         .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:999;}
         .sidebar-overlay.active{display:block;}
@@ -344,6 +344,42 @@
                     <div style="padding:16px;"><div style="font-family:var(--font-mono);font-size:26px;font-weight:900;color:var(--green);" id="mp-roi-big">0,0000%</div></div>
                 </div>
             </div>
+            <!-- PAINEL DE TESTE — OPERAÇÕES AO VIVO -->
+            <div class="panel" style="margin-bottom:14px;background:linear-gradient(135deg,rgba(0,210,106,0.04),var(--bg-1));border-color:rgba(0,210,106,0.2);">
+                <div class="panel-hdr" style="border-bottom-color:rgba(0,210,106,0.15);">
+                    <div class="panel-title" style="color:var(--green);">MONITOR DE OPERAÇÕES · TEMPO REAL</div>
+                    <div class="live-ind"><span class="live-dot"></span>ACUMULANDO</div>
+                </div>
+                <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+                    <div style="text-align:center;">
+                        <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:2px;margin-bottom:6px;">OPS DO MÊS</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--green);" id="test-ops">--</div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;">1 op / 15s</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:2px;margin-bottom:6px;">PRÓXIMA OP EM</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--gold);" id="test-countdown">15s</div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;">countdown</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:2px;margin-bottom:6px;">PROFIT DO MÊS</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--green);" id="test-profit">+$0.00</div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;">capital × taxa × ops</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:2px;margin-bottom:6px;">POOL USDT TOTAL</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--gold);" id="test-pool">$250,000.00</div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;">usdt + lucro</div>
+                    </div>
+                </div>
+                <div style="padding:0 16px 14px;">
+                    <div style="height:4px;background:var(--bg-3);border-radius:2px;overflow:hidden;">
+                        <div id="test-progress-bar" style="height:100%;background:linear-gradient(to right,#006633,var(--green));border-radius:2px;width:0%;transition:width 0.5s linear;"></div>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-3);text-align:center;margin-top:5px;letter-spacing:1px;">progresso até próxima operação</div>
+                </div>
+            </div>
+
             <div class="sec-hdr" style="margin-top:4px;"><div class="sec-title">Opera&ccedil;&otilde;es em Tempo Real</div><div class="live-ind"><span class="live-dot"></span>REAL TIME</div></div>
             <div class="panel" style="overflow:auto;">
                 <table class="arb-table"><thead><tr><th>HORA</th><th>COMPRA</th><th>VENDA</th><th>PRE&Ccedil;O C.</th><th>PRE&Ccedil;O V.</th><th>SPREAD</th><th>ROI MASTER</th></tr></thead><tbody id="mp-ops"></tbody></table>
@@ -452,130 +488,102 @@ const MESAS = [
     {id:'felipe_vaz',    nome:'FELIPE VAZ',     inicio:'09/04/2026', limite:'09/04/2029', poolBtc:0.03451,  poolUsd:2500,    precoMedio:72415.90,  tipo:'btc'},
 ];
 
-// ─── CAPITAL BASE PARA CÁLCULO DE ROI ────────────────────────────────────
-const PROFIT_BASE = {
-    kassem_ataya:  { dataInicio: '2024-09-18', capitalInicial: 3443  },
-    peron:         { dataInicio: '2024-08-27', capitalInicial: 835   },
-    gisele_godk:   { dataInicio: '2024-09-03', capitalInicial: 4550  },
-    eduardo_s:     { dataInicio: '2025-05-08', capitalInicial: 1285  },
-    gustavo_rink:  { dataInicio: '2025-03-06', capitalInicial: 4122  },
-    felipe_campos: { dataInicio: '2026-02-02', capitalInicial: 3163  },
-    ali_ataya:     { dataInicio: '2025-04-08', capitalInicial: 3164  },
-    kelvin_bueno:  { dataInicio: '2026-04-09', capitalInicial: 5000  },
-    pedro_spena:   { dataInicio: '2026-04-09', capitalInicial: 5000  },
-    felipe_vaz:    { dataInicio: '2026-04-09', capitalInicial: 5000  },
-};
-
-const MASTER_CAPITAL    = 500000;
 const MASTER_BTC_FIXED  = 3.45041;
 const MASTER_USDT_FIXED = 250000;
 const MASTER = { profitMensal: 0, roiMensal: 0 };
 
 // ════════════════════════════════════════════════════════════════════════
-//  FUNÇÕES DE CÁLCULO — MODELO LINEAR POR OPERAÇÕES
+//  SISTEMA DE CÁLCULO — CAPITAL ATUAL × OPERAÇÕES POR TEMPO
 //
-//  Regras:
-//  - 1 operação a cada 15 segundos = 5.760 ops/dia
-//  - Taxa por operação: 0.0000001736 (fixo, sem composição)
-//  - profit = capital_base × TAXA_POR_OP × total_operacoes
-//  - total_operacoes = Math.floor((agora - START_TIME) / 15000)
-//  - capital_base nunca muda, profit nunca é reinvestido
-//  - Funciona com site fechado: basta calcular no momento em que abrir
-//
-//  Verificação (deve bater exato):
-//  5760 ops × 0.0000001736 = 0.001 (0,1%/dia) ✓
-//  40320 ops × 0.0000001736 = 0.007 (0,7%/semana) ✓
-//  172800 ops × 0.0000001736 = 0.030 (3,0%/mês 30d) ✓
+//  REGRAS:
+//  1. Capital = poolBtc × precoBTC + poolUSDT  (recalculado a cada tick)
+//  2. taxaPorOp = 0.001 / 5760  (0,1%/dia ÷ 5760 ops/dia)
+//  3. lucroPorOp = capitalAtual × taxaPorOp
+//  4. checkpoint = início do mês (dia 01 às 00:00:00)
+//  5. totalOps = floor((agora - checkpoint) / 15000)
+//  6. profit = totalOps × lucroPorOp
+//  7. Lucro NÃO é composto, capital NÃO muda automaticamente
+//  8. Site fechado → ao reabrir calcula ops que ocorreram no período
 // ════════════════════════════════════════════════════════════════════════
 
-const INTERVALO_MS   = 15000;          // 15 segundos por operação
-const TAXA_POR_OP    = 0.0000001736;   // taxa linear por operação
+const INTERVALO_MS = 15000;         // 15s por operação
+const TAXA_POR_OP  = 0.001 / 5760; // 0,1%/dia ÷ 5760 ops
 
-// Converte string 'YYYY-MM-DD' para timestamp ms (meia-noite local)
-function tsInicio(dataStr) {
-    return new Date(dataStr + 'T00:00:00').getTime();
+// Checkpoint: início do mês atual (dia 01 às 00:00:00)
+function tsCheckpoint() {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0, 0).getTime();
 }
 
-// Timestamp de início do mês atual (dia 01 às 00:00:00)
-function tsInicioMes() {
-    const agora = new Date();
-    return new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0).getTime();
+// Total de operações desde o checkpoint até agora
+function totalOpsNoMes() {
+    return Math.floor(Math.max(0, Date.now() - tsCheckpoint()) / INTERVALO_MS);
 }
 
-// Profit TOTAL: desde o início do contrato até agora
-function calcProfitTotal(mesaId) {
-    const b = PROFIT_BASE[mesaId]; if(!b) return 0;
-    const agora        = Date.now();
-    const tempoDecorrido = Math.max(0, agora - tsInicio(b.dataInicio));
-    const totalOps     = Math.floor(tempoDecorrido / INTERVALO_MS);
-    return b.capitalInicial * TAXA_POR_OP * totalOps;
+// Capital atual de uma mesa (BTC convertido + USDT) — dinâmico com preço real
+function capitalAtual(m) {
+    if(m.tipo === 'inv') return m.saldoIni || m.poolUsd;
+    return (m.poolBtc * btcBase) + m.poolUsd;
 }
 
-// Profit do MÊS ATUAL: desde o dia 01 do mês (ou início do contrato se posterior)
-function calcProfitMensal(mesaId) {
-    const b = PROFIT_BASE[mesaId]; if(!b) return 0;
-    const agora        = Date.now();
-    const refContrato  = tsInicio(b.dataInicio);
-    const refMes       = tsInicioMes();
-    // Conta a partir do mais recente: virada do mês OU início do contrato
-    const dataRef      = Math.max(refContrato, refMes);
-    const tempoDecorrido = Math.max(0, agora - dataRef);
-    const totalOps     = Math.floor(tempoDecorrido / INTERVALO_MS);
-    return b.capitalInicial * TAXA_POR_OP * totalOps;
+// Capital atual do Master — DINÂMICO (BTC × preço real + USDT fixo)
+// CORREÇÃO 1: não usar MASTER_CAPITAL fixo
+function capitalMasterAtual() {
+    return (MASTER_BTC_FIXED * btcBase) + MASTER_USDT_FIXED;
 }
 
-// ROI% mensal
-function calcROIMensal(mesaId) {
-    const b = PROFIT_BASE[mesaId]; if(!b) return 0;
-    return (calcProfitMensal(mesaId) / b.capitalInicial) * 100;
+// Profit do mês de uma mesa
+function calcProfitMensal(m) {
+    return totalOpsNoMes() * capitalAtual(m) * TAXA_POR_OP;
 }
 
-// Profit MASTER do mês atual
+// ROI% do mês de uma mesa
+function calcROIMensal(m) {
+    const cap = capitalAtual(m);
+    if(cap <= 0) return 0;
+    return (calcProfitMensal(m) / cap) * 100;
+}
+
+// Profit do mês do Master — usa capital dinâmico
 function calcProfitMensalMaster() {
-    const agora          = Date.now();
-    const tempoDecorrido = Math.max(0, agora - tsInicioMes());
-    const totalOps       = Math.floor(tempoDecorrido / INTERVALO_MS);
-    return MASTER_CAPITAL * TAXA_POR_OP * totalOps;
+    return totalOpsNoMes() * capitalMasterAtual() * TAXA_POR_OP;
 }
 
-// Operações do Master no mês (para label)
-function opsMasterNoMes() {
-    return Math.floor(Math.max(0, Date.now() - tsInicioMes()) / INTERVALO_MS);
-}
-
-// Atualiza todos os profits (roda a cada 15s)
+// Atualiza profits de todas as mesas e master (roda a cada 15s)
 function atualizarTodosProfits() {
     MESAS.forEach(m => {
-        m.profitTotal  = calcProfitTotal(m.id);
-        m.profitMensal = calcProfitMensal(m.id);
-        m.roiMensal    = calcROIMensal(m.id);
+        m.profitMensal = calcProfitMensal(m);
+        m.roiMensal    = calcROIMensal(m);
     });
     MASTER.profitMensal = calcProfitMensalMaster();
-    MASTER.roiMensal    = (MASTER.profitMensal / MASTER_CAPITAL) * 100;
+    MASTER.roiMensal    = (MASTER.profitMensal / capitalMasterAtual()) * 100;
 }
 
-// Capital pool para exibição
-function mesaCap(m) {
-    if(m.tipo === 'inv') return m.saldoIni || m.poolUsd;
-    return m.poolBtc * m.precoMedio + m.poolUsd;
-}
-
-// Inicializa
-atualizarTodosProfits();
+// Capital exibido na pool
+function mesaCap(m) { return capitalAtual(m); }
 
 // ─── ESTADO GLOBAL ────────────────────────────────────────────────────────
 const prices = {};
-let btcBase = 72400;
+let btcBase = 72400;  // valor inicial até WS conectar
 let maxSp = 0, maxPair = '--';
 const TOTAL_CLIENT_BTC = MESAS.reduce((s, m) => s + m.poolBtc, 0);
-const TOTAL_CAPITAL_OP = 523162;
-const DAILY_MAX_PROFIT = TOTAL_CAPITAL_OP * TAXA_POR_OP * 5760; // 5760 ops/dia
-const ROI_PER_OP = DAILY_MAX_PROFIT / 5760;
+
+// CORREÇÃO 2: ROI_PER_OP calculado dinamicamente com capital real
+// Usado apenas na tabela cosmética de operações (não afeta profit real)
+function roiPorOp() {
+    const capTotal = (TOTAL_CLIENT_BTC * btcBase)
+                   + MESAS.reduce((s, m) => s + (m.saldoIni || m.poolUsd), 0)
+                   + capitalMasterAtual();
+    return capTotal * TAXA_POR_OP;
+}
+
+// Inicializa profits com btcBase padrão (WS vai atualizar em seguida)
+atualizarTodosProfits();
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────
 const fmt  = (n, d=2) => n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
 // 4 casas decimais para ROI%, vírgula brasileira
-const fmtR = (n)      => n.toFixed(4).replace('.', ',') + '%';
+const fmtR = (n)      => n.toFixed(3).replace('.', ',') + '%';
 const set  = (id, v)  => { const e = document.getElementById(id); if(e) e.textContent = v; };
 const setW = (id, w)  => { const e = document.getElementById(id); if(e) e.style.width = w; };
 
@@ -628,6 +636,29 @@ function renderRadar(id){
     }).join('');
 }
 
+// ─── LOGOS DAS EXCHANGES (URLs públicas — funcionam sem servidor) ─────────
+const EX_LOGOS = {
+    bybit:    'https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png',
+    binance:  'https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png',
+    okx:      'https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png',
+    kucoin:   'https://s2.coinmarketcap.com/static/img/exchanges/64x64/311.png',
+    coinbase: 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png',
+    crypto:   'https://s2.coinmarketcap.com/static/img/exchanges/64x64/1149.png',
+    bitget:   'https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png',
+    kraken:   'https://s2.coinmarketcap.com/static/img/exchanges/64x64/24.png',
+    gate:     'https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png',
+    bitfinex: 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/37.png',
+};
+
+function exIcon(id, side){
+    const url  = EX_LOGOS[id] || '';
+    const glow = side === 'buy'
+        ? '0 0 6px rgba(0,210,106,0.7)'
+        : '0 0 6px rgba(255,59,92,0.7)';
+    const name = EX.find(e => e.id === id)?.name || id;
+    return `<img src="${url}" title="${name}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;box-shadow:${glow};border:1px solid ${side==='buy'?'rgba(0,210,106,0.4)':'rgba(255,59,92,0.4)'};" onerror="this.outerHTML='<span style=\'font-family:var(--font-mono);font-size:9px;font-weight:700;color:${side==='buy'?'var(--green)':'var(--red)'}\'>${name}</span>'">`;
+}
+
 // ─── MATRIX ──────────────────────────────────────────────────────────────
 function renderMatrix(){
     const el = document.getElementById('tb-matrix'); if(!el) return;
@@ -636,20 +667,20 @@ function renderMatrix(){
     const hora = new Date().toLocaleTimeString('pt-BR');
 
     const spreadFactor = Math.min(1, result.spread / 0.05);
-    const roiOp    = ROI_PER_OP * (0.7 + Math.random() * 0.6) * spreadFactor;
-    const masterRoi = roiOp * (MASTER_CAPITAL / TOTAL_CAPITAL_OP);
-    const buyId    = result.minId;
-    const sellId   = result.maxId;
-    const iconStyle = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(0,210,106,0.4));';
-    const iconStyleSell = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(255,59,92,0.4));';
-    const buyIcon  = `<img src="icones/${buyId}.svg"  title="${EX.find(e=>e.id===buyId)?.name||buyId}"  style="${iconStyle}"  onerror="this.outerHTML='<span class=\'ex-tag buy\'>${EX.find(e=>e.id===buyId)?.name||buyId}</span>'">`;
-    const sellIcon = `<img src="icones/${sellId}.svg" title="${EX.find(e=>e.id===sellId)?.name||sellId}" style="${iconStyleSell}" onerror="this.outerHTML='<span class=\'ex-tag sell\'>${EX.find(e=>e.id===sellId)?.name||sellId}</span>'">`;
+    const capTotal  = roiPorOp();   // capital real total das pools
+    const capMaster = capitalMasterAtual();
+    const roiOp     = capTotal * (0.7 + Math.random() * 0.6) * spreadFactor * TAXA_POR_OP;
+    const masterRoi = capMaster * (0.7 + Math.random() * 0.6) * spreadFactor * TAXA_POR_OP;
+
+    const buyId  = result.minId;
+    const sellId = result.maxId;
+
     const addRow = (tbody, roi) => {
         if(!tbody) return;
         const r = document.createElement('tr'); r.style.cssText = 'opacity:0;transition:opacity .4s;';
         r.innerHTML = `<td style="color:var(--text-3);font-size:10px;">${hora}</td>
-            <td style="text-align:center;">${buyIcon}</td>
-            <td style="text-align:center;">${sellIcon}</td>
+            <td style="text-align:center;">${exIcon(buyId,'buy')}</td>
+            <td style="text-align:center;">${exIcon(sellId,'sell')}</td>
             <td style="color:var(--green);font-family:var(--font-mono);">$${result.min.toFixed(2)}</td>
             <td style="color:var(--red);font-family:var(--font-mono);">$${result.max.toFixed(2)}</td>
             <td style="color:var(--gold);font-family:var(--font-mono);font-weight:700;">${result.spread.toFixed(4)}%</td>
@@ -694,7 +725,7 @@ function renderDist(){
     const el = document.getElementById('ex-dist'); if(!el) return;
     el.innerHTML = EX.map(ex => {
         const effectivePct = Math.max(0.5, ex.pct + (Math.random() * 1 - 0.5));
-        const totalCap = TOTAL_CLIENT_BTC * btcBase + MESAS.reduce((s,m)=>s+(m.saldoIni||m.poolUsd),0) + MASTER_CAPITAL;
+        const totalCap = TOTAL_CLIENT_BTC * btcBase + MESAS.reduce((s,m)=>s+(m.saldoIni||m.poolUsd),0) + capitalMasterAtual();
         const val = totalCap * (effectivePct / 100);
         const barWidth = (effectivePct / 28 * 100).toFixed(1);
         return `<div style="display:flex;align-items:center;gap:7px;">
@@ -749,7 +780,7 @@ function updateBtcDynamic(){
         if(m.tipo === 'inv') return;
         const btcV     = m.poolBtc * btcBase;
         const poolTotal = btcV + m.poolUsd;
-        const acum     = poolTotal + m.profitTotal;
+        const acum     = poolTotal + m.profitMensal;
         set('mesa-' + m.id + '-btc-usd',    '(≈ $' + btcV.toFixed(0) + ')');
         set('mesa-' + m.id + '-pool-total', '≈ $'  + fmt(poolTotal));
         set('mesa-' + m.id + '-acum',       '≈ $'  + fmt(acum));
@@ -762,52 +793,55 @@ function updateBtcDynamic(){
     set('mesa-master-acum',       '≈ $' + fmt(masterTotal + MASTER.profitMensal));
 }
 
-// ─── ATUALIZA MESAS (roda a cada 30s) ────────────────────────────────────
+// ─── ATUALIZA MESAS (roda a cada 15s) — mesma lógica para admin e cliente ──
+// Admin vê todos os cards, cliente vê só o seu. Os IDs são os mesmos.
 function updateMesasValues(){
     MESAS.forEach(m => {
-        const b    = PROFIT_BASE[m.id];
-        const cap  = b ? b.capitalInicial : mesaCap(m);
+        const cap  = capitalAtual(m);          // sempre recalcula com btcBase atual
         const meta = cap * 0.03;
         const pct  = Math.min(100, (m.profitMensal / meta * 100)).toFixed(1);
-        set('mesa-' + m.id + '-roi',      '≈ ' + fmtR(m.roiMensal));
-        set('mesa-' + m.id + '-roi-usd',  '+$' + m.profitMensal.toFixed(2));
-        set('mesa-' + m.id + '-profit',   '+$' + m.profitMensal.toFixed(2));
+        set('mesa-' + m.id + '-roi',       '≈ ' + fmtR(m.roiMensal));
+        set('mesa-' + m.id + '-roi-usd',   '+$' + m.profitMensal.toFixed(2));
+        set('mesa-' + m.id + '-profit',    '+$' + m.profitMensal.toFixed(2));
         set('mesa-' + m.id + '-barra-pct', pct + '%');
-        setW('mesa-' + m.id + '-barra',   pct + '%');
+        setW('mesa-' + m.id + '-barra',    pct + '%');
         if(m.tipo === 'inv'){
             const poolTotal = m.saldoIni || m.poolUsd;
             set('mesa-' + m.id + '-pool-total', '≈ $' + fmt(poolTotal));
-            set('mesa-' + m.id + '-acum', '≈ $' + fmt(poolTotal + m.profitTotal));
+            set('mesa-' + m.id + '-acum',       '≈ $' + fmt(poolTotal + m.profitMensal));
         }
     });
-    const masterMeta = MASTER_CAPITAL * 0.03;
+    const masterMeta = capitalMasterAtual() * 0.03;
     const masterPct  = Math.min(100, (MASTER.profitMensal / masterMeta * 100)).toFixed(1);
-    setW('mesa-master-barra', masterPct + '%');
-    set('mesa-master-barra-pct', masterPct + '%');
-    set('mesa-master-roi',        '≈ ' + fmtR(MASTER.roiMensal));
-    set('mesa-master-hdr-profit', '+$' + fmt(MASTER.profitMensal));
-    set('mesa-master-profit',     '+$' + fmt(MASTER.profitMensal));
+    setW('mesa-master-barra',        masterPct + '%');
+    set('mesa-master-barra-pct',     masterPct + '%');
+    set('mesa-master-roi',           '≈ ' + fmtR(MASTER.roiMensal));
+    set('mesa-master-hdr-profit',    '+$' + fmt(MASTER.profitMensal));
+    set('mesa-master-profit',        '+$' + fmt(MASTER.profitMensal));
+    // Atualiza vista do cliente individual (se logado)
     if(currentUser && currentUser.mesa) updateMinhasMesaLive();
     updateBtcDynamic();
 }
 
-// ─── ATUALIZA VISTA INDIVIDUAL DO CLIENTE ────────────────────────────────
+// ─── ATUALIZA VISTA INDIVIDUAL DO CLIENTE ─────────────────────────────────
+// Mesma fórmula do admin — só muda quais IDs são atualizados (mm-* prefixo)
 function updateMinhasMesaLive(){
     const mesa = MESAS.find(m => m.id === currentUser.mesa); if(!mesa) return;
-    const b         = PROFIT_BASE[mesa.id];
-    const cap       = b ? b.capitalInicial : mesaCap(mesa);
+    const cap       = capitalAtual(mesa);      // BTC × preço + USDT
     const meta      = cap * 0.03;
     const btcV      = mesa.poolBtc * btcBase;
     const poolTotal = mesa.tipo === 'inv' ? (mesa.saldoIni || mesa.poolUsd) : (btcV + mesa.poolUsd);
-    const acum      = poolTotal + mesa.profitTotal;
+    const acum      = poolTotal + mesa.profitMensal;
     const pct       = Math.min(100, (mesa.profitMensal / meta * 100)).toFixed(1);
 
+    // Cards do topo
     set('mm-pool-total', '$' + fmt(poolTotal));
     set('mm-profit',     '+$' + mesa.profitMensal.toFixed(2));
     set('mm-profit-big', '+$' + mesa.profitMensal.toFixed(2));
     set('mm-roi',         fmtR(mesa.roiMensal));
     set('mm-acum',       '$' + fmt(acum));
     setW('mm-barra',     pct + '%');
+    // Card da mesa
     set('mm-card-roi',        '≈ ' + fmtR(mesa.roiMensal));
     set('mm-card-roi-usd',    '+$' + mesa.profitMensal.toFixed(2));
     set('mm-card-profit',     '+$' + mesa.profitMensal.toFixed(2));
@@ -839,11 +873,10 @@ function updateMasterPage(){
 
 // ─── CARD DE MESA (HTML) ─────────────────────────────────────────────────
 function mesaCardHTML(m, idx){
-    const b         = PROFIT_BASE[m.id];
-    const cap       = b ? b.capitalInicial : mesaCap(m);
+    const cap       = capitalAtual(m);
     const btcV      = m.poolBtc * btcBase;
     const poolTotal = m.tipo === 'inv' ? (m.saldoIni || m.poolUsd) : (btcV + m.poolUsd);
-    const acum      = poolTotal + m.profitTotal;
+    const acum      = poolTotal + m.profitMensal;
     const meta      = cap * 0.03;
     const pct       = Math.min(100, (m.profitMensal / meta * 100)).toFixed(1);
     const rows = m.tipo === 'inv' ? `
@@ -908,11 +941,10 @@ function renderAllMesas(container){
 }
 
 function renderMinhasMesa(container, mesa){
-    const b         = PROFIT_BASE[mesa.id];
-    const cap       = b ? b.capitalInicial : mesaCap(mesa);
+    const cap       = capitalAtual(mesa);
     const btcV      = mesa.poolBtc * btcBase;
     const poolTotal = mesa.tipo === 'inv' ? (mesa.saldoIni || mesa.poolUsd) : (btcV + mesa.poolUsd);
-    const acum      = poolTotal + mesa.profitTotal;
+    const acum      = poolTotal + mesa.profitMensal;
     const meta      = cap * 0.03;
     const pct       = Math.min(100, (mesa.profitMensal / meta * 100)).toFixed(1);
     const dataInicioObj = new Date(mesa.inicio.split('/').reverse().join('-'));
@@ -1000,7 +1032,27 @@ function renderMinhasMesa(container, mesa){
         </div>`;
 }
 
-// ─── NAVEGAÇÃO ───────────────────────────────────────────────────────────
+// ─── MONITOR DE TESTE (atualiza a cada 1s) ───────────────────────────────
+function updateTestMonitor(){
+    const agora      = Date.now();
+    const inicioMes  = new Date(new Date().getFullYear(), new Date().getMonth(), 1, 0, 0, 0, 0).getTime();
+    const decorrido  = Math.max(0, agora - inicioMes);
+    const totalOps   = Math.floor(decorrido / 15000);
+    const msAteProx  = 15000 - (decorrido % 15000);
+    const segsAteProx = Math.ceil(msAteProx / 1000);
+    const progresso  = ((15000 - msAteProx) / 15000 * 100).toFixed(1);
+    const profitMes  = capitalMasterAtual() * TAXA_POR_OP * totalOps;
+    const poolUsdt   = MASTER_USDT_FIXED + profitMes;
+
+    set('test-ops',      totalOps.toLocaleString('pt-BR'));
+    set('test-countdown', segsAteProx + 's');
+    set('test-profit',   '+$' + profitMes.toFixed(2));
+    set('test-pool',     '$' + poolUsdt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
+    const bar = document.getElementById('test-progress-bar');
+    if(bar) bar.style.width = progresso + '%';
+}
+
+
 window.showPage = (page, el) => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1055,23 +1107,31 @@ function init(){
     setInterval(renderMatrix,15000);  // tabela de operações
     setInterval(updateClock, 1000);   // relógio
     setInterval(profitTick,  15000);  // ← PROFIT: recalcula a cada 15s (1 operação)
+    setInterval(updateTestMonitor, 1000); // monitor de teste · countdown ao vivo
 }
 
 if(currentUser) init();
 
 // ─── MENU (hambúrguer sempre visível) ────────────────────────────────────
-function toggleMobileMenu(){
-    document.querySelector('.sidebar').classList.toggle('active');
-    document.querySelector('.sidebar-overlay').classList.toggle('active');
-    document.querySelector('.menu-toggle').classList.toggle('active');
+function closeSidebar(){
+    document.querySelector('.sidebar').classList.remove('active');
+    document.querySelector('.sidebar-overlay').classList.remove('active');
+    document.querySelector('.menu-toggle').classList.remove('active');
 }
-// Fecha menu ao clicar em qualquer aba de navegação
-document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelector('.sidebar').classList.remove('active');
-        document.querySelector('.sidebar-overlay').classList.remove('active');
-        document.querySelector('.menu-toggle').classList.remove('active');
-    });
+function toggleMobileMenu(){
+    const sidebar = document.querySelector('.sidebar');
+    if(sidebar.classList.contains('active')){
+        closeSidebar();
+    } else {
+        sidebar.classList.add('active');
+        document.querySelector('.sidebar-overlay').classList.add('active');
+        document.querySelector('.menu-toggle').classList.add('active');
+    }
+}
+// Event delegation — funciona para abas estáticas E dinâmicas
+document.addEventListener('click', function(e){
+    const tab = e.target.closest('.nav-tab');
+    if(tab) closeSidebar();
 });
 </script>
 </body>
