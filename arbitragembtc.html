@@ -341,7 +341,7 @@
                     <div style="padding:16px;"><div style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--green);">$250,000.00</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);margin-top:5px;">Est&aacute;tico &middot; incorpora lucro no dia 01</div></div>
                 </div>
                 <div class="panel" style="padding:0;"><div class="panel-hdr"><div class="panel-title">ROI ACUMULADO NO M&Ecirc;S</div></div>
-                    <div style="padding:16px;"><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-bottom:8px;letter-spacing:1px;" id="mp-dias-label">0,1%/dia · tempo real</div><div style="font-family:var(--font-mono);font-size:26px;font-weight:900;color:var(--green);" id="mp-roi-big">0,0000%</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-top:6px;">Zera dia 01 &bull; Lucro vai para Pool USDT</div></div>
+                    <div style="padding:16px;"><div style="font-family:var(--font-mono);font-size:26px;font-weight:900;color:var(--green);" id="mp-roi-big">0,0000%</div></div>
                 </div>
             </div>
             <div class="sec-hdr" style="margin-top:4px;"><div class="sec-title">Opera&ccedil;&otilde;es em Tempo Real</div><div class="live-ind"><span class="live-dot"></span>REAL TIME</div></div>
@@ -634,17 +634,22 @@ function renderMatrix(){
     const mpEl = document.getElementById('mp-ops');
     const result = updatePrices(); if(result.spread <= 0) return;
     const hora = new Date().toLocaleTimeString('pt-BR');
-    const buyName  = EX.find(e => e.id === result.minId)?.name || result.minId;
-    const sellName = EX.find(e => e.id === result.maxId)?.name || result.maxId;
+
     const spreadFactor = Math.min(1, result.spread / 0.05);
     const roiOp    = ROI_PER_OP * (0.7 + Math.random() * 0.6) * spreadFactor;
     const masterRoi = roiOp * (MASTER_CAPITAL / TOTAL_CAPITAL_OP);
+    const buyId    = result.minId;
+    const sellId   = result.maxId;
+    const iconStyle = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(0,210,106,0.4));';
+    const iconStyleSell = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(255,59,92,0.4));';
+    const buyIcon  = `<img src="icones/${buyId}.svg"  title="${EX.find(e=>e.id===buyId)?.name||buyId}"  style="${iconStyle}"  onerror="this.outerHTML='<span class=\'ex-tag buy\'>${EX.find(e=>e.id===buyId)?.name||buyId}</span>'">`;
+    const sellIcon = `<img src="icones/${sellId}.svg" title="${EX.find(e=>e.id===sellId)?.name||sellId}" style="${iconStyleSell}" onerror="this.outerHTML='<span class=\'ex-tag sell\'>${EX.find(e=>e.id===sellId)?.name||sellId}</span>'">`;
     const addRow = (tbody, roi) => {
         if(!tbody) return;
         const r = document.createElement('tr'); r.style.cssText = 'opacity:0;transition:opacity .4s;';
         r.innerHTML = `<td style="color:var(--text-3);font-size:10px;">${hora}</td>
-            <td><span class="ex-tag buy">${buyName}</span></td>
-            <td><span class="ex-tag sell">${sellName}</span></td>
+            <td style="text-align:center;">${buyIcon}</td>
+            <td style="text-align:center;">${sellIcon}</td>
             <td style="color:var(--green);font-family:var(--font-mono);">$${result.min.toFixed(2)}</td>
             <td style="color:var(--red);font-family:var(--font-mono);">$${result.max.toFixed(2)}</td>
             <td style="color:var(--gold);font-family:var(--font-mono);font-weight:700;">${result.spread.toFixed(4)}%</td>
@@ -826,7 +831,7 @@ function updateMasterPage(){
     set('mp-pool-sub',    MASTER_BTC_FIXED.toFixed(5) + ' BTC + $250.000 USDT');
     set('mp-btc-amt',     MASTER_BTC_FIXED.toFixed(5) + ' BTC');
     set('mp-btc-usd-val', '≈ $' + fmt(masterBtcUsd, 0));
-    set('mp-dias-label',  `${opsMasterNoMes().toLocaleString('pt-BR')} ops · 15s/op · linear`);
+
     set('mp-btc-price-hdr', '$' + fmt(btcBase));
     set('mesa-master-roi',        '≈ ' + roiStr);
     set('mesa-master-hdr-profit', profStr);
@@ -924,7 +929,7 @@ function renderMinhasMesa(container, mesa){
         <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
             <div class="stat-card" style="--c:var(--gold)"><div class="stat-label">Capital Total</div><div class="stat-value" id="mm-pool-total">$${fmt(poolTotal)}</div><div class="stat-sub">Pool BTC + USDT</div></div>
             <div class="stat-card" style="--c:var(--green)"><div class="stat-label">Lucro do Mês</div><div class="stat-value" id="mm-profit">+$${mesa.profitMensal.toFixed(2)}</div><div class="stat-sub">Mês atual · reseta dia 01</div></div>
-            <div class="stat-card" style="--c:var(--blue)"><div class="stat-label">ROI do Mês</div><div class="stat-value" style="--c:var(--blue)" id="mm-roi">${fmtR(mesa.roiMensal)}</div><div class="stat-sub">0,1%/dia · tempo real</div></div>
+            <div class="stat-card" style="--c:var(--blue)"><div class="stat-label">ROI do Mês</div><div class="stat-value" style="--c:var(--blue)" id="mm-roi">${fmtR(mesa.roiMensal)}</div></div>
             <div class="stat-card" style="--c:#a855f7"><div class="stat-label">ROI Diário</div><div class="stat-value" style="--c:#a855f7">0,1000%</div><div class="stat-sub">Fixo · todos os dias</div></div>
         </div>
         <div class="grid-2" style="margin-bottom:20px;">
