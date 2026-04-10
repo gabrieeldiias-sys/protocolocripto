@@ -194,6 +194,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .radar-card.is-buy  .rc-logo{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.08);}
 .radar-card.is-sell .rc-logo{border-color:rgba(255,77,106,.35);background:rgba(255,77,106,.08);}
 .rc-logo img{width:24px;height:24px;object-fit:contain;border-radius:50%;}
+/* Logos com fundo branco — inverte para tema escuro */
+.rc-logo img.invert{filter:invert(1) brightness(.85);}
 .rc-exinfo{flex:1;min-width:0;}
 .rc-exname{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rc-pair{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:1px;margin-top:2px;}
@@ -354,6 +356,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 .ex-logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .ex-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;border:1px solid rgba(255,255,255,.08);}
+.ex-logo.invert{filter:invert(1) brightness(.85);}
 .ex-logo-fallback{width:32px;height:32px;border-radius:50%;background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.15);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;color:var(--gold);}
 .ex-name{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);letter-spacing:.5px;}
 .ex-pair{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
@@ -895,16 +898,16 @@ const TAXA_POR_OP  = 0.001 / 5760; // 0,1%/dia ÷ 5760 ops/dia
 
 // ── EXCHANGES ──────────────────────────────────────────────────
 const EX = [
-    {id:'bybit',    name:'BYBIT',      logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png'},
-    {id:'binance',  name:'BINANCE',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png'},
-    {id:'okx',      name:'OKX',        logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png'},
-    {id:'kucoin',   name:'KUCOIN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/311.png'},
-    {id:'coinbase', name:'COINBASE',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png'},
-    {id:'crypto',   name:'CRYPTO.COM', logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/1149.png'},
-    {id:'bitget',   name:'BITGET',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png'},
-    {id:'kraken',   name:'KRAKEN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/24.png'},
-    {id:'gate',     name:'GATE.IO',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png'},
-    {id:'bitfinex', name:'BITFINEX',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/37.png'},
+    {id:'bybit',    name:'BYBIT',      logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png',  inv:true },
+    {id:'binance',  name:'BINANCE',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png',  inv:false},
+    {id:'okx',      name:'OKX',        logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png',  inv:true },
+    {id:'kucoin',   name:'KUCOIN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/311.png',  inv:false},
+    {id:'coinbase', name:'COINBASE',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png',   inv:false},
+    {id:'crypto',   name:'CRYPTO.COM', logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/1149.png', inv:false},
+    {id:'bitget',   name:'BITGET',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png',  inv:false},
+    {id:'kraken',   name:'KRAKEN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/24.png',   inv:false},
+    {id:'gate',     name:'GATE.IO',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png',  inv:true },
+    {id:'bitfinex', name:'BITFINEX',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/37.png',   inv:false},
 ];
 
 // ── ESTADO ─────────────────────────────────────────────────────
@@ -1088,7 +1091,7 @@ function renderRadar(elId) {
         return `<div class="radar-card ${cls}">
             <div class="rc-head">
                 <div class="rc-logo">
-                    <img src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none'">
+                    <img src="${ex.logo}" alt="${ex.name}" class="${ex.inv?'invert':''}" onerror="this.style.display='none'">
                 </div>
                 <div class="rc-exinfo">
                     <div class="rc-exname">${ex.name}</div>
@@ -1366,7 +1369,7 @@ function renderExchanges() {
     el.dataset.done = '1';
     el.innerHTML = EX.map((ex, i) => {
         const latency = (Math.random() * 18 + 8).toFixed(0);
-        const logoOk  = `<img class="ex-logo" src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        const logoOk  = `<img class="ex-logo${ex.inv?' invert':''}" src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                          <div class="ex-logo-fallback" style="display:none;">${ex.name.substring(0,3)}</div>`;
         return `<div class="ex-card" style="animation:fadeUp .3s ease ${i * .05}s both;">
             <div class="ex-seal">SYNC</div>
