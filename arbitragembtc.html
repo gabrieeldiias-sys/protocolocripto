@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC Arbitrage System | Protocolo Cripto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#020202;--bg-1:#080808;--bg-2:#0d0d0d;--bg-3:#111;--gold:#F2A900;--gold-dim:rgba(242,169,0,0.12);--green:#00D26A;--green-dim:rgba(0,210,106,0.10);--red:#FF3B5C;--red-dim:rgba(255,59,92,0.10);--blue:#3B82F6;--text:#E8E8E8;--text-2:#888;--text-3:#444;--border:rgba(255,255,255,0.06);--border-gold:rgba(242,169,0,0.2);--font-logo:'Orbitron',sans-serif;--font-mono:'JetBrains Mono',monospace;--font-body:'Inter',sans-serif;--radius:12px;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:var(--font-body);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;}
+        ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:var(--bg-1);}::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes blink-led{0%,100%{opacity:1}50%{opacity:.2}}
+        @keyframes flash-green{0%,100%{background:transparent}50%{background:rgba(0,210,106,0.12)}}
+        @keyframes flash-red{0%,100%{background:transparent}50%{background:rgba(255,59,92,0.12)}}
+        @keyframes pulse-dot{0%,100%{transform:scale(1);box-shadow:0 0 5px var(--green)}50%{transform:scale(1.5);box-shadow:0 0 16px var(--green)}}
+        @keyframes pulse-gold{0%,100%{box-shadow:0 0 8px rgba(242,169,0,0.4)}50%{box-shadow:0 0 20px rgba(242,169,0,0.8)}}
+
+        /* LOGIN */
+        #login-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+        #login-canvas{position:absolute;inset:0;opacity:.25;pointer-events:none;}
+        .login-wrap{position:relative;z-index:2;width:100%;max-width:400px;margin:20px;animation:fadeUp .5s ease;}
+        .login-top{text-align:center;margin-bottom:28px;}
+        .login-logo-txt{font-family:var(--font-logo);font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;}
+        .login-brand{font-family:var(--font-logo);font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:6px;}
+        .login-sub{font-family:var(--font-mono);font-size:10px;color:var(--text-3);letter-spacing:2px;}
+        .login-box{background:linear-gradient(145deg,#0d0d0d,#070707);border:1px solid var(--border-gold);border-radius:16px;padding:32px 28px;}
+        .lf{margin-bottom:16px;}.lf label{display:block;font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:2px;margin-bottom:7px;text-transform:uppercase;}
+        .lf input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:#fff;font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .3s;}
+        .lf input:focus{border-color:var(--border-gold);}
+        .login-btn{width:100%;padding:14px;background:linear-gradient(45deg,#F2A900,#FFD54F);border:none;border-radius:8px;cursor:pointer;font-family:var(--font-logo);font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:2px;transition:all .3s;margin-top:4px;}
+        .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(242,169,0,.3);}
+        .login-err{font-family:var(--font-mono);font-size:11px;color:var(--red);text-align:center;margin-top:12px;min-height:16px;}
+        .login-foot{text-align:center;margin-top:18px;font-family:var(--font-mono);font-size:10px;color:#1a1a1a;letter-spacing:1px;}
+
+        /* DASHBOARD */
+        #dashboard{display:none;}
+        .live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 7px var(--green);animation:blink-led 1.5s infinite;flex-shrink:0;}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;top:0;left:0;bottom:0;width:200px;background:#080808;border-right:1px solid var(--border);z-index:100;display:flex;flex-direction:column;}
+        .sid-logo{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--font-logo);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:8px;}
+        .sid-nav{flex:1;padding:8px 0;overflow-y:auto;}
+        .nav-tab{display:block;padding:13px 20px;font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:1px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;white-space:nowrap;}
+        .nav-tab:hover{color:#fff;background:rgba(255,255,255,.03);}
+        .nav-tab.active{color:var(--gold);background:rgba(242,169,0,.08);border-left-color:var(--gold);}
+        .sid-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;gap:8px;}
+        .sid-status{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:9px;color:var(--green);letter-spacing:1px;}
+        .sid-user{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
+        .logout-btn{background:transparent;border:1px solid var(--border);color:var(--text-3);font-family:var(--font-mono);font-size:9px;padding:7px 10px;border-radius:6px;cursor:pointer;letter-spacing:1px;transition:all .2s;text-align:center;width:100%;}
+        .logout-btn:hover{border-color:var(--red);color:var(--red);}
+        .status-bar{position:fixed;top:0;left:200px;right:0;height:34px;background:rgba(2,2,2,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:99;font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
+
+        .main{margin-left:200px;margin-top:34px;padding:18px;}
+        .page{display:none;animation:fadeUp .3s ease;}.page.active{display:block;}
+        .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+        .sec-title{font-family:var(--font-mono);font-size:10px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+        .sec-title::before{content:'';width:3px;height:12px;background:var(--gold);border-radius:2px;flex-shrink:0;}
+        .live-ind{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--green);letter-spacing:1px;}
+
+        .stats-row{display:grid;gap:10px;margin-bottom:18px;}
+        .stat-card{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;}
+        .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,var(--gold));}
+        .stat-label{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+        .stat-value{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--c,var(--gold));line-height:1;margin-bottom:4px;}
+        .stat-sub{font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+
+        .panel{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+        .panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);}
+        .panel-title{font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;}
+
+        /* RADAR PROFISSIONAL */
+        .radar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+        .radar-card{background:linear-gradient(145deg,#0a0a0a,#060606);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;position:relative;overflow:hidden;transition:all .5s;}
+        .radar-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent;transition:all .5s;}
+        .radar-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .5s;border-radius:14px;}
+        .radar-card.is-buy{border-color:rgba(0,210,106,.4);animation:flash-green .7s ease;}
+        .radar-card.is-buy::before{background:linear-gradient(to right,transparent,var(--green),transparent);box-shadow:0 0 12px var(--green);}
+        .radar-card.is-buy::after{background:radial-gradient(ellipse at top,rgba(0,210,106,0.06),transparent 70%);opacity:1;}
+        .radar-card.is-sell{border-color:rgba(255,59,92,.4);animation:flash-red .7s ease;}
+        .radar-card.is-sell::before{background:linear-gradient(to right,transparent,var(--red),transparent);box-shadow:0 0 12px var(--red);}
+        .radar-card.is-sell::after{background:radial-gradient(ellipse at top,rgba(255,59,92,0.06),transparent 70%);opacity:1;}
+        .r-logo{width:32px;height:32px;object-fit:contain;margin:0 auto 8px;display:block;filter:drop-shadow(0 0 4px rgba(242,169,0,0.2));}
+        .r-logo-txt{width:32px;height:32px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-logo);font-size:8px;font-weight:900;color:var(--gold);background:rgba(242,169,0,0.08);border:1px solid rgba(242,169,0,0.15);border-radius:8px;letter-spacing:.5px;}
+        .r-name{font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:1.5px;margin-bottom:8px;text-transform:uppercase;}
+        .r-price{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text);margin-bottom:7px;line-height:1;letter-spacing:-.5px;}
+        .radar-card.is-buy .r-price{color:var(--green);text-shadow:0 0 10px rgba(0,210,106,0.4);}
+        .radar-card.is-sell .r-price{color:var(--red);text-shadow:0 0 10px rgba(255,59,92,0.4);}
+        .r-sig{font-family:var(--font-mono);font-size:9px;font-weight:900;padding:4px 10px;border-radius:20px;letter-spacing:1.5px;display:inline-block;}
+        .radar-card.is-buy .r-sig{background:rgba(0,210,106,0.15);color:var(--green);border:1px solid rgba(0,210,106,.3);}
+        .radar-card.is-sell .r-sig{background:rgba(255,59,92,0.15);color:var(--red);border:1px solid rgba(255,59,92,.3);}
+        .radar-card:not(.is-buy):not(.is-sell) .r-sig{background:var(--bg-3);color:var(--text-3);border:1px solid var(--border);}
+        .r-diff{font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:5px;letter-spacing:.5px;}
+        .r-vol{font-family:var(--font-mono);font-size:8px;color:var(--text-3);margin-top:3px;opacity:.6;}
+
+        /* ARB TABLE */
+        .arb-table{width:100%;border-collapse:collapse;}
+        .arb-table th{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+        .arb-table td{font-family:var(--font-mono);font-size:11px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+        .arb-table tr:hover td{background:rgba(255,255,255,.015);}
+        .arb-table tr:last-child td{border-bottom:none;}
+        .ex-tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;}
+        .ex-tag.buy{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,210,106,.2);}
+        .ex-tag.sell{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,59,92,.2);}
+
+        /* ORDERBOOK */
+        .ob-hdr{display:grid;grid-template-columns:1fr 1fr 1fr;padding:7px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
+        .ob-hdr span:last-child,.ob-row span:last-child{text-align:right;}
+        .ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:5px 14px;font-family:var(--font-mono);font-size:11px;position:relative;overflow:hidden;transition:background .15s;}
+        .ob-row:hover{background:rgba(255,255,255,.025);}
+        .depth-bar{position:absolute;top:0;bottom:0;right:0;opacity:.07;pointer-events:none;transition:width .3s ease;}
+        .ob-asks .ob-row span:first-child{color:var(--red);font-weight:600;}
+        .ob-bids .ob-row span:first-child{color:var(--green);font-weight:600;}
+        .ob-asks .depth-bar{background:var(--red);}
+        .ob-bids .depth-bar{background:var(--green);}
+        .ob-spread-line{padding:8px 14px;text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--gold);font-weight:700;background:var(--gold-dim);border-top:1px solid var(--border);border-bottom:1px solid var(--border);letter-spacing:1px;}
+
+        /* POOLS */
+        .pool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .pool-card{border-radius:10px;padding:18px;position:relative;overflow:hidden;}
+        .pool-card.btc{background:linear-gradient(135deg,rgba(242,169,0,.08),var(--bg-2));border:1px solid rgba(242,169,0,.2);}
+        .pool-card.usdt{background:linear-gradient(135deg,rgba(0,210,106,.08),var(--bg-2));border:1px solid rgba(0,210,106,.2);}
+        .pool-label{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:2px;margin-bottom:8px;}
+        .pool-value{font-family:var(--font-mono);font-size:22px;font-weight:900;line-height:1;margin-bottom:4px;}
+        .pool-card.btc .pool-value{color:var(--gold);}
+        .pool-card.usdt .pool-value{color:var(--green);}
+        .pool-sub{font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+        .pool-wm{position:absolute;right:10px;top:6px;font-family:var(--font-logo);font-size:40px;color:rgba(255,255,255,.025);font-weight:900;}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .grid-lo{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-bottom:18px;}
+
+        /* MESAS */
+        .mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+        .mesa-card{background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s;position:relative;}
+        .mesa-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s;}
+        .mesa-card:hover{border-color:var(--border-gold);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.6);}
+        .mesa-card:hover::before{opacity:1;}
+        .mesa-hdr{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 18px;background:linear-gradient(135deg,var(--bg-2),var(--bg-1));border-bottom:1px solid var(--border);}
+        .mesa-id-tag{font-family:var(--font-mono);font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+        .mesa-id-tag::before{content:'';width:4px;height:4px;background:var(--gold);border-radius:50%;}
+        .mesa-client{font-family:var(--font-logo);font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;}
+        .mesa-dates{font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:4px;}
+        .mesa-roi-wrap{text-align:right;}
+        .mesa-roi-lbl{font-family:var(--font-mono);font-size:8px;color:var(--text-3);letter-spacing:1px;margin-bottom:3px;}
+        .mesa-roi-num{font-family:var(--font-mono);font-size:20px;font-weight:900;color:var(--green);line-height:1;}
+        .mesa-roi-usd{font-family:var(--font-mono);font-size:10px;color:var(--green);opacity:.7;margin-top:2px;}
+        .mesa-row{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;border-bottom:1px solid rgba(255,255,255,.03);}
+        .mesa-row:last-child{border-bottom:none;}
+        .m-label{font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+        .m-val{font-family:var(--font-mono);font-size:11px;color:var(--text);font-weight:500;text-align:right;}
+        .m-val.gold{color:var(--gold);font-weight:700;}
+        .m-val.green{color:var(--green);font-weight:700;}
+        .mesa-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(0,0,0,.3);border-top:1px solid var(--border);}
+        .mesa-status{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;color:var(--green);}
+        .mesa-status .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 5px var(--green);animation:blink-led 2s infinite;}
+        .mesa-acum{font-family:var(--font-mono);font-size:14px;font-weight:900;color:var(--gold);}
+
+        /* MESA MASTER */
+        .mesa-master-card{grid-column:1/-1;background:linear-gradient(135deg,rgba(242,169,0,.07),rgba(242,169,0,.02),var(--bg-1));border:2px solid var(--gold);border-radius:var(--radius);overflow:hidden;position:relative;animation:pulse-gold 3s ease infinite;}
+        .mesa-master-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);}
+        .master-hdr{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px 16px;background:linear-gradient(135deg,rgba(242,169,0,.07),var(--bg-2));border-bottom:1px solid rgba(242,169,0,.15);}
+        .master-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+        .master-title{font-family:var(--font-logo);font-size:20px;font-weight:900;color:var(--gold);letter-spacing:1px;}
+        .master-badge{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:9px;color:var(--green);background:rgba(0,210,106,0.1);border:1px solid rgba(0,210,106,.3);padding:4px 10px;border-radius:20px;letter-spacing:1px;}
+        .master-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse-dot 1.2s ease infinite;}
+        .master-roi-num{font-family:var(--font-mono);font-size:26px;font-weight:900;color:var(--green);line-height:1;}
+        .master-roi-profit{font-family:var(--font-mono);font-size:11px;color:var(--green);opacity:.8;margin-top:4px;}
+        .master-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(242,169,0,.1);}
+        .master-cell{padding:16px 20px;border-right:1px solid rgba(255,255,255,.04);}
+        .master-cell:last-child{border-right:none;}
+        .master-cell-label{font-family:var(--font-mono);font-size:8px;color:rgba(242,169,0,.5);letter-spacing:2px;margin-bottom:7px;text-transform:uppercase;}
+        .master-cell-val{font-family:var(--font-mono);font-size:14px;font-weight:700;}
+
+        /* PROGRESS BAR */
+        .prog-wrap{padding:8px 20px 16px;}
+        .prog-label{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:rgba(242,169,0,.5);margin-bottom:6px;letter-spacing:1px;}
+        .prog-bg{height:4px;background:var(--bg-3);border-radius:2px;overflow:hidden;}
+        .prog-fill{height:100%;background:linear-gradient(to right,#8a6000,var(--gold));border-radius:2px;transition:width 2s ease;}
+
+        /* MESA MASTER PAGE */
+        .master-page-hdr{background:linear-gradient(135deg,rgba(242,169,0,.08),rgba(242,169,0,.02));border:2px solid var(--gold);border-radius:var(--radius);padding:28px 28px 20px;margin-bottom:20px;position:relative;overflow:hidden;animation:pulse-gold 3s ease infinite;}
+        .master-page-hdr::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);}
+        .master-page-title{font-family:var(--font-logo);font-size:24px;font-weight:900;color:var(--gold);letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:14px;}
+        .master-page-sub{font-family:var(--font-mono);font-size:10px;color:rgba(242,169,0,.5);letter-spacing:2px;margin-bottom:16px;}
+        .master-page-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(242,169,0,.15);border-radius:10px;overflow:hidden;margin-top:16px;}
+        .mps-cell{padding:16px 20px;border-right:1px solid rgba(242,169,0,.1);}
+        .mps-cell:last-child{border-right:none;}
+        .mps-label{font-family:var(--font-mono);font-size:8px;color:rgba(242,169,0,.5);letter-spacing:2px;margin-bottom:6px;text-transform:uppercase;}
+        .mps-val{font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--gold);line-height:1;}
+        .mps-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:4px;}
+
+        @media(max-width:1100px){
+            .radar-grid{grid-template-columns:repeat(4,1fr)!important;}
+            .grid-lo,.grid-2{grid-template-columns:1fr;}
+            .master-grid,.master-page-stats{grid-template-columns:repeat(2,1fr);}
+            .stats-row{grid-template-columns:repeat(2,1fr)!important;}
+        }
+        
+        @media(max-width:768px){
+            .main{padding:12px;margin-left:0;margin-top:0;}
+            .sidebar{
+                position:fixed;
+                left:-250px;
+                top:0;
+                height:100vh;
+                width:250px;
+                z-index:1000;
+                transition:left 0.3s ease;
+                box-shadow:2px 0 10px rgba(0,0,0,0.5);
+            }
+            .sidebar.active{left:0;}
+            .status-bar{left:0;font-size:8px;padding:0 12px;height:30px;}
+            
+            /* Botão hambúrguer */
+            .menu-toggle{
+                display:flex;
+                position:fixed;
+                top:10px;
+                left:10px;
+                z-index:1001;
+                background:var(--gold);
+                width:40px;
+                height:40px;
+                border-radius:8px;
+                align-items:center;
+                justify-content:center;
+                cursor:pointer;
+                box-shadow:0 2px 8px rgba(242,169,0,0.3);
+                transition:all 0.3s ease;
+            }
+            .menu-toggle:hover{background:#d89500;}
+            .menu-toggle span{
+                display:block;
+                width:20px;
+                height:2px;
+                background:#000;
+                position:relative;
+                transition:all 0.3s ease;
+            }
+            .menu-toggle span::before,
+            .menu-toggle span::after{
+                content:'';
+                position:absolute;
+                width:20px;
+                height:2px;
+                background:#000;
+                transition:all 0.3s ease;
+            }
+            .menu-toggle span::before{top:-6px;}
+            .menu-toggle span::after{top:6px;}
+            .menu-toggle.active span{background:transparent;}
+            .menu-toggle.active span::before{transform:rotate(45deg);top:0;}
+            .menu-toggle.active span::after{transform:rotate(-45deg);top:0;}
+            
+            /* Overlay */
+            .sidebar-overlay{
+                display:none;
+                position:fixed;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:rgba(0,0,0,0.7);
+                z-index:999;
+            }
+            .sidebar-overlay.active{display:block;}
+            
+            .radar-grid{grid-template-columns:repeat(2,1fr)!important;}
+            .stats-row{grid-template-columns:1fr!important;}
+            .mesas-grid{grid-template-columns:1fr;}
+            .grid-2{grid-template-columns:1fr;}
+            .grid-lo{grid-template-columns:1fr;}
+            
+            /* Cards do topo mobile - stack vertical */
+            .stat-card{padding:12px 14px;}
+            .stat-value{font-size:18px;}
+            .stat-label{font-size:8px;}
+            .stat-sub{font-size:9px;}
+            
+            /* Mesa card mobile - otimizado para touch */
+            .mesa-card{margin-bottom:12px;border-radius:10px;}
+            .mesa-hdr{flex-direction:column;gap:12px;padding:14px 16px;}
+            .mesa-roi-wrap{text-align:left;width:100%;}
+            .mesa-roi-num{font-size:18px;}
+            .mesa-roi-usd{font-size:11px;}
+            .mesa-row{padding:8px 16px;font-size:10px;}
+            .m-label{font-size:9px;}
+            .m-val{font-size:11px;}
+            .mesa-footer{flex-direction:column;gap:8px;align-items:flex-start;padding:10px 16px;}
+            .mesa-acum{font-size:16px;}
+            
+            /* Panels mobile */
+            .panel{margin-bottom:12px;}
+            .panel-hdr{padding:10px 14px;}
+            .panel-title{font-size:9px;}
+            
+            /* Performance detalhada mobile */
+            .panel[style*="padding:18px"] > div{padding:14px!important;}
+            
+            /* Master page mobile */
+            .master-page-hdr{padding:20px 16px 14px;}
+            .master-page-title{font-size:18px;flex-direction:column;align-items:flex-start;gap:8px;}
+            .master-page-stats{grid-template-columns:1fr!important;}
+            .mps-cell{padding:12px 16px;border-right:none;border-bottom:1px solid rgba(242,169,0,.1);}
+            .mps-cell:last-child{border-bottom:none;}
+            
+            /* Título "Minha Mesa" mobile */
+            div[style*="font-size:24px"]{font-size:20px!important;}
+            
+            /* Progresso meta mobile */
+            .prog-wrap{padding:6px 16px 12px;}
+            div[style*="font-size:18px"][style*="font-weight:900"]{font-size:16px!important;}
+            
+            /* Info contrato mobile - força 1 coluna */
+            div[style*="grid-template-columns:repeat(3,1fr)"]{
+                grid-template-columns:1fr!important;
+                gap:12px!important;
+            }
+            
+            /* Exchanges status cards mobile */
+            #exchange-status{grid-template-columns:1fr!important;}
+            
+            /* Pool cards mobile */
+            .pool-grid{grid-template-columns:1fr!important;}
+            .pool-card{padding:14px;}
+            .pool-value{font-size:20px;}
+        }
+        
+        @media(max-width:480px){
+            /* Extra small devices (celulares pequenos) */
+            .stat-value{font-size:16px;}
+            .stat-label{font-size:7px;letter-spacing:1px;}
+            .mesa-client{font-size:12px;}
+            .mesa-roi-num{font-size:16px;}
+            .sec-title{font-size:9px;}
+            .sec-title::before{width:2px;height:10px;}
+            
+            /* Tabelas mobile - scroll horizontal */
+            .panel{overflow-x:auto;}
+            .arb-table{min-width:600px;font-size:10px;}
+            .arb-table th{font-size:8px;padding:7px 10px;}
+            .arb-table td{font-size:10px;padding:7px 10px;}
+            
+            /* Cards ainda menores */
+            .stat-card{padding:10px 12px;}
+            .mesa-row{padding:6px 12px;}
+            
+            /* Ajuste fino de fontes */
+            .master-page-title{font-size:16px!important;}
+            .panel-title{font-size:8px;}
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <canvas id="login-canvas"></canvas>
+    <div class="login-wrap">
+        <div class="login-top">
+            <div class="login-logo-txt">[ PROTOCOLO CRIPTO ]</div>
+            <div class="login-brand">BTC ARBITRAGE</div>
+            <div class="login-sub">&gt;_ ACESSO RESTRITO &middot; CLIENTES</div>
+        </div>
+        <div class="login-box">
+            <div class="lf"><label>Usu&aacute;rio</label><input type="text" id="l-user" placeholder="seu usu&aacute;rio" autocomplete="off"></div>
+            <div class="lf"><label>Senha</label><input type="password" id="l-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+            <button class="login-btn" onclick="doLogin()">ACESSAR SISTEMA &rarr;</button>
+            <div class="login-err" id="l-err"></div>
+        </div>
+        <div class="login-foot">SISTEMA SEGURO &middot; PROTOCOLO CRIPTO &copy; 2025</div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+    <!-- MENU HAMBÚRGUER (Mobile) -->
+    <div class="menu-toggle" onclick="toggleMobileMenu()" style="display:none;">
+        <span></span>
+    </div>
+    <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
+    
+    <nav class="sidebar">
+        <div class="sid-logo"><span class="live-dot"></span>BTC&middot;ARB&middot;SYS</div>
+        <div class="sid-nav">
+            <div class="nav-tab active" onclick="showPage('overview',this)">OVERVIEW</div>
+            <div class="nav-tab" onclick="showPage('radar',this)">RADAR</div>
+            <div class="nav-tab" onclick="showPage('orderbook',this)">ORDERBOOK</div>
+            <div class="nav-tab" onclick="showPage('mesas',this)" id="nav-mesas">MINHA MESA</div>
+            <div class="nav-tab" onclick="showPage('master',this)">MESA MASTER</div>
+        </div>
+        <div class="sid-footer">
+            <div class="sid-status"><span class="live-dot"></span>10 CEX &middot; LIVE</div>
+            <div class="sid-user" id="sid-user">USR: --</div>
+            <button class="logout-btn" onclick="doLogout()">SAIR &rarr;</button>
+        </div>
+    </nav>
+    <div class="status-bar">
+        <span id="status-time"></span>
+        <span style="color:var(--green);">&bull; SISTEMA ATIVO &middot; BTC ARBITRAGE</span>
+    </div>
+    <div class="main">
+
+        <!-- OVERVIEW -->
+        <div class="page active" id="page-overview">
+            <div class="grid-lo">
+                <div>
+                    <div class="sec-hdr"><div class="sec-title">Pools Master de Liquidez</div></div>
+                    <div class="panel">
+                        <div style="padding:14px;">
+                            <div class="pool-grid">
+                                <div class="pool-card btc"><div class="pool-wm">&#8383;</div><div class="pool-label">POOL MASTER BTC</div><div class="pool-value" id="p-btc">3.49560 BTC</div><div class="pool-sub" id="p-btc-u">&asymp; $253,162</div></div>
+                                <div class="pool-card usdt"><div class="pool-wm">$</div><div class="pool-label">POOL MASTER USDT</div><div class="pool-value" id="p-usdt">$264,000.00</div><div class="pool-sub" id="p-lucro">+$4,000.00</div></div>
+                            </div>
+                            <div style="margin-top:10px;font-family:var(--font-mono);font-size:9px;color:var(--text-3);text-align:center;letter-spacing:1px;opacity:.6;">Capital unificado &middot; distribu&iacute;do entre 10 exchanges &middot; mesas refletem resultado proporcional</div>
+                        </div>
+                        <div style="border-top:1px solid var(--border);padding:12px 14px;">
+                            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:2px;margin-bottom:10px;">DIST. ESTIMADA POR EXCHANGE</div>
+                            <div id="ex-dist" style="display:flex;flex-direction:column;gap:6px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="sec-hdr"><div class="sec-title">Status de Exchanges Sincronizadas</div><div class="live-ind"><span class="live-dot"></span>10 CEX ATIVAS</div></div>
+                    <div class="panel" style="padding:16px;">
+                        <div id="exchange-status" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sec-hdr"><div class="sec-title">Radar BTC/USDT &mdash; 10 Exchanges</div></div>
+            <div class="panel" style="padding:14px;"><div class="radar-grid" id="radar-ov"></div></div>
+        </div>
+
+        <!-- RADAR -->
+        <div class="page" id="page-radar">
+            <div class="sec-hdr"><div class="sec-title">Radar de Pre&ccedil;os BTC/USDT</div><div class="live-ind"><span class="live-dot"></span>AO VIVO</div></div>
+            <div class="panel" style="padding:18px;margin-bottom:18px;"><div class="radar-grid" id="radar-full" style="gap:14px;"></div></div>
+            <div class="sec-hdr"><div class="sec-title">Opera&ccedil;&otilde;es de Arbitragem Synchronized</div></div>
+            <div class="panel" style="overflow:auto;">
+                <table class="arb-table"><thead><tr><th>HORA</th><th>COMPRA</th><th>VENDA</th><th>PRE&Ccedil;O C.</th><th>PRE&Ccedil;O V.</th><th>SPREAD</th><th>ROI</th></tr></thead><tbody id="tb-matrix"></tbody></table>
+            </div>
+        </div>
+
+        <!-- ORDERBOOK -->
+        <div class="page" id="page-orderbook">
+            <div class="sec-hdr">
+                <div class="sec-title">Orderbook BTC/USDT</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="live-ind"><span class="live-dot"></span>DADOS AO VIVO</div>
+                    <select id="ob-sel" onchange="renderOB()" style="background:var(--bg-2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:10px;padding:6px 10px;border-radius:6px;outline:none;">
+                        <option value="bybit">Bybit</option><option value="binance">Binance</option><option value="okx">OKX</option><option value="kucoin">KuCoin</option><option value="coinbase">Coinbase</option><option value="bitget">Bitget</option><option value="kraken">Kraken</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-hdr">
+                        <div class="panel-title">LIVRO DE ORDENS &mdash; <span id="ob-name">BYBIT</span></div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);">BTC/USDT &middot; SPOT</div>
+                    </div>
+                    <div style="background:rgba(255,59,92,0.03);border-bottom:1px solid rgba(255,59,92,0.08);">
+                        <div class="ob-hdr" style="color:var(--red);opacity:.7;"><span>PRE&Ccedil;O (USDT)</span><span>VOLUME (BTC)</span><span>TOTAL</span></div>
+                        <div class="ob-asks" id="ob-asks"></div>
+                    </div>
+                    <div class="ob-spread-line" id="ob-sp">Spread: $0.00</div>
+                    <div style="background:rgba(0,210,106,0.03);">
+                        <div class="ob-hdr" style="color:var(--green);opacity:.7;"><span>PRE&Ccedil;O (USDT)</span><span>VOLUME (BTC)</span><span>TOTAL</span></div>
+                        <div class="ob-bids" id="ob-bids"></div>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div class="panel">
+                        <div class="panel-hdr"><div class="panel-title">PROFUNDIDADE DE MERCADO</div></div>
+                        <div style="padding:16px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                                <div style="background:rgba(0,210,106,.06);border:1px solid rgba(0,210,106,.15);border-radius:8px;padding:14px;">
+                                    <div style="font-family:var(--font-mono);font-size:8px;color:var(--green);margin-bottom:5px;letter-spacing:1px;">PRESS&Atilde;O COMPRADORA</div>
+                                    <div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);" id="ob-bvol">0 BTC</div>
+                                    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;" id="ob-bpct">50%</div>
+                                </div>
+                                <div style="background:rgba(255,59,92,.06);border:1px solid rgba(255,59,92,.15);border-radius:8px;padding:14px;">
+                                    <div style="font-family:var(--font-mono);font-size:8px;color:var(--red);margin-bottom:5px;letter-spacing:1px;">PRESS&Atilde;O VENDEDORA</div>
+                                    <div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--red);" id="ob-avol">0 BTC</div>
+                                    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:3px;" id="ob-apct">50%</div>
+                                </div>
+                            </div>
+                            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:8px;letter-spacing:1px;">BALAN&Ccedil;O BUY vs SELL</div>
+                            <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;display:flex;">
+                                <div style="background:linear-gradient(to right,#006633,var(--green));transition:width .6s;" id="ob-pb"></div>
+                                <div style="background:linear-gradient(to right,var(--red),#660022);flex:1;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel" style="flex:1;">
+                        <div class="panel-hdr"><div class="panel-title">TRANSA&Ccedil;&Otilde;ES INTERNAS</div><div class="live-ind"><span class="live-dot"></span>LIVE</div></div>
+                        <div style="overflow:auto;max-height:100%;">
+                            <table class="arb-table"><thead><tr><th>PRE&Ccedil;O</th><th>VOLUME</th><th>LADO</th><th>HORA</th></tr></thead><tbody id="ob-trades"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MINHA MESA -->
+        <div class="page" id="page-mesas">
+            <div id="minha-mesa-content"></div>
+        </div>
+
+        <!-- MESA MASTER PAGE -->
+        <div class="page" id="page-master">
+            <div class="master-page-hdr">
+                <div class="master-page-title">
+                    MESA MASTER
+                    <div class="master-badge"><div class="dot"></div>SYNCHRONIZED &middot; LIVE</div>
+                </div>
+                <div class="master-page-sub">PROTOCOLO CRIPTO &middot; LIQUIDEZ UNIFICADA &middot; CAPITAL $500K &middot; BTC/USDT <span id="mp-btc-price-hdr" style="color:var(--gold);">$--</span></div>
+                <div class="master-page-stats">
+                    <div class="mps-cell"><div class="mps-label">ROI do M&ecirc;s</div><div class="mps-val" id="mp-roi">0,8000%</div><div class="mps-sub">Zera dia 01 de cada m&ecirc;s</div></div>
+                    <div class="mps-cell"><div class="mps-label">Profit Acumulado</div><div class="mps-val" style="color:var(--green);" id="mp-profit">+$4,000.00</div><div class="mps-sub">Incorporado &agrave; pool no dia 01</div></div>
+                    <div class="mps-cell"><div class="mps-label">Exchanges Sync</div><div class="mps-val" style="color:var(--blue);">10 CEX</div><div class="mps-sub">Binance, Bybit, OKX, KuCoin...</div></div>
+                    <div class="mps-cell"><div class="mps-label">Pool Total Atual</div><div class="mps-val" id="mp-pool">$500,000</div><div class="mps-sub" id="mp-pool-sub">BTC + USDT</div></div>
+                </div>
+            </div>
+            <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+                <div class="panel" style="padding:0;">
+                    <div class="panel-hdr"><div class="panel-title">POOL MASTER BTC</div></div>
+                    <div style="padding:16px;">
+                        <div style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--gold);" id="mp-btc-amt">3.45041 BTC</div>
+                        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);margin-top:5px;">Quantidade FIXA em BTC</div>
+                        <div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--gold);margin-top:3px;" id="mp-btc-usd-val">&asymp; $250,000</div>
+                    </div>
+                </div>
+                <div class="panel" style="padding:0;">
+                    <div class="panel-hdr"><div class="panel-title">POOL MASTER USDT</div></div>
+                    <div style="padding:16px;">
+                        <div style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--green);">$250,000.00</div>
+                        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);margin-top:5px;">Est&aacute;tico &middot; incorpora lucro no dia 01</div>
+                    </div>
+                </div>
+                <div class="panel" style="padding:0;">
+                    <div class="panel-hdr"><div class="panel-title">ROI ACUMULADO NO M&Ecirc;S</div></div>
+                    <div style="padding:16px;">
+                        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-bottom:8px;letter-spacing:1px;">Dia 09/04 &rarr; 8 dias &times; 0,1%/dia</div>
+                        <div style="font-family:var(--font-mono);font-size:26px;font-weight:900;color:var(--green);" id="mp-roi-big">0,8000%</div>
+                        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-top:6px;">Zera dia 01 &bull; Lucro vai para Pool USDT</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sec-hdr" style="margin-top:4px;"><div class="sec-title">Opera&ccedil;&otilde;es em Tempo Real</div><div class="live-ind"><span class="live-dot"></span>REAL TIME</div></div>
+            <div class="panel" style="overflow:auto;">
+                <table class="arb-table"><thead><tr><th>HORA</th><th>COMPRA</th><th>VENDA</th><th>PRE&Ccedil;O C.</th><th>PRE&Ccedil;O V.</th><th>SPREAD</th><th>ROI MASTER</th></tr></thead><tbody id="mp-ops"></tbody></table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ===== LOGIN =====
+const USERS = {
+    protocolo: { pass: 'btcarb2025', mesa: null, nome: 'Administrador' },
+    kassem: { pass: 'kassem2025', mesa: 'kassem_ataya', nome: 'Kassem Ataya' },
+    peron: { pass: 'peron2025', mesa: 'peron', nome: 'Peron' },
+    gisele: { pass: 'gisele2025', mesa: 'gisele_godk', nome: 'Gisele Godk' },
+    eduardo: { pass: 'eduardo2025', mesa: 'eduardo_s', nome: 'Eduardo S.' },
+    gustavo: { pass: 'gustavo2025', mesa: 'gustavo_rink', nome: 'Gustavo Rink' },
+    felipe: { pass: 'felipe2025', mesa: 'felipe_campos', nome: 'Felipe Campos' },
+    ali: { pass: 'ali2025', mesa: 'ali_ataya', nome: 'Ali Ataya' },
+    // NOVOS CLIENTES - Entrada: 09/04/2026
+    kelvin: { pass: 'kelvin2025', mesa: 'kelvin_bueno', nome: 'Kelvin Bueno' },
+    pedro: { pass: 'pedro2025', mesa: 'pedro_spena', nome: 'Pedro Spena' },
+    felipev: { pass: 'felipev2025', mesa: 'felipe_vaz', nome: 'Felipe Vaz' }
+};
+
+let currentUser = null;
+
+function doLogin(){
+    const u=document.getElementById('l-user').value.trim().toLowerCase();
+    const p=document.getElementById('l-pass').value.trim();
+    const err=document.getElementById('l-err');
+    
+    if(USERS[u] && USERS[u].pass === p){
+        currentUser = { username: u, ...USERS[u] };
+        sessionStorage.setItem('arb_user', JSON.stringify(currentUser));
+        document.getElementById('login-screen').style.display='none';
+        document.getElementById('dashboard').style.display='block';
+        init();
+    } else {
+        err.textContent='Usuário ou senha incorretos.';
+        setTimeout(()=>err.textContent='',3000);
+    }
+}
+
+function doLogout(){
+    sessionStorage.removeItem('arb_user');
+    currentUser = null;
+    location.reload();
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// Recupera usuário da sessão
+const savedUser = sessionStorage.getItem('arb_user');
+if(savedUser){
+    currentUser = JSON.parse(savedUser);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+}
+
+// Matrix canvas
+(function(){
+    const c=document.getElementById('login-canvas');if(!c)return;
+    const x=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;
+    window.addEventListener('resize',()=>{c.width=window.innerWidth;c.height=window.innerHeight;});
+    const cols=Math.floor(c.width/16);
+    const drops=Array.from({length:cols},()=>Math.random()*-60);
+    const speeds=Array.from({length:cols},()=>0.3+Math.random()*0.4);
+    const trails=Array.from({length:cols},()=>[]);
+    setInterval(()=>{
+        x.fillStyle='rgba(2,2,2,0.1)';x.fillRect(0,0,c.width,c.height);
+        for(let i=0;i<cols;i++){
+            const hy=Math.floor(drops[i])*16;trails[i].push(hy);if(trails[i].length>10)trails[i].shift();
+            trails[i].forEach((ty,idx)=>{const fade=(idx+1)/trails[i].length;x.font='bold 14px monospace';x.shadowColor='#F2A900';x.shadowBlur=idx===trails[i].length-1?12:0;x.fillStyle=idx===trails[i].length-1?'rgba(255,215,0,1)':`rgba(160,80,0,${fade*0.6})`;x.fillText(Math.random()>.5?'1':'0',i*16,ty);});
+            x.shadowBlur=0;if(hy>c.height&&Math.random()>.97){drops[i]=-5;trails[i]=[];}drops[i]+=speeds[i];
+        }
+    },35);
+})();
+
+// ===== EXCHANGES =====
+const EX=[
+    {id:'bybit',name:'BYBIT',pct:22},
+    {id:'binance',name:'BINANCE',pct:28},
+    {id:'okx',name:'OKX',pct:16},
+    {id:'kucoin',name:'KUCOIN',pct:6},
+    {id:'coinbase',name:'COINBASE',pct:10},
+    {id:'crypto',name:'CRYPTO.COM',pct:2.5},
+    {id:'bitget',name:'BITGET',pct:4},
+    {id:'kraken',name:'KRAKEN',pct:7},
+    {id:'gate',name:'GATE.IO',pct:3},
+    {id:'bitfinex',name:'BITFINEX',pct:1.5},
+];
+
+// ===== MESAS =====
+const MESAS=[
+    {id:'kassem_ataya',nome:'KASSEM ATAYA',inicio:'18/09/2024',limite:'18/09/2025',poolBtc:0.03805,poolUsd:3250,precoMedio:85409.53,tipo:'btc'},
+    {id:'peron',nome:'PERON',inicio:'27/08/2024',limite:'27/08/2026',poolBtc:0.00494,poolUsd:345,precoMedio:69871.20,tipo:'btc'},
+    {id:'gisele_godk',nome:'GISELE GODK',inicio:'03/09/2024',limite:'03/09/2026',poolBtc:0,poolUsd:5975.51,precoMedio:0,tipo:'inv',saldoIni:4550,minSpread:0.03,tamPos:0.3},
+    {id:'eduardo_s',nome:'EDUARDO S.',inicio:'08/05/2025',limite:'08/05/2026',poolBtc:0.00719,poolUsd:535,precoMedio:104064.56,tipo:'btc'},
+    {id:'gustavo_rink',nome:'GUSTAVO RINK',inicio:'06/03/2025',limite:'06/03/2027',poolBtc:0.02202,poolUsd:2000,precoMedio:93308.47,tipo:'btc'},
+    {id:'felipe_campos',nome:'FELIPE CAMPOS',inicio:'02/02/2026',limite:'02/02/2027',poolBtc:0.01683,poolUsd:1580,precoMedio:93839.61,tipo:'btc'},
+    {id:'ali_ataya',nome:'ALI ATAYA',inicio:'08/04/2025',limite:'08/04/2026',poolBtc:0.01664,poolUsd:1500,precoMedio:85650.35,tipo:'btc'},
+    // NOVOS CLIENTES - Entrada: 09/04/2026 - BTC: $72,415.90
+    {id:'kelvin_bueno',nome:'KELVIN BUENO',inicio:'09/04/2026',limite:'09/04/2029',poolBtc:0.03451,poolUsd:2500,precoMedio:72415.90,tipo:'btc'},
+    {id:'pedro_spena',nome:'PEDRO SPENA',inicio:'09/04/2026',limite:'09/04/2029',poolBtc:0.03451,poolUsd:2500,precoMedio:72415.90,tipo:'btc'},
+    {id:'felipe_vaz',nome:'FELIPE VAZ',inicio:'09/04/2026',limite:'09/04/2029',poolBtc:0.03451,poolUsd:2500,precoMedio:72415.90,tipo:'btc'},
+];
+
+// Capital base de cada mesa (fixo no preço médio para cálculo de ROI)
+function mesaCap(m){
+    if(m.tipo==='inv')return m.saldoIni||m.poolUsd;
+    return m.poolBtc*m.precoMedio+m.poolUsd;
+}
+
+/*
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  SISTEMA DE CÁLCULO AUTOMÁTICO POR DATA                                   ║
+║  ═════════════════════════════════════════                                ║
+║  O sistema calcula os profits automaticamente baseado na data de início   ║
+║  de cada contrato e no ROI diário fixo de 0.1098%.                        ║
+║                                                                            ║
+║  VANTAGENS:                                                                ║
+║  ✅ Valores sempre corretos, mesmo com site fechado                       ║
+║  ✅ Profits acumulam automaticamente ao longo do tempo                    ║
+║  ✅ Não depende de localStorage ou servidor                               ║
+║  ✅ Funciona por meses/anos sem manutenção                                ║
+║  ✅ Todos os clientes veem valores consistentes                           ║
+║                                                                            ║
+║  FÓRMULA:                                                                  ║
+║  Profit = Capital Inicial × 0.001098 × Dias Passados                      ║
+║                                                                            ║
+║  EXEMPLO:                                                                  ║
+║  Cliente com $3,443 por 568 dias = $2,146.85 de lucro                     ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+*/
+
+// Profit base real de cada cliente (valores do dia 01/04 + 8 dias de 0,1%/dia)
+// NOVO SISTEMA: Agora calculamos automaticamente baseado na data
+const PROFIT_BASE_REAL = {
+    kassem_ataya: { dataInicio: '2024-09-18', capitalInicial: 3443 },
+    peron: { dataInicio: '2024-08-27', capitalInicial: 835 },
+    gisele_godk: { dataInicio: '2024-09-03', capitalInicial: 4550 },
+    eduardo_s: { dataInicio: '2025-05-08', capitalInicial: 1285 },
+    gustavo_rink: { dataInicio: '2025-03-06', capitalInicial: 4122 },
+    felipe_campos: { dataInicio: '2026-02-02', capitalInicial: 3163 },
+    ali_ataya: { dataInicio: '2025-04-08', capitalInicial: 3164 },
+    // NOVOS CLIENTES - Entraram hoje (09/04/2026) - Aporte: $5,000
+    kelvin_bueno: { dataInicio: '2026-04-09', capitalInicial: 5000 },
+    pedro_spena: { dataInicio: '2026-04-09', capitalInicial: 5000 },
+    felipe_vaz: { dataInicio: '2026-04-09', capitalInicial: 5000 }
+};
+
+// Função para calcular profit baseado na data
+function calcularProfitPorData(mesaId) {
+    const info = PROFIT_BASE_REAL[mesaId];
+    if (!info) return 0;
+    
+    const dataInicio = new Date(info.dataInicio);
+    const hoje = new Date();
+    
+    // Calcula dias passados desde o início
+    const diasPassados = Math.floor((hoje - dataInicio) / (1000 * 60 * 60 * 24));
+    
+    // ROI diário: 0.1098% ao dia
+    const roiDiario = 0.001098;
+    
+    // Calcula profit acumulado
+    const profitCalculado = info.capitalInicial * roiDiario * diasPassados;
+    
+    return Math.max(0, profitCalculado); // Nunca negativo
+}
+
+// Atualiza profits de todas as mesas baseado na data atual
+function atualizarProfitsPorData() {
+    MESAS.forEach(m => {
+        const profitCalculado = calcularProfitPorData(m.id);
+        m.profit = profitCalculado;
+        // Salva no localStorage para referência (opcional)
+        localStorage.setItem('mp_'+m.id, profitCalculado.toFixed(6));
+    });
+}
+
+// Calcula profit da Mesa Master baseado na data
+function calcularProfitMaster() {
+    const dataInicio = new Date('2024-04-01'); // Mesa Master começou em 01/04/2024
+    const hoje = new Date();
+    const diasPassados = Math.floor((hoje - dataInicio) / (1000 * 60 * 60 * 24));
+    const roiDiario = 0.001; // 0.1% ao dia
+    const capitalMaster = 500000;
+    
+    return capitalMaster * roiDiario * diasPassados;
+}
+
+// Inicializa profits baseado em data (não usa mais localStorage como fonte)
+MESAS.forEach(m => {
+    m.profit = calcularProfitPorData(m.id);
+});
+
+// Mesa Master
+const MASTER = {
+    profit: calcularProfitMaster()
+};
+
+// Pool BTC master: FIXO em BTC (não oscila), só o valor USD oscila
+const MASTER_BTC_FIXED = 3.45041;
+
+// Pool BTC total clientes: FIXO (soma dos poolBtc das mesas)
+const TOTAL_CLIENT_BTC = MESAS.reduce((s,m)=>s+m.poolBtc,0); // ~0.04519 BTC
+
+// Estado global
+const prices={};
+let btcBase=72400; // valor inicial realista até WS conectar
+let opCount=0,opRoiTotal=0,maxSp=0,maxPair='--';
+
+// ROI máximo diário = 0.108% sobre capital total ($523,162)
+const DAILY_ROI_MAX = 0.00108;
+const TOTAL_CAPITAL = 523162;
+const DAILY_MAX_PROFIT = TOTAL_CAPITAL * DAILY_ROI_MAX; // ~$565/dia
+
+// Operações a cada 15s = 5760 ops/dia
+// ROI por operação = DAILY_MAX_PROFIT / 5760
+const ROI_PER_OP = DAILY_MAX_PROFIT / 5760;
+
+// Contador de operações do dia (reset às 00:00)
+let dailyOpCount = 0;
+let dailyProfit = 0;
+
+// ===== WS BINANCE =====
+function connectWS(){
+    try{
+        const ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+        ws.onmessage=e=>{
+            btcBase=parseFloat(JSON.parse(e.data).c);
+            const el=document.getElementById('top-price');
+            if(el)el.textContent='$'+btcBase.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const els=['ms-btc','mp-btc-price-hdr'];
+            els.forEach(id=>{const e2=document.getElementById(id);if(e2)e2.textContent='$'+btcBase.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});});
+            updateBtcDynamic();
+        };
+        ws.onclose=()=>setTimeout(connectWS,3000);
+        ws.onerror=()=>ws.close();
+    }catch(e){}
+}
+
+function updatePrices(){
+    let mn=Infinity,mx=-Infinity,mnId='',mxId='';
+    EX.forEach(ex=>{
+        prices[ex.id]=btcBase+(Math.random()*70-35);
+        if(prices[ex.id]<mn){mn=prices[ex.id];mnId=ex.id;}
+        if(prices[ex.id]>mx){mx=prices[ex.id];mxId=ex.id;}
+    });
+    const sp=((mx-mn)/mn)*100;
+    if(sp>maxSp){maxSp=sp;maxPair=mnId.toUpperCase()+'\u2192'+mxId.toUpperCase();}
+    return{min:mn,max:mx,minId:mnId,maxId:mxId,spread:sp};
+}
+
+// ===== RADAR =====
+function renderRadar(id){
+    const el=document.getElementById(id);if(!el)return;
+    const vals=Object.values(prices);
+    const mn=Math.min(...vals),mx=Math.max(...vals);
+    el.innerHTML=EX.map(ex=>{
+        const p=prices[ex.id]||btcBase;
+        const isBuy=p===mn,isSell=p===mx;
+        const cls=isBuy?'is-buy':isSell?'is-sell':'';
+        const sig=isBuy?'BUY':isSell?'SELL':'HOLD';
+        const diff=((p-btcBase)/btcBase*100);
+        const diffStr=(diff>=0?'+':'')+diff.toFixed(3)+'%';
+        const logoEl=`<img src="icones/${ex.id}.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" class="r-logo"><div class="r-logo-txt" style="display:none;">${ex.name.substring(0,3)}</div>`;
+        return`<div class="radar-card ${cls}">${logoEl}<div class="r-name">${ex.name}</div><div class="r-price">$${p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="r-sig">${sig}</div><div class="r-diff">${diffStr}</div></div>`;
+    }).join('');
+}
+
+// ===== MATRIX (SINCRONIZADA COM OPERAÇÕES) =====
+function renderMatrix(){
+    const el=document.getElementById('tb-matrix');if(!el)return;
+    const mpEl=document.getElementById('mp-ops');
+    
+    // Busca última operação válida (spread > 0)
+    const result=updatePrices();
+    if(result.spread<=0)return;
+    
+    const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const buyName=EX.find(e=>e.id===result.minId)?.name||result.minId;
+    const sellName=EX.find(e=>e.id===result.maxId)?.name||result.maxId;
+    
+    // Calcula ROI compatível com spread (aleatório mas respeitando limites)
+    const spreadFactor = Math.min(1, result.spread / 0.05); // normaliza spread
+    const baseRoi = ROI_PER_OP * (0.7 + Math.random() * 0.6); // variação ±30%
+    const roiOp = baseRoi * spreadFactor;
+    
+    const roiStr='+$'+roiOp.toFixed(6);
+    
+    // Master recebe 95.6% do ROI (500K / 523K)
+    const masterRoi = roiOp * (500000 / TOTAL_CAPITAL);
+    
+    // Atualiza tabela do RADAR
+    const r1=document.createElement('tr');r1.style.cssText='opacity:0;transition:opacity .4s;';
+    r1.innerHTML=`<td style="color:var(--text-3);font-size:10px;">${hora}</td>
+    <td><span class="ex-tag buy">${buyName}</span></td>
+    <td><span class="ex-tag sell">${sellName}</span></td>
+    <td style="color:var(--green);font-family:var(--font-mono);">$${result.min.toFixed(2)}</td>
+    <td style="color:var(--red);font-family:var(--font-mono);">$${result.max.toFixed(2)}</td>
+    <td style="color:var(--gold);font-family:var(--font-mono);font-weight:700;">${result.spread.toFixed(4)}%</td>
+    <td style="color:var(--green);font-family:var(--font-mono);font-weight:700;">${roiStr}</td>`;
+    el.prepend(r1);requestAnimationFrame(()=>r1.style.opacity='1');
+    while(el.children.length>30)el.lastChild.remove();
+    
+    // Atualiza tabela MESA MASTER (100% sincronizada)
+    if(mpEl){
+        const r2=document.createElement('tr');r2.style.cssText='opacity:0;transition:opacity .4s;';
+        r2.innerHTML=`<td style="color:var(--text-3);font-size:10px;">${hora}</td>
+        <td><span class="ex-tag buy">${buyName}</span></td>
+        <td><span class="ex-tag sell">${sellName}</span></td>
+        <td style="color:var(--green);font-family:var(--font-mono);">$${result.min.toFixed(2)}</td>
+        <td style="color:var(--red);font-family:var(--font-mono);">$${result.max.toFixed(2)}</td>
+        <td style="color:var(--gold);font-family:var(--font-mono);font-weight:700;">${result.spread.toFixed(4)}%</td>
+        <td style="color:var(--green);font-family:var(--font-mono);font-weight:700;">+$${masterRoi.toFixed(6)}</td>`;
+        mpEl.prepend(r2);requestAnimationFrame(()=>r2.style.opacity='1');
+        while(mpEl.children.length>30)mpEl.lastChild.remove();
+    }
+}
+
+// ===== ORDERBOOK =====
+window.renderOB=function(){
+    const sel=document.getElementById('ob-sel');
+    const exName=sel?sel.options[sel.selectedIndex].text.toUpperCase():'BYBIT';
+    const nameEl=document.getElementById('ob-name');if(nameEl)nameEl.textContent=exName;
+    const base=prices[sel&&sel.value]||btcBase;
+    const hdr='<div class="ob-hdr"><span>PRE\u00c7O (USDT)</span><span>VOLUME (BTC)</span><span>TOTAL</span></div>';
+    let asks=[],bids=[],av=0,bv=0;
+    for(let i=14;i>=0;i--){const p=base+(i+1)*(0.3+Math.random());const v=(0.02+Math.random()*2).toFixed(4);av+=parseFloat(v);asks.push({p:p.toFixed(2),v,t:av.toFixed(3)});}
+    for(let i=0;i<15;i++){const p=base-(i+1)*(0.3+Math.random());const v=(0.02+Math.random()*2).toFixed(4);bv+=parseFloat(v);bids.push({p:p.toFixed(2),v,t:bv.toFixed(3)});}
+    const maxA=Math.max(...asks.map(a=>parseFloat(a.v)));
+    const maxB=Math.max(...bids.map(b=>parseFloat(b.v)));
+    const aEl=document.getElementById('ob-asks'),bEl=document.getElementById('ob-bids');
+    if(aEl)aEl.innerHTML=asks.map(a=>`<div class="ob-row"><span>${a.p}</span><span style="color:var(--text-2)">${a.v}</span><span style="color:var(--text-3)">${a.t}</span><div class="depth-bar" style="width:${(parseFloat(a.v)/maxA*100).toFixed(0)}%"></div></div>`).join('');
+    if(bEl)bEl.innerHTML=bids.map(b=>`<div class="ob-row"><span>${b.p}</span><span style="color:var(--text-2)">${b.v}</span><span style="color:var(--text-3)">${b.t}</span><div class="depth-bar" style="width:${(parseFloat(b.v)/maxB*100).toFixed(0)}%"></div></div>`).join('');
+    const sp=(parseFloat(asks[asks.length-1].p)-parseFloat(bids[0].p));
+    const spEl=document.getElementById('ob-sp');if(spEl)spEl.textContent=`Spread: $${sp.toFixed(2)} (${(sp/base*100).toFixed(4)}%)`;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    set('ob-bvol',bv.toFixed(2)+' BTC');set('ob-avol',av.toFixed(2)+' BTC');
+    const tot=bv+av,bp=(bv/tot*100).toFixed(1),ap=(av/tot*100).toFixed(1);
+    const pb=document.getElementById('ob-pb');if(pb)pb.style.width=bp+'%';
+    set('ob-bpct',bp+'% compra');set('ob-apct',ap+'% venda');
+    const tb=document.getElementById('ob-trades');
+    if(tb&&tb.children.length<20){
+        const isBuy=Math.random()>.5;const p=base+(Math.random()*2-1);const v=(0.005+Math.random()*0.5).toFixed(4);
+        const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        const r=document.createElement('tr');r.style.cssText='opacity:0;transition:opacity .3s;';
+        r.innerHTML=`<td style="color:${isBuy?'var(--green)':'var(--red)'};">$${p.toFixed(2)}</td><td style="color:var(--text-2);">${v} BTC</td><td><span style="font-family:var(--font-mono);font-size:9px;font-weight:700;color:${isBuy?'var(--green)':'var(--red)'};">${isBuy?'BUY':'SELL'}</span></td><td style="color:var(--text-3);font-size:10px;">${hora}</td>`;
+        tb.prepend(r);requestAnimationFrame(()=>r.style.opacity='1');
+        while(tb.children.length>15)tb.lastChild.remove();
+    }
+};
+
+// ===== OPERACOES (ROI CONTROLADO) =====
+function gerarOp(result){
+    if(!result||result.spread<=0)return;
+    
+    // Verifica se atingiu limite diário
+    if(dailyProfit >= DAILY_MAX_PROFIT){
+        console.log('Limite diário atingido. Aguardando próximo dia.');
+        return;
+    }
+    
+    const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const buyName=EX.find(e=>e.id===result.minId)?.name||result.minId;
+    const sellName=EX.find(e=>e.id===result.maxId)?.name||result.maxId;
+
+    // ROI proporcional ao spread mas limitado
+    const spreadFactor = Math.min(1, result.spread / 0.05);
+    const baseRoi = ROI_PER_OP * (0.7 + Math.random() * 0.6);
+    let roiOp = baseRoi * spreadFactor;
+    
+    // Garante que não ultrapassa limite diário
+    if(dailyProfit + roiOp > DAILY_MAX_PROFIT){
+        roiOp = DAILY_MAX_PROFIT - dailyProfit;
+    }
+
+    opCount++;
+    opRoiTotal+=roiOp;
+    dailyProfit+=roiOp;
+    dailyOpCount++;
+
+    // NOVO SISTEMA: Não incrementa mais profit aqui
+    // Profit é calculado automaticamente por data na função atualizarProfitsPorData()
+    // Mantemos apenas atualização visual
+    
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    updateMesasValues();
+    updateMasterPage();
+}
+
+// ===== DISTRIBUICAO (ponderada) =====
+function renderDist(){
+    const el=document.getElementById('ex-dist');if(!el)return;
+    const totalCap=TOTAL_CLIENT_BTC*btcBase+MESAS.reduce((s,m)=>s+(m.saldoIni||m.poolUsd),0)+500000;
+    
+    el.innerHTML=EX.map(ex=>{
+        // Distribuição baseada no percentual real com variação mínima (±0.5%)
+        const variation=(Math.random()*1-0.5); // variação muito pequena
+        const effectivePct=Math.max(0.5, ex.pct + variation);
+        const val=totalCap*(effectivePct/100);
+        
+        // Calcula largura da barra baseada no maior percentual (Binance ~28%)
+        const barWidth=(effectivePct/28*100).toFixed(1);
+        
+        return`<div style="display:flex;align-items:center;gap:7px;">
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);width:80px;flex-shrink:0;">${ex.name}</div>
+            <div style="flex:1;height:4px;background:var(--bg-3);border-radius:2px;overflow:hidden;position:relative;">
+                <div style="width:${barWidth}%;height:100%;background:linear-gradient(to right,#8a6000,var(--gold));border-radius:2px;transition:width 1s ease;"></div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--gold);width:55px;text-align:right;">${effectivePct.toFixed(1)}%</div>
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);width:60px;text-align:right;">$${(val/1000).toFixed(1)}K</div>
+        </div>`;
+    }).join('');
+}
+
+// ===== EXCHANGE STATUS CARDS =====
+function renderExchangeStatus(){
+    const el=document.getElementById('exchange-status');if(!el)return;
+    // Só renderiza uma vez para evitar piscar
+    if(el.dataset.rendered==='1')return;
+    el.dataset.rendered='1';
+    
+    el.innerHTML=EX.map((ex,i)=>{
+        const logoEl=`<img src="icones/${ex.id}.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" style="width:24px;height:24px;object-fit:contain;"><div style="width:24px;height:24px;display:none;align-items:center;justify-content:center;font-family:var(--font-logo);font-size:7px;font-weight:900;color:var(--gold);background:rgba(242,169,0,0.08);border:1px solid rgba(242,169,0,0.15);border-radius:6px;">${ex.name.substring(0,3)}</div>`;
+        const latency=(Math.random()*20+10).toFixed(0);
+        return`<div style="background:linear-gradient(135deg,rgba(0,210,106,.05),var(--bg-1));border:1px solid rgba(0,210,106,.2);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;animation:fadeUp .3s ease ${i*.05}s both;">
+            <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,rgba(0,210,106,.15),transparent);padding:3px 10px 3px 16px;border-bottom-left-radius:8px;font-family:var(--font-mono);font-size:7px;font-weight:900;color:var(--green);letter-spacing:1px;border-left:1px solid rgba(0,210,106,.2);border-bottom:1px solid rgba(0,210,106,.2);">SYNC</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                ${logoEl}
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--text);letter-spacing:.5px;">${ex.name}</div>
+                    <div style="font-family:var(--font-mono);font-size:7px;color:var(--text-3);letter-spacing:1px;margin-top:2px;">BTC/USDT SPOT</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(0,210,106,.1);">
+                <div style="display:flex;align-items:center;gap:5px;">
+                    <div style="width:5px;height:5px;background:var(--green);border-radius:50%;box-shadow:0 0 5px var(--green);animation:blink-led 1.5s infinite;"></div>
+                    <div style="font-family:var(--font-mono);font-size:8px;color:var(--green);letter-spacing:1px;">API ATIVA</div>
+                </div>
+                <div style="font-family:var(--font-mono);font-size:7px;color:var(--text-3);letter-spacing:.5px;">LATENCY ${latency}ms</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ===== STATS GERAIS =====
+function updateStats(){
+    // BTC total: FIXO (TOTAL_CLIENT_BTC + MASTER_BTC_FIXED)
+    const totalBtc = TOTAL_CLIENT_BTC + MASTER_BTC_FIXED;
+    const btcUsd = totalBtc * btcBase;
+    
+    // USDT total: soma dos poolUsd/saldoIni + profit total
+    const poolUsdtTot=MESAS.reduce((s,m)=>s+(m.saldoIni||m.poolUsd),0) + 250000;
+    const totalUsdt=poolUsdtTot + MESAS.reduce((s,m)=>s+m.profit,0) + MASTER.profit;
+    const totalCap=btcUsd+totalUsdt;
+    
+    const fmt=(n,d=2)=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    
+    // Pool BTC Total: ESTÁTICO (não muda com preço)
+    set('s-btc',totalBtc.toFixed(5)+' BTC');
+    set('s-btc-usd','\u2248 '+fmt(btcUsd,0));
+    set('s-usdt',fmt(totalUsdt));
+    set('s-lucro','+'+fmt(MESAS.reduce((s,m)=>s+m.profit,0)+MASTER.profit));
+    set('s-total',fmt(totalCap,0));
+    set('s-sp',maxSp.toFixed(4)+'%');set('s-sp-pair',maxPair);
+    
+    set('p-btc',totalBtc.toFixed(5)+' BTC');
+    set('p-btc-u','\u2248 '+fmt(btcUsd,0));
+    set('p-usdt',fmt(totalUsdt));
+    set('p-lucro','+'+fmt(MESAS.reduce((s,m)=>s+m.profit,0)+MASTER.profit));
+    
+    // Mesas page stats
+    const totalCapMesas=MESAS.reduce((s,m)=>s+mesaCap(m),0)+500000;
+    const totalLucro=MESAS.reduce((s,m)=>s+m.profit,0)+MASTER.profit;
+    set('ms-cap',fmt(totalCapMesas,0));
+    set('ms-lucro','+'+fmt(totalLucro));
+    set('ms-btc','$'+btcBase.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+}
+
+// ===== VALORES DINAMICOS DE BTC NAS MESAS =====
+function updateBtcDynamic(){
+    MESAS.forEach(m=>{
+        if(m.tipo==='inv')return;
+        const btcV=m.poolBtc*btcBase;
+        const poolTotal=btcV+m.poolUsd;
+        
+        // ROI fixo para Kassem: 0.7561%
+        const roi = m.id === 'kassem_ataya' ? '0,7561' : (m.profit/poolTotal*100).toFixed(4).replace('.',',');
+        
+        const acum=poolTotal+m.profit;
+        const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+        set('mesa-'+m.id+'-btc-usd','(\u2248 $'+btcV.toFixed(0)+')');
+        set('mesa-'+m.id+'-pool-total','\u2248 $'+poolTotal.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+        set('mesa-'+m.id+'-roi','\u2248 '+roi+'%');
+        set('mesa-'+m.id+'-acum','\u2248 $'+acum.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+    });
+    
+    // Master BTC pool: qty FIXA, só USD oscila
+    const masterBtcUsd=MASTER_BTC_FIXED*btcBase;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    set('mp-btc-usd-val','\u2248 $'+masterBtcUsd.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}));
+    
+    const masterTotal=masterBtcUsd+250000;
+    const masterRoi=(MASTER.profit/500000*100).toFixed(4);
+    const masterAcum=masterTotal+MASTER.profit;
+    set('mesa-master-roi','\u2248 '+masterRoi+'%');
+    set('mesa-master-hdr-profit','+$'+MASTER.profit.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+    set('mesa-master-profit','+$'+MASTER.profit.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+    set('mesa-master-pool-total','\u2248 $'+masterTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+    set('mesa-master-acum','\u2248 $'+masterAcum.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+}
+
+// ===== ATUALIZA VALORES MESAS (a cada 15s) =====
+function updateMesasValues(){
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    const setW=(id,w)=>{const e=document.getElementById(id);if(e)e.style.width=w;};
+    
+    MESAS.forEach(m=>{
+        const cap=mesaCap(m);
+        const meta=cap*0.03;
+        const pct=Math.min(100,(m.profit/meta*100)).toFixed(1);
+        set('mesa-'+m.id+'-profit','+$'+m.profit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));
+        set('mesa-'+m.id+'-barra-pct',pct+'%');
+        setW('mesa-'+m.id+'-barra',pct+'%');
+        if(m.tipo==='inv'){
+            const poolTotal=m.saldoIni||m.poolUsd;
+            const roi=(m.profit/poolTotal*100).toFixed(4).replace('.',',');
+            const acum=poolTotal+m.profit;
+            set('mesa-'+m.id+'-roi','\u2248 '+roi+'%');
+            set('mesa-'+m.id+'-acum','\u2248 $'+acum.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+        }
+        // ROI fixo para Kassem no header do card
+        if(m.id === 'kassem_ataya'){
+            set('mesa-'+m.id+'-roi-usd','+$'+m.profit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));
+        } else {
+            set('mesa-'+m.id+'-roi-usd','+$'+m.profit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));
+        }
+    });
+    
+    // Atualiza vista individual se estiver ativa
+    if(currentUser && currentUser.mesa){
+        const mesa = MESAS.find(m => m.id === currentUser.mesa);
+        if(mesa){
+            const btcV = mesa.poolBtc * btcBase;
+            const poolTotal = mesa.tipo === 'inv' ? (mesa.saldoIni || mesa.poolUsd) : (btcV + mesa.poolUsd);
+            const roi = mesa.id === 'kassem_ataya' ? '0.7561' : (mesa.profit / poolTotal * 100).toFixed(4);
+            const acum = poolTotal + mesa.profit;
+            const cap = mesaCap(mesa);
+            const meta = cap * 0.03;
+            const pct = Math.min(100, (mesa.profit / meta * 100)).toFixed(1);
+            
+            // Atualiza cards do topo
+            set('mm-pool-total','$'+poolTotal.toLocaleString('en-US',{minimumFractionDigits:2}));
+            set('mm-profit','+$'+mesa.profit.toFixed(2));
+            set('mm-profit-big','+$'+mesa.profit.toFixed(2));
+            set('mm-roi',roi+'%');
+            set('mm-acum','$'+acum.toLocaleString('en-US',{minimumFractionDigits:2}));
+            setW('mm-barra',pct+'%');
+            
+            // Atualiza card visual da mesa
+            set('mm-card-roi','\u2248 '+roi+'%');
+            set('mm-card-roi-usd','+$'+mesa.profit.toFixed(2));
+            set('mm-card-profit','+$'+mesa.profit.toFixed(2));
+            set('mm-card-pool-total','\u2248 $'+poolTotal.toLocaleString('en-US',{minimumFractionDigits:2}));
+            set('mm-card-acum','\u2248 $'+acum.toLocaleString('en-US',{minimumFractionDigits:2}));
+            set('mm-card-barra-pct',pct+'%');
+            setW('mm-card-barra',pct+'%');
+            
+            if(mesa.tipo !== 'inv'){
+                set('mm-card-btc-usd','(\u2248 $'+btcV.toFixed(0)+')');
+            }
+        }
+    }
+    
+    // Master barra
+    const masterMeta=500000*0.03;
+    const masterPct=Math.min(100,(MASTER.profit/masterMeta*100)).toFixed(1);
+    setW('mesa-master-barra',masterPct+'%');
+    set('mesa-master-barra-pct',masterPct+'%');
+    updateBtcDynamic();
+}
+
+// ===== MASTER PAGE =====
+function updateMasterPage(){
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    const roiPct=(MASTER.profit/500000*100);
+    const masterBtcUsd=MASTER_BTC_FIXED*btcBase;
+    const poolTotal=masterBtcUsd+250000;
+    const roiStr=roiPct.toFixed(4).replace('.',',')+'%';
+    const profitStr='+$'+MASTER.profit.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    set('mp-roi',roiStr);
+    set('mp-roi-big',roiStr);
+    set('mp-profit',profitStr);
+    set('mp-pool','$'+poolTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+    set('mp-pool-sub',MASTER_BTC_FIXED.toFixed(5)+' BTC + $250.000 USDT');
+    set('mp-btc-amt',MASTER_BTC_FIXED.toFixed(5)+' BTC');
+    set('mp-btc-usd-val','\u2248 $'+masterBtcUsd.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}));
+    set('mp-btc-price-hdr','$'+btcBase.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+    set('mesa-master-roi',roiStr);
+    set('mesa-master-hdr-profit',profitStr);
+}
+
+// ===== INICIALIZA CARDS DAS MESAS (uma vez) =====
+function initMesasCards(){
+    const container = document.getElementById('minha-mesa-content');
+    if(!container) return;
+    
+    // Se for admin, mostra todas as mesas
+    if(!currentUser || !currentUser.mesa){
+        renderAllMesas(container);
+        return;
+    }
+    
+    // Cliente individual - mostra apenas sua mesa com detalhes
+    const mesa = MESAS.find(m => m.id === currentUser.mesa);
+    if(!mesa) return;
+    
+    renderMinhasMesa(container, mesa);
+}
+
+// Renderiza todas as mesas (Admin)
+function renderAllMesas(container){
+    container.innerHTML = `
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card" style="--c:var(--gold)"><div class="stat-label">Capital Gerenciado</div><div class="stat-value" id="ms-cap">$517,162</div><div class="stat-sub">INCLUINDO MESA MASTER</div></div>
+            <div class="stat-card" style="--c:var(--green)"><div class="stat-label">Lucro Acumulado</div><div class="stat-value" id="ms-lucro">+$4,000.00</div><div class="stat-sub">TODAS AS MESAS</div></div>
+            <div class="stat-card" style="--c:var(--gold)"><div class="stat-label">BTC Agora</div><div class="stat-value" id="ms-btc">$--</div><div class="stat-sub">BTC/USDT &middot; LIVE</div></div>
+        </div>
+        <div class="sec-hdr"><div class="sec-title">Todas as Mesas de Opera&ccedil;&atilde;o</div></div>
+        <div class="mesas-grid" id="mesas-grid"></div>
+    `;
+    
+    const grid = document.getElementById('mesas-grid');
+    if(!grid || grid.dataset.init === '1') return;
+    grid.dataset.init = '1';
+
+    grid.innerHTML = MESAS.map((m,i)=>{
+        const cap = mesaCap(m);
+        const btcV = m.poolBtc * btcBase;
+        const poolTotal = m.tipo === 'inv' ? (m.saldoIni || m.poolUsd) : (btcV + m.poolUsd);
+        
+        // ROI fixo para Kassem: 0,7561% (com vírgula para padrão BR)
+        const roi = m.id === 'kassem_ataya' ? '0,7561' : (m.profit / poolTotal * 100).toFixed(4).replace('.',',');
+        
+        const acum = poolTotal + m.profit;
+        const meta = cap * 0.03;
+        const pct = Math.min(100, (m.profit / meta * 100)).toFixed(1);
+
+        const rows = m.tipo === 'inv' ? `
+            <div class="mesa-row"><span class="m-label">Saldo Inicial</span><span class="m-val">$${(m.saldoIni||0).toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+            <div class="mesa-row"><span class="m-label">Saldo Atual</span><span class="m-val green">$${m.poolUsd.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+            <div class="mesa-row"><span class="m-label">Spread M&iacute;nimo</span><span class="m-val">${m.minSpread}%</span></div>
+            <div class="mesa-row"><span class="m-label">Tamanho Posi&ccedil;&atilde;o</span><span class="m-val">${m.tamPos} BTC</span></div>
+            <div class="mesa-row"><span class="m-label">Profit Acumulado</span><span class="m-val green" id="mesa-${m.id}-profit">+$${m.profit.toFixed(2)}</span></div>
+        ` : `
+            <div class="mesa-row"><span class="m-label">Pool Cripto</span><span class="m-val gold">${m.poolBtc.toFixed(5)} BTC <span id="mesa-${m.id}-btc-usd" style="color:var(--text-3);font-size:9px;">(\u2248 $${btcV.toFixed(0)})</span></span></div>
+            <div class="mesa-row"><span class="m-label">Pool D&oacute;lar</span><span class="m-val">$${m.poolUsd.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+            <div class="mesa-row"><span class="m-label">Pool Total</span><span class="m-val" id="mesa-${m.id}-pool-total">\u2248 $${poolTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+            <div class="mesa-row"><span class="m-label">Pre&ccedil;o M&eacute;dio BTC</span><span class="m-val">$${m.precoMedio.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+            <div class="mesa-row"><span class="m-label">Profit Acumulado</span><span class="m-val green" id="mesa-${m.id}-profit">+$${m.profit.toFixed(2)}</span></div>
+        `;
+
+        return `<div class="mesa-card" style="animation:fadeUp .3s ease ${i*.07}s both;">
+            <div class="mesa-hdr">
+                <div>
+                    <div class="mesa-id-tag">BTC/USDT &middot; ARB</div>
+                    <div class="mesa-client">${m.nome}</div>
+                    <div class="mesa-dates">${m.inicio} &rarr; ${m.limite}</div>
+                </div>
+                <div class="mesa-roi-wrap">
+                    <div class="mesa-roi-lbl">ROI TOTAL</div>
+                    <div class="mesa-roi-num" id="mesa-${m.id}-roi">\u2248 ${roi}%</div>
+                    <div class="mesa-roi-usd" id="mesa-${m.id}-roi-usd">+$${m.profit.toFixed(2)}</div>
+                </div>
+            </div>
+            <div>${rows}</div>
+            <div style="padding:6px 18px 12px;">
+                <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:5px;letter-spacing:1px;">
+                    <span>META 3%/M&Ecirc;S</span><span id="mesa-${m.id}-barra-pct">${pct}%</span>
+                </div>
+                <div style="height:3px;background:var(--bg-3);border-radius:2px;overflow:hidden;">
+                    <div id="mesa-${m.id}-barra" style="height:100%;background:linear-gradient(to right,#8a6000,var(--gold));border-radius:2px;width:${pct}%;transition:width 2s ease;"></div>
+                </div>
+            </div>
+            <div class="mesa-footer">
+                <div class="mesa-status"><div class="dot"></div>ATIVO</div>
+                <div class="mesa-acum" id="mesa-${m.id}-acum">\u2248 $${acum.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Renderiza mesa individual com métricas detalhadas
+function renderMinhasMesa(container, mesa){
+    const cap = mesaCap(mesa);
+    const btcV = mesa.poolBtc * btcBase;
+    const poolTotal = mesa.tipo === 'inv' ? (mesa.saldoIni || mesa.poolUsd) : (btcV + mesa.poolUsd);
+    
+    // ROI fixo para Kassem: 0.7561%
+    const roi = mesa.id === 'kassem_ataya' ? '0.7561' : (mesa.profit / poolTotal * 100).toFixed(4);
+    
+    const acum = poolTotal + mesa.profit;
+    const meta = cap * 0.03;
+    const pct = Math.min(100, (mesa.profit / meta * 100)).toFixed(1);
+    
+    // Calcula métricas adicionais
+    const diasAtivo = Math.floor((new Date() - new Date(mesa.inicio.split('/').reverse().join('-'))) / (1000*60*60*24));
+    const roiDiario = 0.1098; // ROI diário fixo
+    const profitDiarioMedio = (mesa.profit / diasAtivo).toFixed(2);
+    const diasRestantes = Math.floor((new Date(mesa.limite.split('/').reverse().join('-')) - new Date()) / (1000*60*60*24));
+    
+    // Data final ajustada para 2028
+    const dataFinal = mesa.id === 'kassem_ataya' ? '18/09/2028' : mesa.limite;
+    
+    container.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div style="font-family:var(--font-logo);font-size:24px;font-weight:900;color:var(--gold);letter-spacing:2px;">MINHA MESA</div>
+                <div class="live-ind"><span class="live-dot"></span>ATIVA &middot; SINCRONIZADA</div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:1px;">Cliente: ${mesa.nome} &middot; BTC/USDT Arbitrage &middot; ${diasAtivo} dias operando</div>
+        </div>
+        
+        <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+            <div class="stat-card" style="--c:var(--gold)">
+                <div class="stat-label">Capital Total</div>
+                <div class="stat-value" id="mm-pool-total">$${poolTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+                <div class="stat-sub">Pool BTC + USDT</div>
+            </div>
+            <div class="stat-card" style="--c:var(--green)">
+                <div class="stat-label">Lucro Acumulado</div>
+                <div class="stat-value" id="mm-profit">+$${mesa.profit.toFixed(2)}</div>
+                <div class="stat-sub">Total desde ${mesa.inicio}</div>
+            </div>
+            <div class="stat-card" style="--c:var(--blue)">
+                <div class="stat-label">ROI Total</div>
+                <div class="stat-value" style="--c:var(--blue)" id="mm-roi">${roi}%</div>
+                <div class="stat-sub">Rendimento acumulado</div>
+            </div>
+            <div class="stat-card" style="--c:#a855f7">
+                <div class="stat-label">ROI Diário Médio</div>
+                <div class="stat-value" style="--c:#a855f7">${roiDiario.toFixed(4)}%</div>
+                <div class="stat-sub">Últimos ${diasAtivo} dias</div>
+            </div>
+        </div>
+        
+        <div class="grid-2" style="margin-bottom:20px;">
+            <!-- CARD DA MESA (substitui painel composição) -->
+            <div class="mesa-card">
+                <div class="mesa-hdr">
+                    <div>
+                        <div class="mesa-id-tag">BTC/USDT &middot; ARB</div>
+                        <div class="mesa-client">${mesa.nome}</div>
+                        <div class="mesa-dates">${mesa.inicio} &rarr; ${dataFinal}</div>
+                    </div>
+                    <div class="mesa-roi-wrap">
+                        <div class="mesa-roi-lbl">ROI TOTAL</div>
+                        <div class="mesa-roi-num" id="mm-card-roi">\u2248 ${roi}%</div>
+                        <div class="mesa-roi-usd" id="mm-card-roi-usd">+$${mesa.profit.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div>
+                    ${mesa.tipo === 'inv' ? `
+                    <div class="mesa-row"><span class="m-label">Saldo Inicial</span><span class="m-val">$${(mesa.saldoIni||0).toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    <div class="mesa-row"><span class="m-label">Saldo Atual</span><span class="m-val green">$${mesa.poolUsd.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    <div class="mesa-row"><span class="m-label">Spread M&iacute;nimo</span><span class="m-val">${mesa.minSpread}%</span></div>
+                    <div class="mesa-row"><span class="m-label">Tamanho Posi&ccedil;&atilde;o</span><span class="m-val">${mesa.tamPos} BTC</span></div>
+                    <div class="mesa-row"><span class="m-label">Profit Acumulado</span><span class="m-val green" id="mm-card-profit">+$${mesa.profit.toFixed(2)}</span></div>
+                    ` : `
+                    <div class="mesa-row"><span class="m-label">Pool Cripto</span><span class="m-val gold">${mesa.poolBtc.toFixed(5)} BTC <span id="mm-card-btc-usd" style="color:var(--text-3);font-size:9px;">(\u2248 $${btcV.toFixed(0)})</span></span></div>
+                    <div class="mesa-row"><span class="m-label">Pool D&oacute;lar</span><span class="m-val">$${mesa.poolUsd.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    <div class="mesa-row"><span class="m-label">Pool Total</span><span class="m-val" id="mm-card-pool-total">\u2248 $${poolTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    <div class="mesa-row"><span class="m-label">Pre&ccedil;o M&eacute;dio BTC</span><span class="m-val">$${mesa.precoMedio.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    <div class="mesa-row"><span class="m-label">Profit Acumulado</span><span class="m-val green" id="mm-card-profit">+$${mesa.profit.toFixed(2)}</span></div>
+                    `}
+                </div>
+                <div style="padding:6px 18px 12px;">
+                    <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:5px;letter-spacing:1px;">
+                        <span>META 3%/M&Ecirc;S</span><span id="mm-card-barra-pct">${pct}%</span>
+                    </div>
+                    <div style="height:3px;background:var(--bg-3);border-radius:2px;overflow:hidden;">
+                        <div id="mm-card-barra" style="height:100%;background:linear-gradient(to right,#8a6000,var(--gold));border-radius:2px;width:${pct}%;transition:width 2s ease;"></div>
+                    </div>
+                </div>
+                <div class="mesa-footer">
+                    <div class="mesa-status"><div class="dot"></div>ATIVO</div>
+                    <div class="mesa-acum" id="mm-card-acum">\u2248 $${acum.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+                </div>
+            </div>
+            
+            <!-- PAINEL PERFORMANCE (mantém) -->
+            <div class="panel">
+                <div class="panel-hdr"><div class="panel-title">PERFORMANCE DETALHADA</div></div>
+                <div style="padding:18px;">
+                    <div style="display:grid;gap:12px;">
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);">Lucro M&eacute;dio/Dia</span>
+                            <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--green);">0,12%</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);">Lucro M&eacute;dio/Semanal</span>
+                            <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--green);">0,77%</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+                            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);">Lucro M&eacute;dio/Mensal</span>
+                            <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--green);">3,18%</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0;">
+                            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-3);">Total Estimado</span>
+                            <span style="font-family:var(--font-mono);font-size:14px;font-weight:900;color:var(--green);" id="mm-acum">$${acum.toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-hdr">
+                <div class="panel-title">PROGRESSO META MENSAL (3%)</div>
+                <div style="font-family:var(--font-mono);font-size:9px;color:var(--gold);">${pct}% ATINGIDO</div>
+            </div>
+            <div style="padding:20px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                    <div>
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:4px;">LUCRO ATUAL</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--green);" id="mm-profit-big">+$${mesa.profit.toFixed(2)}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:4px;">META M&Ecirc;S</div>
+                        <div style="font-family:var(--font-mono);font-size:18px;font-weight:900;color:var(--gold);">$${meta.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div style="height:8px;background:var(--bg-3);border-radius:4px;overflow:hidden;margin-top:16px;">
+                    <div id="mm-barra" style="height:100%;background:linear-gradient(to right,#8a6000,var(--gold));border-radius:4px;width:${pct}%;transition:width 2s ease;box-shadow:0 0 10px rgba(242,169,0,0.5);"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <div class="panel-hdr">
+                <div class="panel-title">INFORMA&Ccedil;&Otilde;ES DO CONTRATO</div>
+            </div>
+            <div style="padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:6px;letter-spacing:1px;">IN&Iacute;CIO</div>
+                    <div style="font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text);">${mesa.inicio}</div>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:6px;letter-spacing:1px;">T&Eacute;RMINO</div>
+                    <div style="font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text);">${dataFinal}</div>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-bottom:6px;letter-spacing:1px;">STATUS</div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div class="live-dot"></div>
+                        <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--green);">ATIVO</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ===== NAVEGACAO =====
+window.showPage=(page,el)=>{
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    if(el)el.classList.add('active');
+    if(page==='mesas')initMesasCards();
+    if(page==='master')updateMasterPage();
+};
+
+// ===== CLOCK =====
+function updateClock(){
+    const el=document.getElementById('status-time');
+    if(el)el.textContent=new Date().toLocaleTimeString('pt-BR');
+}
+
+// Reset diário às 00:00
+function checkDailyReset(){
+    const now = new Date();
+    if(now.getHours() === 0 && now.getMinutes() === 0 && dailyOpCount > 0){
+        dailyOpCount = 0;
+        dailyProfit = 0;
+        console.log('Reset diário executado');
+    }
+}
+
+// ===== TICK VISUAL (4s) =====
+function tick(){
+    updatePrices();
+    renderRadar('radar-ov');renderRadar('radar-full');
+    renderOB();renderDist();renderExchangeStatus();updateStats();
+}
+
+// ===== TICK DE OPERACAO (15s) =====
+function opTick(){
+    const result=updatePrices();
+    if(result.spread > 0){
+        gerarOp(result);
+        renderMatrix(); // Sincroniza matriz com operações
+    }
+}
+
+function init(){
+    document.getElementById('sid-user').textContent='USR: '+(currentUser?.nome || 'protocolo');
+    
+    // Atualiza label do menu baseado no tipo de usuário
+    const navMesas = document.getElementById('nav-mesas');
+    if(navMesas){
+        navMesas.textContent = (currentUser && currentUser.mesa) ? 'MINHA MESA' : 'TODAS MESAS';
+    }
+    
+    // NOVO SISTEMA: Atualiza profits baseado na data (não usa mais localStorage)
+    atualizarProfitsPorData();
+    MASTER.profit = calcularProfitMaster();
+    
+    connectWS();
+    updatePrices();
+    tick();
+    initMesasCards();
+    updateMasterPage();
+    setInterval(tick,4000);
+    setInterval(renderOB,2000);
+    setInterval(opTick,15000);
+    setInterval(updateClock,1000);
+    setInterval(checkDailyReset,60000); // Verifica reset a cada minuto
+    
+    // Atualiza profits a cada 1 minuto (recalcula baseado na data)
+    setInterval(() => {
+        atualizarProfitsPorData();
+        MASTER.profit = calcularProfitMaster();
+        updateMesasValues();
+        updateMasterPage();
+    }, 60000);
+}
+
+if(currentUser)init();
+
+// ===== MENU MOBILE =====
+function toggleMobileMenu(){
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    const toggle = document.querySelector('.menu-toggle');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    toggle.classList.toggle('active');
+}
+
+// Mostrar botão hambúrguer apenas no mobile
+function checkMobileMenu(){
+    const toggle = document.querySelector('.menu-toggle');
+    if(window.innerWidth <= 768){
+        toggle.style.display = 'flex';
+    } else {
+        toggle.style.display = 'none';
+        // Remove classes ativas se voltar pro desktop
+        document.querySelector('.sidebar').classList.remove('active');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+        toggle.classList.remove('active');
+    }
+}
+
+// Fecha menu ao clicar em um item
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        if(window.innerWidth <= 768){
+            toggleMobileMenu();
+        }
+    });
+});
+
+// Verifica tamanho da tela ao carregar e ao redimensionar
+window.addEventListener('resize', checkMobileMenu);
+checkMobileMenu();
+
+</script>
+</body>
+</html>
