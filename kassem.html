@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kassem Ataya · BTC Arbitrage</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030305;--bg1:#07070c;--bg2:#0c0c14;--bg3:#11111c;
+  --gold:#E8B84B;--gold2:#F5D07A;--golddim:rgba(232,184,75,0.10);
+  --green:#00E5A0;--greendim:rgba(0,229,160,0.08);
+  --red:#FF4D6A;--reddim:rgba(255,77,106,0.08);
+  --blue:#4D9FFF;
+  --text:#EEEEF5;--text2:#7A7A9A;--text3:#35354A;
+  --border:rgba(255,255,255,0.05);--bordergold:rgba(232,184,75,0.18);
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9998;}
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+#login-canvas{position:absolute;inset:0;opacity:.55;pointer-events:none;}
+.login-wrap{position:relative;z-index:2;width:100%;max-width:400px;margin:20px;animation:fadeUp .5s ease;}
+.login-top{text-align:center;margin-bottom:28px;}
+.login-logo-txt{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;}
+.login-brand{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:6px;}
+.login-sub{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
+.login-box{background:linear-gradient(145deg,#0d0d0d,#070707);border:1px solid var(--bordergold);border-radius:16px;padding:32px 28px;}
+.lf{margin-bottom:16px;}
+.lf label{display:block;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2px;margin-bottom:7px;text-transform:uppercase;}
+.lf input{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;color:#fff;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .3s;}
+.lf input:focus{border-color:var(--bordergold);}
+.login-btn{width:100%;padding:14px;background:linear-gradient(45deg,var(--gold),#FFD54F);border:none;border-radius:8px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:2px;transition:all .3s;margin-top:4px;}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(232,184,75,.35);}
+.login-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;margin-top:12px;min-height:16px;}
+.login-foot{text-align:center;margin-top:18px;font-family:var(--mono);font-size:10px;color:#1a1a1a;letter-spacing:1px;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:0;left:-260px;bottom:0;width:240px;
+  background:linear-gradient(180deg,#09090f 0%,#060610 100%);
+  border-right:1px solid var(--bordergold);
+  z-index:1000;display:flex;flex-direction:column;
+  transition:left .35s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 40px rgba(232,184,75,0.06);
+}
+.sidebar.open{left:0;}
+.sid-brand{padding:28px 22px 20px;border-bottom:1px solid var(--border);}
+.sid-brand-top{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;opacity:.7;}
+.sid-brand-name{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.sid-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:14px 22px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:var(--golddim);}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.sid-foot{padding:18px 22px;border-top:1px solid var(--border);}
+.sid-status{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1px;}
+.pulse{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* ── OVERLAY ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;backdrop-filter:blur(2px);}
+.overlay.show{display:block;}
+
+/* ── HAMBURGER ── */
+.hamburger{
+  position:fixed;top:14px;left:14px;z-index:1001;
+  width:42px;height:42px;border-radius:10px;
+  background:var(--gold);border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 4px 20px rgba(232,184,75,.35);transition:all .3s;
+}
+.hamburger:hover{transform:scale(1.07);}
+.hamburger span{display:block;width:18px;height:2px;background:#000;border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:58px;
+  background:rgba(3,3,5,.92);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px 0 68px;z-index:100;backdrop-filter:blur(12px);
+}
+.topbar-clock{font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:1px;}
+.topbar-right{display:flex;align-items:center;gap:18px;}
+.btc-live-badge{display:flex;align-items:center;gap:8px;background:var(--golddim);border:1px solid var(--bordergold);border-radius:8px;padding:6px 12px;}
+.btc-live-label{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:2px;}
+.btc-live-price{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold);}
+.sys-badge{font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1.5px;display:flex;align-items:center;gap:5px;}
+
+/* ── MAIN ── */
+.main{margin-top:58px;height:calc(100vh - 58px);overflow-y:auto;padding:20px 22px;}
+.page{display:none;animation:fadeUp .3s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CLIENT CARD ── */
+.client-card{
+  background:linear-gradient(135deg,rgba(232,184,75,.07) 0%,rgba(232,184,75,.02) 50%,var(--bg1) 100%);
+  border:1px solid var(--bordergold);border-radius:20px;padding:28px;
+  position:relative;overflow:hidden;margin-bottom:18px;
+}
+.client-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.client-card-watermark{
+  position:absolute;right:-10px;top:-10px;
+  font-family:var(--sans);font-size:90px;font-weight:800;
+  color:rgba(232,184,75,0.04);line-height:1;user-select:none;
+}
+.client-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.client-id{font-family:var(--mono);font-size:9px;color:rgba(232,184,75,.5);letter-spacing:2.5px;margin-bottom:6px;}
+.client-name{font-family:var(--sans);font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.client-badge{display:flex;align-items:center;gap:6px;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);border-radius:20px;padding:5px 12px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:2px;}
+.client-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.metric{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.metric-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.metric-value{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1;}
+.metric-sub{font-family:var(--mono);font-size:9px;color:var(--text2);margin-top:4px;}
+.mv-gold{color:var(--gold);}
+.mv-green{color:var(--green);}
+.mv-blue{color:var(--blue);}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-title{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0;}
+.live-dot{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;}
+.live-dot::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite;}
+
+/* ══ RADAR GRID — EXPERIENCE CARD ══ */
+.radar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;}
+
+@keyframes glowBuy{
+  0%,100%{box-shadow:0 0 0 1px rgba(0,229,160,.25),0 8px 32px rgba(0,229,160,.12)}
+  50%    {box-shadow:0 0 0 1px rgba(0,229,160,.5), 0 8px 40px rgba(0,229,160,.28)}
+}
+@keyframes glowSell{
+  0%,100%{box-shadow:0 0 0 1px rgba(255,77,106,.25),0 8px 32px rgba(255,77,106,.12)}
+  50%    {box-shadow:0 0 0 1px rgba(255,77,106,.5), 0 8px 40px rgba(255,77,106,.28)}
+}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(500%)}}
+@keyframes ticker{0%,100%{opacity:1}40%,60%{opacity:.35}}
+@keyframes sealPop{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* ── BASE CARD ── */
+.radar-card{
+  background:#08080f;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  position:relative;overflow:hidden;
+  transition:transform .25s ease;
+  cursor:default;
+  display:flex;flex-direction:column;
+}
+.radar-card:hover{transform:translateY(-4px);}
+
+.radar-card::after{
+  content:'';position:absolute;left:0;right:0;height:60px;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.012),transparent);
+  animation:scanline 5s linear infinite;z-index:0;
+}
+
+/* BUY / SELL glow */
+.radar-card.is-buy{
+  background:linear-gradient(170deg,rgba(0,229,160,.09) 0%,rgba(0,229,160,.03) 40%,#06060e 100%);
+  animation:glowBuy 2.8s ease infinite;
+}
+.radar-card.is-sell{
+  background:linear-gradient(170deg,rgba(255,77,106,.09) 0%,rgba(255,77,106,.03) 40%,#06060e 100%);
+  animation:glowSell 2.8s ease infinite;
+}
+
+/* ── HEADER ── */
+.rc-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 8px;position:relative;z-index:1;
+}
+.rc-logo{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  transition:border-color .4s;
+}
+.radar-card.is-buy  .rc-logo{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.08);}
+.radar-card.is-sell .rc-logo{border-color:rgba(255,77,106,.35);background:rgba(255,77,106,.08);}
+.rc-logo img{width:24px;height:24px;object-fit:contain;border-radius:50%;}
+.rc-exinfo{flex:1;min-width:0;}
+.rc-exname{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-pair{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:1px;margin-top:2px;}
+
+/* ── MINI CHART ── */
+.r-minichart{
+  height:48px;width:100%;position:relative;z-index:1;overflow:hidden;flex-shrink:0;
+}
+.r-minichart canvas{width:100%;height:100%;display:block;}
+
+/* ── BODY ── */
+.rc-body{padding:10px 14px 14px;position:relative;z-index:1;}
+
+.rc-price{
+  font-family:var(--mono);font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:-.5px;line-height:1;margin-bottom:5px;
+}
+.radar-card.is-buy  .rc-price{color:var(--green);text-shadow:0 0 20px rgba(0,229,160,.5);animation:ticker 1.8s ease infinite;}
+.radar-card.is-sell .rc-price{color:var(--red);  text-shadow:0 0 20px rgba(255,77,106,.5);animation:ticker 1.8s ease infinite;}
+
+.rc-row{display:flex;align-items:center;justify-content:space-between;}
+.rc-diff{font-family:var(--mono);font-size:9px;color:var(--text2);}
+.radar-card.is-buy  .rc-diff{color:rgba(0,229,160,.7);}
+.radar-card.is-sell .rc-diff{color:rgba(255,77,106,.7);}
+
+/* ── SEAL ── */
+.rc-seal{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;
+  padding:4px 10px 4px 7px;border-radius:20px;
+}
+/* BUY seal — verde com ícone seta + texto */
+.rc-seal.buy{
+  background:linear-gradient(90deg,rgba(0,229,160,.2),rgba(0,229,160,.08));
+  border:1px solid rgba(0,229,160,.45);
+  color:var(--green);
+  box-shadow:0 0 10px rgba(0,229,160,.15),inset 0 0 8px rgba(0,229,160,.05);
+  animation:sealPop 2s ease infinite;
+}
+/* SELL seal — vermelho */
+.rc-seal.sell{
+  background:linear-gradient(90deg,rgba(255,77,106,.2),rgba(255,77,106,.08));
+  border:1px solid rgba(255,77,106,.45);
+  color:var(--red);
+  box-shadow:0 0 10px rgba(255,77,106,.15),inset 0 0 8px rgba(255,77,106,.05);
+  animation:sealPop 2s ease infinite;
+}
+.rc-seal.hold{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  color:var(--text2);font-size:7px;
+}
+.rc-seal-icon{font-size:10px;line-height:1;}
+
+/* ── OPS TABLE ── */
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);}
+.panel-title{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.ops-table{width:100%;border-collapse:collapse;}
+.ops-table th{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+.ops-table td{font-family:var(--mono);font-size:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.025);vertical-align:middle;}
+.ops-table tr:hover td{background:rgba(255,255,255,.015);}
+.ops-table tr:last-child td{border-bottom:none;}
+.tag-buy{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.06);overflow:hidden;}
+.tag-sell{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,77,106,.3);background:rgba(255,77,106,.06);overflow:hidden;}
+.tag-buy img,.tag-sell img{width:18px;height:18px;object-fit:contain;border-radius:50%;}
+
+/* ── ORDERBOOK ── */
+.ob-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ob-side{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.ob-hdr-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;}
+.ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:5px 14px;font-family:var(--mono);font-size:10px;position:relative;overflow:hidden;}
+.ob-depth{position:absolute;top:0;bottom:0;right:0;opacity:.07;pointer-events:none;}
+.ob-ask .ob-row span:first-child{color:var(--red);font-weight:600;}
+.ob-bid .ob-row span:first-child{color:var(--green);font-weight:600;}
+.ob-ask .ob-depth{background:var(--red);}
+.ob-bid .ob-depth{background:var(--green);}
+.ob-spread{text-align:center;padding:7px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);background:var(--golddim);border-top:1px solid var(--border);border-bottom:1px solid var(--border);letter-spacing:1px;}
+
+/* ── BTC LIVE PAGE ── */
+.btc-hero{
+  background:linear-gradient(135deg,rgba(232,184,75,.08),var(--bg1));
+  border:1px solid var(--bordergold);border-radius:20px;
+  padding:36px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.btc-hero::before{content:'₿';position:absolute;right:-20px;top:-20px;font-size:160px;color:rgba(232,184,75,.04);font-weight:900;line-height:1;}
+.btc-hero-label{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:3px;margin-bottom:12px;opacity:.7;}
+.btc-hero-price{font-family:var(--mono);font-size:56px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-2px;margin-bottom:8px;}
+.btc-hero-change{font-family:var(--mono);font-size:12px;letter-spacing:1px;}
+.btc-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.btc-stat{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.btc-stat-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;}
+.btc-stat-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text);}
+
+/* ── PERFORMANCE PAGE ── */
+.perf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+.perf-card{
+  background:linear-gradient(135deg,var(--bg2),var(--bg1));
+  border:1px solid var(--border);border-radius:16px;padding:24px;
+  position:relative;overflow:hidden;
+}
+.perf-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,var(--gold));}
+.perf-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.perf-range{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+.perf-min{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--c,var(--gold));}
+.perf-sep{font-family:var(--mono);font-size:12px;color:var(--text2);}
+.perf-max{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--c,var(--gold));}
+.perf-sub{font-family:var(--mono);font-size:9px;color:var(--text2);}
+.perf-bar-wrap{margin-top:14px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.perf-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,rgba(232,184,75,.4),var(--c,var(--gold)));animation:barPulse 3s ease infinite alternate;}
+@keyframes barPulse{from{opacity:.6}to{opacity:1}}
+.perf-note{background:rgba(232,184,75,.05);border:1px solid rgba(232,184,75,.12);border-radius:12px;padding:18px;font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.7;letter-spacing:.3px;}
+.perf-note strong{color:var(--gold);}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{padding:0 0 4px;}
+.prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--text2);margin-bottom:6px;letter-spacing:1px;}
+.prog-bg{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,rgba(232,184,75,.5),var(--gold));border-radius:2px;transition:width 1.5s ease;}
+
+/* ── CHART PAGE ── */
+.chart-wrap{background:var(--bg1);border:1px solid var(--bordergold);border-radius:20px;padding:24px;position:relative;overflow:hidden;margin-bottom:18px;}
+.chart-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.chart-title-block{}
+.chart-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:4px;}
+.chart-subtitle{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1.5px;}
+.chart-kpis{display:flex;gap:24px;flex-wrap:wrap;}
+.chart-kpi{text-align:right;}
+.chart-kpi-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1.5px;margin-bottom:4px;}
+.chart-kpi-val{font-family:var(--mono);font-size:16px;font-weight:700;}
+.chart-canvas-wrap{position:relative;width:100%;height:320px;}
+#growth-chart{width:100%;height:100%;}
+.chart-legend{display:flex;align-items:center;gap:20px;margin-top:14px;flex-wrap:wrap;}
+.chart-leg-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1px;}
+.chart-leg-dot{width:8px;height:8px;border-radius:50%;}
+.chart-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.chart-stat{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.chart-stat-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase;}
+.chart-stat-val{font-family:var(--mono);font-size:17px;font-weight:700;}
+@media(max-width:700px){.chart-stats-row{grid-template-columns:1fr 1fr;}.chart-kpis{gap:14px;}.chart-canvas-wrap{height:220px;}}
+
+/* ── EXCHANGE CARDS ── */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.ex-card{
+  background:linear-gradient(135deg,rgba(0,229,160,.04),var(--bg1));
+  border:1px solid rgba(0,229,160,.18);border-radius:14px;
+  padding:16px;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+}
+.ex-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,160,.08);}
+.ex-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,160,.4),transparent);}
+.ex-seal{
+  position:absolute;top:10px;right:10px;
+  background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);
+  border-radius:6px;padding:2px 7px;
+  font-family:var(--mono);font-size:7px;font-weight:700;color:var(--green);letter-spacing:1.5px;
+}
+.ex-logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ex-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;border:1px solid rgba(255,255,255,.08);}
+.ex-logo-fallback{width:32px;height:32px;border-radius:50%;background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.15);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;color:var(--gold);}
+.ex-name{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);letter-spacing:.5px;}
+.ex-pair{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
+.ex-status-row{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(0,229,160,.08);}
+.ex-live{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;}
+.ex-latency{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:.5px;}
+
+/* ── MINI CHART NO CARD ── */
+.r-minichart{
+  position:absolute;bottom:28px;left:0;right:0;height:36px;
+  overflow:hidden;opacity:.35;pointer-events:none;
+}
+.radar-card.is-buy .r-minichart{opacity:.5;}
+.radar-card.is-sell .r-minichart{opacity:.5;}
+.r-minichart canvas{width:100%;height:100%;}
+
+/* ══ RESPONSIVO — WEB FIRST ══ */
+@media(min-width:1400px){
+  .main{padding:24px 32px;}
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:14px;}
+  .client-metrics{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:1100px) and (max-width:1399px){
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:12px;}
+  .client-metrics{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:900px) and (max-width:1099px){
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:8px;}
+  .client-metrics{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ══ RESPONSIVO — MOBILE ══ */
+@media(max-width:899px){
+  /* Layout base mobile */
+  html,body{overflow:auto;}
+  .main{margin-top:52px;height:auto;overflow:visible;padding:12px;}
+
+  /* Topbar mobile */
+  .topbar{height:52px;padding:0 10px 0 56px;}
+  .topbar-clock{font-size:10px;}
+  .btc-live-badge{padding:5px 9px;gap:6px;}
+  .btc-live-label{display:none;} /* esconde label, mantém só o preço */
+  .btc-live-price{font-size:13px;}
+  .sys-badge{display:none;} /* remove badge sistema no mobile */
+
+  /* Hamburger mobile */
+  .hamburger{width:38px;height:38px;top:7px;left:8px;}
+
+  /* Sidebar mobile */
+  .sidebar{width:220px;left:-221px;}
+
+  /* Client card mobile */
+  .client-card{padding:18px 16px;}
+  .client-name{font-size:18px!important;}
+  .client-badge{font-size:7px;padding:4px 9px;}
+  .client-metrics{grid-template-columns:1fr 1fr;gap:8px;}
+  .metric{padding:12px 10px;}
+  .metric-value{font-size:16px;}
+  .metric-label{font-size:7px;}
+
+  /* Radar mobile — 2 colunas */
+  .radar-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px;}
+  .radar-card{padding:14px 8px 32px;}
+  .r-logo-ring{width:36px;height:36px;}
+  .r-img{width:22px;height:22px;}
+  .r-price{font-size:11px;}
+  .r-name{font-size:6px;letter-spacing:1px;}
+  .r-tag{font-size:7px;padding:3px 7px;}
+  .r-diff{font-size:7px;}
+
+  /* Ops table mobile — scroll horizontal */
+  .panel{overflow-x:auto;}
+  .ops-table{min-width:520px;font-size:9px;}
+  .ops-table th{font-size:7px;padding:7px 8px;}
+  .ops-table td{padding:7px 8px;}
+
+  /* Orderbook mobile */
+  .ob-wrap{grid-template-columns:1fr;}
+  .ob-hdr-row{font-size:7px;padding:6px 10px;}
+  .ob-row{font-size:9px;padding:4px 10px;}
+
+  /* BTC page mobile */
+  .btc-hero{padding:22px 16px;}
+  .btc-hero-price{font-size:36px;}
+  .btc-stats-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .btc-stat{padding:12px;}
+  .btc-stat-val{font-size:13px;}
+
+  /* Performance mobile */
+  .perf-grid{grid-template-columns:1fr;gap:10px;}
+  .perf-min,.perf-max{font-size:18px;}
+
+  /* Chart mobile */
+  .chart-wrap{padding:16px;}
+  .chart-header{flex-direction:column;gap:10px;}
+  .chart-kpis{flex-direction:row;gap:12px;flex-wrap:wrap;}
+  .chart-kpi{text-align:left;}
+  .chart-kpi-val{font-size:13px;}
+  .chart-canvas-wrap{height:200px;}
+  .chart-stats-row{grid-template-columns:1fr 1fr;gap:8px;}
+  .chart-stat{padding:12px;}
+  .chart-stat-val{font-size:14px;}
+
+  /* Exchange cards mobile */
+  .ex-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .ex-card{padding:12px;}
+  .ex-name{font-size:9px;}
+
+  /* Section headers mobile */
+  .sec-title{font-size:8px;letter-spacing:1.5px;}
+  .panel-title{font-size:8px;}
+}
+
+@media(max-width:480px){
+  .client-metrics{grid-template-columns:1fr 1fr;}
+  .radar-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px;}
+  .radar-card{padding:12px 6px 28px;}
+  .r-logo-ring{width:30px;height:30px;margin-bottom:6px;}
+  .r-img{width:18px;height:18px;}
+  .r-price{font-size:10px;}
+  .r-name{font-size:6px;}
+  .topbar-clock{font-size:9px;}
+  .btc-live-price{font-size:12px;}
+  .metric-value{font-size:15px;}
+  .chart-canvas-wrap{height:170px;}
+  .ex-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<!-- LOGIN -->
+<div id="login-screen">
+    <canvas id="login-canvas"></canvas>
+    <div class="login-wrap">
+        <div class="login-top">
+            <div class="login-logo-txt">[ PROTOCOLO CRIPTO ]</div>
+            <div class="login-brand">BTC ARBITRAGE</div>
+            <div class="login-sub">&gt;_ ACESSO RESTRITO &middot; CLIENTES</div>
+        </div>
+        <div class="login-box">
+            <div class="lf"><label>Usu&aacute;rio</label><input type="text" id="l-user" placeholder="seu usu&aacute;rio" autocomplete="off"></div>
+            <div class="lf"><label>Senha</label><input type="password" id="l-pass" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+            <button class="login-btn" onclick="doLogin()">ACESSAR SISTEMA &rarr;</button>
+            <div class="login-err" id="l-err"></div>
+        </div>
+        <div class="login-foot">SISTEMA SEGURO &middot; PROTOCOLO CRIPTO &copy; 2025</div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- HAMBURGER -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sid-brand">
+    <div class="sid-brand-top">PROTOCOLO CRIPTO</div>
+    <div class="sid-brand-name">Kassem Ataya</div>
+  </div>
+  <div class="sid-nav">
+    <div class="nav-item active" onclick="showPage('overview',this)">
+      <span class="nav-icon">◈</span>OVERVIEW
+    </div>
+    <div class="nav-item" onclick="showPage('btclive',this)">
+      <span class="nav-icon">₿</span>BTC LIVE-ON
+    </div>
+    <div class="nav-item" onclick="showPage('orderbook',this)">
+      <span class="nav-icon">≡</span>ORDERBOOK
+    </div>
+    <div class="nav-item" onclick="showPage('performance',this)">
+      <span class="nav-icon">↗</span>PERFORMANCE
+    </div>
+    <div class="nav-item" onclick="showPage('exchanges',this)">
+      <span class="nav-icon">⬡</span>EXCHANGES
+    </div>
+    <div class="nav-item" onclick="showPage('chart',this)">
+      <span class="nav-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="1,11 4,7 7,9 10,4 13,2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <polyline points="10,2 13,2 13,5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </span>CRESCIMENTO
+    </div>
+  </div>
+  <div class="sid-foot">
+    <div class="sid-status"><span class="pulse"></span>SISTEMA ATIVO · LIVE</div>
+  </div>
+</nav>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <span class="topbar-clock" id="clock">--:--:--</span>
+  <div class="topbar-right">
+    <div class="btc-live-badge">
+      <span class="btc-live-label">BTC/USDT</span>
+      <span class="btc-live-price" id="top-price">$--</span>
+    </div>
+    <div class="sys-badge"><span class="pulse"></span>BTC ARBITRAGE</div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="page active" id="page-overview">
+
+    <!-- CLIENT CARD -->
+    <div class="client-card">
+      <div class="client-top">
+        <div>
+          <div class="client-id">BTC/USDT · ARB · CLIENTE</div>
+          <div class="client-name" style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:24px;letter-spacing:1px;">KASSEM ATAYA</div>
+        </div>
+        <div class="client-badge"><span class="pulse"></span>ATIVO · SINCRONIZADO</div>
+      </div>
+      <div class="client-metrics">
+        <div class="metric">
+          <div class="metric-label">Capital Total</div>
+          <div class="metric-value mv-gold" id="cap-total">$--</div>
+          <div class="metric-sub" id="cap-sub">BTC + USDT</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Lucro do Mês</div>
+          <div class="metric-value mv-green" id="profit-mes">+$--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">ROI do Mês</div>
+          <div class="metric-value mv-blue" id="roi-mes">--%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Pool BTC</div>
+          <div class="metric-value mv-gold">0.03805 BTC</div>
+          <div class="metric-sub" id="btc-usd-val">≈ $--</div>
+        </div>
+      </div>
+      <div style="margin-top:18px;">
+        <div class="prog-wrap">
+          <div class="prog-label"><span>META MENSAL (3%)</span><span id="prog-pct">--%</span></div>
+          <div class="prog-bg"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RADAR -->
+    <div class="sec-hdr">
+      <div class="sec-title">Rastreador de Preços · 10 Exchanges</div>
+      <div class="live-dot">AO VIVO</div>
+    </div>
+    <div class="radar-grid" id="radar" style="margin-bottom:18px;"></div>
+
+    <!-- OPS TABLE -->
+    <div class="sec-hdr">
+      <div class="sec-title">Operações em Tempo Real</div>
+      <div class="live-dot">REAL TIME</div>
+    </div>
+    <div class="panel" style="overflow:auto;">
+      <div class="panel-hdr">
+        <div class="panel-title">ARBITRAGEM BTC/USDT</div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">1 OP / 15s</div>
+      </div>
+      <table class="ops-table">
+        <thead>
+          <tr>
+            <th>HORA</th><th>COMPRA</th><th>VENDA</th>
+            <th>PREÇO C.</th><th>PREÇO V.</th><th>SPREAD</th><th>ROI</th>
+          </tr>
+        </thead>
+        <tbody id="ops-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ BTC LIVE-ON ══ -->
+  <div class="page" id="page-btclive">
+    <div class="btc-hero">
+      <div class="btc-hero-label">BITCOIN · PREÇO EM TEMPO REAL</div>
+      <div class="btc-hero-price" id="btc-hero-price">$--</div>
+      <div class="btc-hero-change" id="btc-change" style="color:var(--green);">carregando...</div>
+    </div>
+    <div class="btc-stats-grid" style="margin-bottom:18px;">
+      <div class="btc-stat"><div class="btc-stat-label">PAR</div><div class="btc-stat-val" style="color:var(--gold);">BTC/USDT</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">FONTE</div><div class="btc-stat-val" style="font-size:11px;">BINANCE WS</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">ATUALIZAÇÃO</div><div class="btc-stat-val" style="font-size:11px;">TEMPO REAL</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">STATUS</div><div class="btc-stat-val" style="color:var(--green);font-size:11px;" id="ws-status">CONECTANDO...</div></div>
+    </div>
+    <div class="sec-hdr"><div class="sec-title">Radar de Preços · Exchanges</div><div class="live-dot">AO VIVO</div></div>
+    <div class="radar-grid" id="radar-btc"></div>
+  </div>
+
+  <!-- ══ ORDERBOOK ══ -->
+  <div class="page" id="page-orderbook">
+    <div class="sec-hdr">
+      <div class="sec-title">Orderbook BTC/USDT</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="live-dot">LIVE</div>
+        <select id="ob-sel" onchange="renderOB()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:9px;padding:5px 10px;border-radius:7px;outline:none;">
+          <option value="bybit">Bybit</option><option value="binance">Binance</option>
+          <option value="okx">OKX</option><option value="kucoin">KuCoin</option>
+          <option value="coinbase">Coinbase</option><option value="bitget">Bitget</option>
+          <option value="kraken">Kraken</option>
+        </select>
+      </div>
+    </div>
+    <div class="ob-wrap">
+      <div class="ob-side">
+        <div class="panel-hdr"><div class="panel-title" style="color:var(--red);">ASKS (VENDA)</div></div>
+        <div class="ob-hdr-row"><span>PREÇO</span><span>VOLUME</span><span>TOTAL</span></div>
+        <div class="ob-ask" id="ob-asks"></div>
+        <div class="ob-spread" id="ob-spread">Spread: --</div>
+        <div class="ob-hdr-row" style="color:var(--green);opacity:.7;"><span>PREÇO</span><span>VOLUME</span><span>TOTAL</span></div>
+        <div class="ob-bid" id="ob-bids"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">PROFUNDIDADE</div></div>
+          <div style="padding:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+              <div style="background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.15);border-radius:10px;padding:14px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--green);margin-bottom:5px;letter-spacing:1px;">COMPRADORES</div>
+                <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);" id="ob-bvol">--</div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:3px;" id="ob-bpct">--%</div>
+              </div>
+              <div style="background:rgba(255,77,106,.05);border:1px solid rgba(255,77,106,.15);border-radius:10px;padding:14px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--red);margin-bottom:5px;letter-spacing:1px;">VENDEDORES</div>
+                <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--red);" id="ob-avol">--</div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:3px;" id="ob-apct">--%</div>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-bottom:7px;letter-spacing:1px;">BALANÇO BUY/SELL</div>
+            <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:flex;">
+              <div style="background:linear-gradient(90deg,#005533,var(--green));transition:width .6s;" id="ob-pb"></div>
+              <div style="background:linear-gradient(90deg,var(--red),#660022);flex:1;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="flex:1;">
+          <div class="panel-hdr"><div class="panel-title">TRADES RECENTES</div><div class="live-dot">LIVE</div></div>
+          <div style="overflow:auto;max-height:220px;">
+            <table class="ops-table"><thead><tr><th>PREÇO</th><th>VOLUME</th><th>LADO</th><th>HORA</th></tr></thead><tbody id="ob-trades"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PERFORMANCE ══ -->
+  <div class="page" id="page-performance">
+    <div class="sec-hdr" style="margin-bottom:16px;">
+      <div class="sec-title">Estimativa de Performance</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">VALORES HISTÓRICOS · FAIXA DE VARIAÇÃO</div>
+    </div>
+    <div class="perf-grid">
+      <div class="perf-card" style="--c:var(--gold)">
+        <div class="perf-label">Lucro Médio Diário</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--gold)">0,08%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--gold)">0,12%</span>
+        </div>
+        <div class="perf-sub">por dia de operação</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:70%;--c:var(--gold)"></div></div>
+      </div>
+      <div class="perf-card" style="--c:var(--blue)">
+        <div class="perf-label">Lucro Médio Semanal</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--blue)">0,50%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--blue)">0,90%</span>
+        </div>
+        <div class="perf-sub">por semana (7 dias)</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:65%;--c:var(--blue)"></div></div>
+      </div>
+      <div class="perf-card" style="--c:var(--green)">
+        <div class="perf-label">Lucro Médio Mensal</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--green)">2,5%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--green)">3,5%</span>
+        </div>
+        <div class="perf-sub">por mês (30 dias)</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:80%;--c:var(--green)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CRESCIMENTO ══ -->
+  <div class="page" id="page-chart">
+    <div class="sec-hdr" style="margin-bottom:16px;">
+      <div class="sec-title">Crescimento de Banca</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">SET/2024 → HOJE · TEMPO REAL</div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <div class="chart-title-block">
+          <div class="chart-title">EVOLUÇÃO DO PATRIMÔNIO</div>
+          <div class="chart-subtitle">KASSEM ATAYA · BTC/USDT ARBITRAGE · 0,1%/DIA</div>
+        </div>
+        <div class="chart-kpis">
+          <div class="chart-kpi">
+            <div class="chart-kpi-label">CAPITAL INICIAL</div>
+            <div class="chart-kpi-val" style="color:var(--text2);" id="chart-inicial">$--</div>
+          </div>
+          <div class="chart-kpi">
+            <div class="chart-kpi-label">HOJE</div>
+            <div class="chart-kpi-val" style="color:var(--gold);" id="chart-hoje">$--</div>
+          </div>
+          <div class="chart-kpi">
+            <div class="chart-kpi-label">LUCRO TOTAL</div>
+            <div class="chart-kpi-val" style="color:var(--green);" id="chart-lucro">+$--</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="growth-chart"></canvas>
+      </div>
+      <div class="chart-legend">
+        <div class="chart-leg-item"><div class="chart-leg-dot" style="background:var(--gold);"></div>PATRIMÔNIO TOTAL</div>
+        <div class="chart-leg-item"><div class="chart-leg-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>LUCRO ACUMULADO</div>
+        <div class="chart-leg-item"><div class="chart-leg-dot" style="background:var(--text2);"></div>CAPITAL BASE</div>
+      </div>
+    </div>
+
+    <div class="chart-stats-row">
+      <div class="chart-stat">
+        <div class="chart-stat-label">Dias Operando</div>
+        <div class="chart-stat-val" style="color:var(--gold);" id="chart-dias">--</div>
+      </div>
+      <div class="chart-stat">
+        <div class="chart-stat-label">ROI Acumulado</div>
+        <div class="chart-stat-val" style="color:var(--green);" id="chart-roi">--%</div>
+      </div>
+      <div class="chart-stat">
+        <div class="chart-stat-label">Média/Mês</div>
+        <div class="chart-stat-val" style="color:var(--blue);">~3,0%</div>
+      </div>
+      <div class="chart-stat">
+        <div class="chart-stat-label">Operações</div>
+        <div class="chart-stat-val" style="color:var(--text);" id="chart-ops">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EXCHANGES ══ -->
+  <div class="page" id="page-exchanges">
+    <div class="sec-hdr" style="margin-bottom:16px;">
+      <div class="sec-title">Exchanges Sincronizadas</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;"><span class="pulse"></span>10 CEX · ATIVAS</div>
+    </div>
+    <div class="ex-grid" id="ex-grid"></div>
+  </div>
+
+</main>
+</div><!-- /dashboard -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ══ LOGIN ══
+const KASSEM_USER = 'kassem';
+const KASSEM_PASS = 'kassem2025';
+
+function doLogin(){
+    const u   = document.getElementById('l-user').value.trim().toLowerCase();
+    const p   = document.getElementById('l-pass').value.trim();
+    const err = document.getElementById('l-err');
+    if(u === KASSEM_USER && p === KASSEM_PASS){
+        sessionStorage.setItem('kassem_auth','1');
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display    = 'block';
+        init();
+    } else {
+        err.textContent = 'Usuário ou senha incorretos.';
+        setTimeout(() => err.textContent = '', 3000);
+    }
+}
+document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+
+// Recupera sessão
+if(sessionStorage.getItem('kassem_auth') === '1'){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display    = 'block';
+}
+
+// Matrix canvas — igual ao site oficial protocolocripto.com
+(function startMatrix() {
+    var c = document.getElementById('login-canvas');
+    var x = c.getContext('2d');
+    var chars = '0189ABCDEF'.split('');
+    var W, H, drops, cols;
+    function setup() {
+        W = c.width  = window.innerWidth;
+        H = c.height = window.innerHeight;
+        cols  = Math.floor(W / 16);
+        drops = [];
+        for (var i = 0; i < cols; i++) drops[i] = Math.random() * -80;
+    }
+    function tick() {
+        x.fillStyle = 'rgba(3,3,3,0.03)';
+        x.fillRect(0, 0, W, H);
+        x.font = 'bold 14px monospace';
+        for (var i = 0; i < cols; i++) {
+            x.fillStyle = Math.random() > 0.85 ? '#F2A900' : '#8B4500';
+            x.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, drops[i] * 16);
+            if (drops[i] * 16 > H && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setup();
+    setInterval(tick, 35);
+    window.addEventListener('resize', setup);
+})();
+// ═══════════════════════════════════════════════════════════════
+//  KASSEM ATAYA — DASHBOARD EXCLUSIVO
+//  Lógica isolada, sem múltiplos clientes
+//
+//  CÁLCULO:
+//  capitalAtual = (poolBtc × precoBTC) + poolUSDT
+//  taxaPorOp    = 0.001 / 5760
+//  checkpoint   = dia 01 do mês atual às 00:00:00
+//  totalOps     = floor((Date.now() - checkpoint) / 15000)
+//  profitMensal = totalOps × capitalAtual × taxaPorOp
+//  roiMensal    = (profitMensal / capitalAtual) × 100
+// ═══════════════════════════════════════════════════════════════
+
+// ── DADOS DO CLIENTE (estado atual das pools) ──────────────────
+const POOL_BTC  = 0.03805;   // BTC fixo na pool
+const POOL_USDT = 3250;       // USDT fixo na pool
+
+// ── CONSTANTES DE CÁLCULO ──────────────────────────────────────
+const INTERVALO_MS = 15000;
+const TAXA_POR_OP  = 0.001 / 5760; // 0,1%/dia ÷ 5760 ops/dia
+
+// ── EXCHANGES ──────────────────────────────────────────────────
+const EX = [
+    {id:'bybit',    name:'BYBIT',      logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/521.png'},
+    {id:'binance',  name:'BINANCE',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png'},
+    {id:'okx',      name:'OKX',        logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png'},
+    {id:'kucoin',   name:'KUCOIN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/311.png'},
+    {id:'coinbase', name:'COINBASE',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/89.png'},
+    {id:'crypto',   name:'CRYPTO.COM', logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/1149.png'},
+    {id:'bitget',   name:'BITGET',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/513.png'},
+    {id:'kraken',   name:'KRAKEN',     logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/24.png'},
+    {id:'gate',     name:'GATE.IO',    logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png'},
+    {id:'bitfinex', name:'BITFINEX',   logo:'https://s2.coinmarketcap.com/static/img/exchanges/64x64/37.png'},
+];
+
+// ── ESTADO ─────────────────────────────────────────────────────
+let btcBase = 72400;
+let btcPrev = 72400;
+const prices = {};
+
+// ── HELPERS ────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt  = (n, d=2) => n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+const set  = (id, v)  => { const e = $(id); if(e) e.textContent = v; };
+const setW = (id, w)  => { const e = $(id); if(e) e.style.width = w; };
+
+// ── CÁLCULO PRINCIPAL ──────────────────────────────────────────
+function checkpoint() {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0, 0).getTime();
+}
+
+function totalOpsNoMes() {
+    return Math.floor(Math.max(0, Date.now() - checkpoint()) / INTERVALO_MS);
+}
+
+function capitalAtual() {
+    return (POOL_BTC * btcBase) + POOL_USDT;
+}
+
+function profitMensal() {
+    return totalOpsNoMes() * capitalAtual() * TAXA_POR_OP;
+}
+
+function roiMensal() {
+    const cap = capitalAtual();
+    return cap > 0 ? (profitMensal() / cap) * 100 : 0;
+}
+
+// ── ATUALIZA CARD DO CLIENTE ───────────────────────────────────
+function updateClientCard() {
+    const cap   = capitalAtual();
+    const prof  = profitMensal();
+    const roi   = roiMensal();
+    const meta  = cap * 0.03;
+    const pct   = Math.min(100, (prof / meta * 100));
+    const btcV  = POOL_BTC * btcBase;
+
+    set('cap-total',  '$' + fmt(cap));
+    set('cap-sub',    POOL_BTC.toFixed(5) + ' BTC + $' + fmt(POOL_USDT, 0) + ' USDT');
+    set('profit-mes', '+$' + fmt(prof));
+    set('roi-mes',    roi.toFixed(3).replace('.', ',') + '%');
+    set('btc-usd-val','≈ $' + fmt(btcV, 0));
+    set('prog-pct',   pct.toFixed(1) + '%');
+    setW('prog-bar',  pct.toFixed(1) + '%');
+}
+
+// ── WEBSOCKET BINANCE ──────────────────────────────────────────
+function connectWS() {
+    try {
+        const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+        ws.onopen = () => set('ws-status', 'CONECTADO ✓');
+        ws.onmessage = e => {
+            const data = JSON.parse(e.data);
+            btcPrev = btcBase;
+            btcBase = parseFloat(data.c);
+            const change = parseFloat(data.P);
+            const changeStr = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            const color = change >= 0 ? 'var(--green)' : 'var(--red)';
+
+            // Atualiza preços em todos os lugares
+            ['top-price','btc-hero-price'].forEach(id => set(id, '$' + fmt(btcBase)));
+            const chEl = $('btc-change');
+            if(chEl){ chEl.textContent = changeStr + ' (24h)'; chEl.style.color = color; }
+
+            updateClientCard();
+        };
+        ws.onclose = () => { set('ws-status', 'RECONECTANDO...'); setTimeout(connectWS, 3000); };
+        ws.onerror = () => ws.close();
+    } catch(e) {}
+}
+
+// ── ATUALIZA PREÇOS DAS EXCHANGES ─────────────────────────────
+function updatePrices() {
+    let mn = Infinity, mx = -Infinity, mnId = '', mxId = '';
+    EX.forEach(ex => {
+        prices[ex.id] = btcBase + (Math.random() * 60 - 30);
+        if(prices[ex.id] < mn){ mn = prices[ex.id]; mnId = ex.id; }
+        if(prices[ex.id] > mx){ mx = prices[ex.id]; mxId = ex.id; }
+    });
+    return { min: mn, max: mx, minId: mnId, maxId: mxId, spread: ((mx - mn) / mn) * 100 };
+}
+
+// ── MINI CHART ─────────────────────────────────────────────────
+function genMiniPoints(base, count = 24) {
+    const pts = [];
+    let val = base * (0.998 + Math.random() * 0.004);
+    for(let i = 0; i < count; i++){
+        val += (Math.random() - 0.46) * base * 0.0008;
+        pts.push(val);
+    }
+    return pts;
+}
+
+function drawMiniChart(canvas, points, r, g, b) {
+    if(!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if(!w || !h) return;
+    canvas.width  = w * dpr;
+    canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const mn = Math.min(...points);
+    const mx = Math.max(...points);
+    const range = mx - mn || 1;
+    const pad = 2;
+    const xStep = (w - pad * 2) / (points.length - 1);
+    const toY = v => h - pad - ((v - mn) / range) * (h - pad * 2);
+
+    // Gradient fill — usa r,g,b separados para evitar erro de parsing
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0,   `rgba(${r},${g},${b},0.45)`);
+    grad.addColorStop(0.7, `rgba(${r},${g},${b},0.1)`);
+    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+
+    // Area
+    ctx.beginPath();
+    points.forEach((p, i) => {
+        const x = pad + i * xStep;
+        const y = toY(p);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.lineTo(pad + (points.length - 1) * xStep, h);
+    ctx.lineTo(pad, h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    points.forEach((p, i) => {
+        const x = pad + i * xStep;
+        const y = toY(p);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = `rgba(${r},${g},${b},0.9)`;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+}
+
+// ── RADAR ─────────────────────────────────────────────────────
+function renderRadar(elId) {
+    const el = $(elId); if(!el) return;
+    const vals = Object.values(prices);
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const spread = ((mx - mn) / mn * 100).toFixed(4);
+
+    el.innerHTML = EX.map((ex, idx) => {
+        const p      = prices[ex.id] || btcBase;
+        const isBuy  = p === mn;
+        const isSell = p === mx;
+        const cls    = isBuy ? 'is-buy' : isSell ? 'is-sell' : '';
+        const diff   = ((p - btcBase) / btcBase * 100);
+        const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(3) + '%';
+
+        // Seal premium
+        let seal;
+        if(isBuy){
+            seal = `<div class="rc-seal buy">
+                <span class="rc-seal-icon">↓</span>MENOR PREÇO
+            </div>`;
+        } else if(isSell){
+            seal = `<div class="rc-seal sell">
+                <span class="rc-seal-icon">↑</span>MAIOR PREÇO
+            </div>`;
+        } else {
+            seal = `<div class="rc-seal hold">● NEUTRO</div>`;
+        }
+
+        return `<div class="radar-card ${cls}">
+            <div class="rc-head">
+                <div class="rc-logo">
+                    <img src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none'">
+                </div>
+                <div class="rc-exinfo">
+                    <div class="rc-exname">${ex.name}</div>
+                    <div class="rc-pair">BTC / USDT · SPOT</div>
+                </div>
+            </div>
+            <div class="r-minichart"><canvas id="mc-${elId}-${idx}"></canvas></div>
+            <div class="rc-body">
+                <div class="rc-price" id="rcp-${elId}-${idx}">$${fmt(p)}</div>
+                <div class="rc-row">
+                    <div class="rc-diff">${diffStr}</div>
+                    ${seal}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    requestAnimationFrame(() => {
+        EX.forEach((ex, idx) => {
+            const p      = prices[ex.id] || btcBase;
+            const isBuy  = p === mn;
+            const isSell = p === mx;
+            const [r,g,b] = isBuy ? [0,229,160] : isSell ? [255,77,106] : [80,80,110];
+            drawMiniChart(document.getElementById(`mc-${elId}-${idx}`), genMiniPoints(p), r, g, b);
+        });
+    });
+}
+
+// ── TABELA DE OPERAÇÕES ────────────────────────────────────────
+function renderOps() {
+    const tbody = $('ops-tbody'); if(!tbody) return;
+    const result = updatePrices(); if(result.spread <= 0) return;
+
+    const hora = new Date().toLocaleTimeString('pt-BR');
+    const buyEx  = EX.find(e => e.id === result.minId);
+    const sellEx = EX.find(e => e.id === result.maxId);
+    const cap = capitalAtual();
+    const roiOp = cap * TAXA_POR_OP * (0.7 + Math.random() * 0.6);
+
+    const r = document.createElement('tr');
+    r.style.cssText = 'opacity:0;transition:opacity .4s;';
+    r.innerHTML = `
+        <td style="color:var(--text2);font-size:9px;">${hora}</td>
+        <td><span class="tag-buy"><img src="${buyEx?.logo||''}" alt="${buyEx?.name||''}"></span></td>
+        <td><span class="tag-sell"><img src="${sellEx?.logo||''}" alt="${sellEx?.name||''}"></span></td>
+        <td style="color:var(--green);">$${result.min.toFixed(2)}</td>
+        <td style="color:var(--red);">$${result.max.toFixed(2)}</td>
+        <td style="color:var(--gold);font-weight:700;">${result.spread.toFixed(4)}%</td>
+        <td style="color:var(--green);font-weight:700;">+$${roiOp.toFixed(6)}</td>`;
+    tbody.prepend(r);
+    requestAnimationFrame(() => r.style.opacity = '1');
+    while(tbody.children.length > 25) tbody.lastChild.remove();
+}
+
+// ── ORDERBOOK ─────────────────────────────────────────────────
+window.renderOB = function() {
+    const sel = $('ob-sel');
+    const base = prices[sel?.value] || btcBase;
+    let asks=[], bids=[], av=0, bv=0;
+    for(let i=14;i>=0;i--){ const p=base+(i+1)*(0.25+Math.random()); const v=(0.02+Math.random()*1.5).toFixed(4); av+=parseFloat(v); asks.push({p:p.toFixed(2),v,t:av.toFixed(3)}); }
+    for(let i=0;i<15;i++){ const p=base-(i+1)*(0.25+Math.random()); const v=(0.02+Math.random()*1.5).toFixed(4); bv+=parseFloat(v); bids.push({p:p.toFixed(2),v,t:bv.toFixed(3)}); }
+    const maxA=Math.max(...asks.map(a=>parseFloat(a.v)));
+    const maxB=Math.max(...bids.map(b=>parseFloat(b.v)));
+    const asksEl=$('ob-asks'), bidsEl=$('ob-bids');
+    if(asksEl) asksEl.innerHTML=asks.map(a=>`<div class="ob-row"><span>${a.p}</span><span style="color:var(--text2)">${a.v}</span><span style="color:var(--text2)">${a.t}</span><div class="ob-depth" style="width:${(parseFloat(a.v)/maxA*100).toFixed(0)}%"></div></div>`).join('');
+    if(bidsEl) bidsEl.innerHTML=bids.map(b=>`<div class="ob-row"><span>${b.p}</span><span style="color:var(--text2)">${b.v}</span><span style="color:var(--text2)">${b.t}</span><div class="ob-depth" style="width:${(parseFloat(b.v)/maxB*100).toFixed(0)}%"></div></div>`).join('');
+    const sp=parseFloat(asks[asks.length-1].p)-parseFloat(bids[0].p);
+    set('ob-spread',`Spread: $${sp.toFixed(2)} (${(sp/base*100).toFixed(4)}%)`);
+    set('ob-bvol',bv.toFixed(2)+' BTC'); set('ob-avol',av.toFixed(2)+' BTC');
+    const tot=bv+av, bp=(bv/tot*100).toFixed(1), ap=(av/tot*100).toFixed(1);
+    const pb=$('ob-pb'); if(pb) pb.style.width=bp+'%';
+    set('ob-bpct',bp+'% compra'); set('ob-apct',ap+'% venda');
+    const trades=$('ob-trades');
+    if(trades && trades.children.length < 15){
+        const isBuy=Math.random()>.5; const p=base+(Math.random()*2-1); const v=(0.005+Math.random()*0.3).toFixed(4);
+        const tr=document.createElement('tr'); tr.style.cssText='opacity:0;transition:opacity .3s;';
+        tr.innerHTML=`<td style="color:${isBuy?'var(--green)':'var(--red)'};">$${p.toFixed(2)}</td><td style="color:var(--text2);">${v}</td><td style="font-weight:700;color:${isBuy?'var(--green)':'var(--red)'};">${isBuy?'BUY':'SELL'}</td><td style="color:var(--text2);font-size:9px;">${new Date().toLocaleTimeString('pt-BR')}</td>`;
+        trades.prepend(tr); requestAnimationFrame(()=>tr.style.opacity='1');
+        while(trades.children.length>12) trades.lastChild.remove();
+    }
+};
+
+// ── GRÁFICO DE CRESCIMENTO ─────────────────────────────────────
+let chartInstance = null;
+
+function buildChartData() {
+    // Kassem: início 18/09/2024, capital base = poolBtc×preçoMédio + poolUSDT
+    // preço médio entrada: $85,409.53
+    const PRECO_MEDIO_ENTRADA = 85409.53;
+    const capitalBase = (POOL_BTC * PRECO_MEDIO_ENTRADA) + POOL_USDT; // ~$6,498
+    const startDate   = new Date('2024-09-18T00:00:00');
+    const hoje        = new Date();
+    const totalDias   = Math.floor((hoje - startDate) / 86400000);
+    const TAXA_DIA    = 0.001; // 0,1%/dia linear
+
+    // Gera pontos diários: 1 ponto por semana para não sobrecarregar
+    // Com variação mínima de ±0.01% pra dar vida, nunca negativo
+    const labels = [];
+    const patrimonio = [];
+    const lucroAcum  = [];
+    const baseFlat   = [];
+
+    const msDay = 86400000;
+    let lucroAcc = 0;
+    let lastVal = capitalBase;
+
+    for(let d = 0; d <= totalDias; d++) {
+        // Ponto apenas a cada 7 dias + último dia
+        if(d % 7 !== 0 && d !== totalDias) continue;
+
+        const dataPoint = new Date(startDate.getTime() + d * msDay);
+        const label = dataPoint.toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'2-digit'});
+
+        // Lucro linear do dia (0,1%/dia)
+        const lucroHoje = capitalBase * TAXA_DIA * d;
+
+        // Adiciona micro-variação: ±0 a +0.05% (nunca negativo, tendência sempre positiva)
+        const noise = lucroHoje * (Math.random() * 0.004); // ruído de 0 a 0,4% do lucro
+        const totalVal = capitalBase + lucroHoje + noise;
+
+        labels.push(label);
+        patrimonio.push(parseFloat(totalVal.toFixed(2)));
+        lucroAcum.push(parseFloat((lucroHoje + noise).toFixed(2)));
+        baseFlat.push(parseFloat(capitalBase.toFixed(2)));
+
+        lastVal = totalVal;
+    }
+
+    // KPIs
+    const lucroTotal = lastVal - capitalBase;
+    const roiTotal   = (lucroTotal / capitalBase * 100);
+    const opsTotal   = Math.floor(totalDias * 5760);
+
+    set('chart-inicial', '$' + fmt(capitalBase));
+    set('chart-hoje',    '$' + fmt(lastVal));
+    set('chart-lucro',   '+$' + fmt(lucroTotal));
+    set('chart-dias',    totalDias.toString());
+    set('chart-roi',     roiTotal.toFixed(1) + '%');
+    set('chart-ops',     (opsTotal / 1000000).toFixed(1) + 'M');
+
+    return { labels, patrimonio, lucroAcum, baseFlat, capitalBase };
+}
+
+function renderChart() {
+    const canvas = document.getElementById('growth-chart');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const data = buildChartData();
+
+    if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+    // Gradiente para patrimônio
+    const gradGold = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 300);
+    gradGold.addColorStop(0, 'rgba(232,184,75,0.35)');
+    gradGold.addColorStop(1, 'rgba(232,184,75,0.01)');
+
+    const gradGreen = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 300);
+    gradGreen.addColorStop(0, 'rgba(0,229,160,0.18)');
+    gradGreen.addColorStop(1, 'rgba(0,229,160,0.01)');
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Patrimônio Total',
+                    data: data.patrimonio,
+                    borderColor: '#E8B84B',
+                    borderWidth: 2.5,
+                    backgroundColor: gradGold,
+                    fill: true,
+                    tension: 0.45,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#E8B84B',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 2,
+                    order: 1,
+                },
+                {
+                    label: 'Lucro Acumulado',
+                    data: data.lucroAcum,
+                    borderColor: '#00E5A0',
+                    borderWidth: 1.5,
+                    backgroundColor: gradGreen,
+                    fill: true,
+                    tension: 0.45,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHoverBackgroundColor: '#00E5A0',
+                    borderDash: [],
+                    order: 2,
+                },
+                {
+                    label: 'Capital Base',
+                    data: data.baseFlat,
+                    borderColor: 'rgba(122,122,154,0.35)',
+                    borderWidth: 1,
+                    borderDash: [6, 4],
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0,
+                    order: 3,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(7,7,12,0.95)',
+                    borderColor: 'rgba(232,184,75,0.2)',
+                    borderWidth: 1,
+                    titleColor: '#7A7A9A',
+                    bodyColor: '#EEEEF5',
+                    titleFont: { family: "'JetBrains Mono'", size: 10 },
+                    bodyFont:  { family: "'JetBrains Mono'", size: 11 },
+                    padding: 12,
+                    callbacks: {
+                        label: ctx => {
+                            const label = ctx.dataset.label;
+                            const val = ctx.parsed.y;
+                            return ` ${label}: $${val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                    ticks: {
+                        color: '#4A4A6A',
+                        font: { family: "'JetBrains Mono'", size: 9 },
+                        maxTicksLimit: 8,
+                        maxRotation: 0,
+                    },
+                    border: { display: false }
+                },
+                y: {
+                    position: 'right',
+                    grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+                    ticks: {
+                        color: '#4A4A6A',
+                        font: { family: "'JetBrains Mono'", size: 9 },
+                        callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0)),
+                        maxTicksLimit: 6,
+                    },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+
+    // Animação viva: a cada 8s adiciona micro-ponto no final
+    setInterval(() => {
+        if(!chartInstance) return;
+        const ds = chartInstance.data.datasets;
+        const lastPatrimonio = ds[0].data[ds[0].data.length - 1];
+        const noise = lastPatrimonio * (Math.random() * 0.0003); // +0 a +0,03%
+        const newVal = lastPatrimonio + noise;
+        ds[0].data[ds[0].data.length - 1] = parseFloat(newVal.toFixed(2));
+        ds[1].data[ds[1].data.length - 1] = parseFloat((newVal - data.capitalBase).toFixed(2));
+        chartInstance.update('none'); // sem animação de re-draw
+    }, 8000);
+}
+
+// ── EXCHANGES PAGE ─────────────────────────────────────────────
+function renderExchanges() {
+    const el = $('ex-grid'); if(!el || el.dataset.done === '1') return;
+    el.dataset.done = '1';
+    el.innerHTML = EX.map((ex, i) => {
+        const latency = (Math.random() * 18 + 8).toFixed(0);
+        const logoOk  = `<img class="ex-logo" src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                         <div class="ex-logo-fallback" style="display:none;">${ex.name.substring(0,3)}</div>`;
+        return `<div class="ex-card" style="animation:fadeUp .3s ease ${i * .05}s both;">
+            <div class="ex-seal">SYNC</div>
+            <div class="ex-logo-wrap">
+                ${logoOk}
+                <div>
+                    <div class="ex-name">${ex.name}</div>
+                    <div class="ex-pair">BTC / USDT · SPOT</div>
+                </div>
+            </div>
+            <div class="ex-status-row">
+                <div class="ex-live"><span class="pulse"></span>API ATIVA</div>
+                <div class="ex-latency">LATÊNCIA ${latency}ms</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────
+function updateClock(){ set('clock', new Date().toLocaleTimeString('pt-BR')); }
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────
+function showPage(page, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const pg = $('page-' + page); if(pg) pg.classList.add('active');
+    if(el) el.classList.add('active');
+    if(page === 'exchanges') renderExchanges();
+    if(page === 'chart') { renderChart(); }
+    closeSidebar();
+}
+
+function toggleSidebar() {
+    const sb = $('sidebar'), hb = $('hamburger'), ov = $('overlay');
+    sb.classList.toggle('open');
+    hb.classList.toggle('open');
+    ov.classList.toggle('show');
+}
+function closeSidebar() {
+    $('sidebar').classList.remove('open');
+    $('hamburger').classList.remove('open');
+    $('overlay').classList.remove('show');
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+function init() {
+    updatePrices();
+    updateClientCard();
+    renderRadar('radar');
+    renderRadar('radar-btc');
+    renderOB();
+
+    connectWS();
+
+    setInterval(() => {
+        updatePrices();
+        renderRadar('radar');
+        renderRadar('radar-btc');
+        renderOB();
+        updateClientCard();
+    }, 4000);
+
+    setInterval(renderOps, 15000);  // 1 op a cada 15s
+    setInterval(updateClock, 1000);
+
+    // Recalcula profit a cada 15s (novo op completo)
+    setInterval(updateClientCard, 15000);
+}
+
+// Inicializa só se sessão ativa (chamado pelo doLogin ou pela recuperação de sessão acima)
+if(sessionStorage.getItem('kassem_auth') === '1') init();
+</script>
+</body>
+</html>
