@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/kassem", "destination": "/kassem.html" }
+    { "source": "/kassem", "destination": "/kassem.html" },
+    { "source": "/acesso-kassem", "destination": "/acesso_kassem.html" }
   ]
 }
