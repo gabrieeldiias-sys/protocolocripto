@@ -37,19 +37,24 @@
         /* DASHBOARD */
         #dashboard{display:none;}
         .live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 7px var(--green);animation:blink-led 1.5s infinite;flex-shrink:0;}
-        .sidebar{position:fixed;top:0;left:0;bottom:0;width:200px;background:#080808;border-right:1px solid var(--border);z-index:100;display:flex;flex-direction:column;}
-        .sid-logo{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--font-logo);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;display:flex;align-items:center;gap:8px;}
-        .sid-nav{flex:1;padding:8px 0;overflow-y:auto;}
-        .nav-tab{display:block;padding:13px 20px;font-family:var(--font-mono);font-size:11px;color:var(--text-3);letter-spacing:1px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;white-space:nowrap;}
-        .nav-tab:hover{color:#fff;background:rgba(255,255,255,.03);}
-        .nav-tab.active{color:var(--gold);background:rgba(242,169,0,.08);border-left-color:var(--gold);}
-        .sid-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;gap:8px;}
-        .sid-status{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:9px;color:var(--green);letter-spacing:1px;}
-        .sid-user{font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
-        .logout-btn{background:transparent;border:1px solid var(--border);color:var(--text-3);font-family:var(--font-mono);font-size:9px;padding:7px 10px;border-radius:6px;cursor:pointer;letter-spacing:1px;transition:all .2s;text-align:center;width:100%;}
-        .logout-btn:hover{border-color:var(--red);color:var(--red);}
-        .status-bar{position:fixed;top:0;left:200px;right:0;height:34px;background:rgba(2,2,2,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:99;font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
-        .main{margin-left:200px;margin-top:34px;padding:18px;}
+        /* SIDEBAR — começa fechada em qualquer tamanho de tela */
+        .sidebar{position:fixed;top:0;left:-220px;bottom:0;width:200px;background:#080808;border-right:1px solid var(--border);z-index:1000;display:flex;flex-direction:column;transition:left 0.3s ease;box-shadow:2px 0 12px rgba(0,0,0,0.6);}
+        .sidebar.active{left:0;}
+        .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:999;}
+        .sidebar-overlay.active{display:block;}
+        /* HAMBÚRGUER — sempre visível */
+        .menu-toggle{display:flex;position:fixed;top:8px;left:8px;z-index:1001;background:var(--gold);width:38px;height:38px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(242,169,0,0.4);transition:all 0.3s ease;border:none;}
+        .menu-toggle:hover{background:#d89500;transform:scale(1.05);}
+        .menu-toggle span{display:block;width:18px;height:2px;background:#000;position:relative;transition:all 0.3s ease;}
+        .menu-toggle span::before,.menu-toggle span::after{content:'';position:absolute;width:18px;height:2px;background:#000;transition:all 0.3s ease;}
+        .menu-toggle span::before{top:-5px;}
+        .menu-toggle span::after{top:5px;}
+        .menu-toggle.active span{background:transparent;}
+        .menu-toggle.active span::before{transform:rotate(45deg);top:0;}
+        .menu-toggle.active span::after{transform:rotate(-45deg);top:0;}
+        /* STATUS BAR e MAIN — sempre sem sidebar empurrada */
+        .status-bar{position:fixed;top:0;left:0;right:0;height:34px;background:rgba(2,2,2,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 56px;z-index:99;font-family:var(--font-mono);font-size:9px;color:var(--text-3);letter-spacing:1px;}
+        .main{margin-left:0;margin-top:34px;padding:18px;}
         .page{display:none;animation:fadeUp .3s ease;}.page.active{display:block;}
         .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
         .sec-title{font-family:var(--font-mono);font-size:10px;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:7px;}
@@ -153,20 +158,7 @@
         .mps-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-3);margin-top:4px;}
         @media(max-width:1100px){.radar-grid{grid-template-columns:repeat(4,1fr)!important;}.grid-lo,.grid-2{grid-template-columns:1fr;}.master-page-stats{grid-template-columns:repeat(2,1fr);}.stats-row{grid-template-columns:repeat(2,1fr)!important;}}
         @media(max-width:768px){
-            .main{padding:12px;margin-left:0;margin-top:0;}
-            .sidebar{position:fixed;left:-250px;top:0;height:100vh;width:250px;z-index:1000;transition:left 0.3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5);}
-            .sidebar.active{left:0;}
-            .status-bar{left:0;font-size:8px;padding:0 12px;height:30px;}
-            .menu-toggle{display:flex;position:fixed;top:10px;left:10px;z-index:1001;background:var(--gold);width:40px;height:40px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(242,169,0,0.3);transition:all 0.3s ease;}
-            .menu-toggle:hover{background:#d89500;}
-            .menu-toggle span{display:block;width:20px;height:2px;background:#000;position:relative;transition:all 0.3s ease;}
-            .menu-toggle span::before,.menu-toggle span::after{content:'';position:absolute;width:20px;height:2px;background:#000;transition:all 0.3s ease;}
-            .menu-toggle span::before{top:-6px;}.menu-toggle span::after{top:6px;}
-            .menu-toggle.active span{background:transparent;}
-            .menu-toggle.active span::before{transform:rotate(45deg);top:0;}
-            .menu-toggle.active span::after{transform:rotate(-45deg);top:0;}
-            .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:999;}
-            .sidebar-overlay.active{display:block;}
+            .main{padding:12px;}
             .radar-grid{grid-template-columns:repeat(2,1fr)!important;}
             .stats-row{grid-template-columns:1fr!important;}
             .mesas-grid,.grid-2,.grid-lo{grid-template-columns:1fr;}
@@ -206,7 +198,7 @@
 
 <!-- DASHBOARD -->
 <div id="dashboard">
-    <div class="menu-toggle" onclick="toggleMobileMenu()" style="display:none;"><span></span></div>
+    <div class="menu-toggle" onclick="toggleMobileMenu()"><span></span></div>
     <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
     <nav class="sidebar">
         <div class="sid-logo"><span class="live-dot"></span>BTC&middot;ARB&middot;SYS</div>
@@ -374,8 +366,7 @@
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
 // ─── CONSTANTE CRÍTICA ───────────────────────────────────────────────────
-const ROI_DIARIO = 0.001;          // 0,1% exato por dia
-const MS_POR_DIA = 86400000;       // milissegundos em 1 dia
+
 
 // ─── LOGIN ───────────────────────────────────────────────────────────────
 const USERS = {
@@ -481,38 +472,56 @@ const MASTER_USDT_FIXED = 250000;
 const MASTER = { profitMensal: 0, roiMensal: 0 };
 
 // ════════════════════════════════════════════════════════════════════════
-//  FUNÇÕES DE CÁLCULO — TEMPO CONTÍNUO (sem Math.floor)
+//  FUNÇÕES DE CÁLCULO — MODELO LINEAR POR OPERAÇÕES
 //
-//  A diferença crítica: usar (agora - dataRef) / MS_POR_DIA
-//  Em vez de Math.floor(...) — isso faz o valor mudar a cada segundo.
+//  Regras:
+//  - 1 operação a cada 15 segundos = 5.760 ops/dia
+//  - Taxa por operação: 0.0000001736 (fixo, sem composição)
+//  - profit = capital_base × TAXA_POR_OP × total_operacoes
+//  - total_operacoes = Math.floor((agora - START_TIME) / 15000)
+//  - capital_base nunca muda, profit nunca é reinvestido
+//  - Funciona com site fechado: basta calcular no momento em que abrir
 //
-//  Exemplo com capital $5.000:
-//  30 min = 30/60/24 = 0.02083 dias → $5.000 × 0.001 × 0.02083 = $0.104
-//  1 hora = 1/24 = 0.04167 dias    → $5.000 × 0.001 × 0.04167 = $0.208
+//  Verificação (deve bater exato):
+//  5760 ops × 0.0000001736 = 0.001 (0,1%/dia) ✓
+//  40320 ops × 0.0000001736 = 0.007 (0,7%/semana) ✓
+//  172800 ops × 0.0000001736 = 0.030 (3,0%/mês 30d) ✓
 // ════════════════════════════════════════════════════════════════════════
 
-// Profit TOTAL desde o início do contrato (tempo contínuo)
-function calcProfitTotal(mesaId) {
-    const b = PROFIT_BASE[mesaId]; if(!b) return 0;
-    // Início do contrato: meia-noite do dia de entrada
-    const dataInicio = new Date(b.dataInicio + 'T00:00:00');
-    const agora = new Date();
-    const diasDecorridos = Math.max(0, (agora - dataInicio) / MS_POR_DIA);
-    return b.capitalInicial * ROI_DIARIO * diasDecorridos;
+const INTERVALO_MS   = 15000;          // 15 segundos por operação
+const TAXA_POR_OP    = 0.0000001736;   // taxa linear por operação
+
+// Converte string 'YYYY-MM-DD' para timestamp ms (meia-noite local)
+function tsInicio(dataStr) {
+    return new Date(dataStr + 'T00:00:00').getTime();
 }
 
-// Profit do MÊS ATUAL (reseta automaticamente na virada do dia 01)
+// Timestamp de início do mês atual (dia 01 às 00:00:00)
+function tsInicioMes() {
+    const agora = new Date();
+    return new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0).getTime();
+}
+
+// Profit TOTAL: desde o início do contrato até agora
+function calcProfitTotal(mesaId) {
+    const b = PROFIT_BASE[mesaId]; if(!b) return 0;
+    const agora        = Date.now();
+    const tempoDecorrido = Math.max(0, agora - tsInicio(b.dataInicio));
+    const totalOps     = Math.floor(tempoDecorrido / INTERVALO_MS);
+    return b.capitalInicial * TAXA_POR_OP * totalOps;
+}
+
+// Profit do MÊS ATUAL: desde o dia 01 do mês (ou início do contrato se posterior)
 function calcProfitMensal(mesaId) {
     const b = PROFIT_BASE[mesaId]; if(!b) return 0;
-    const agora = new Date();
-    // Dia 01 do mês atual às 00:00:00
-    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
-    // Início do contrato à meia-noite
-    const dataContrato = new Date(b.dataInicio + 'T00:00:00');
+    const agora        = Date.now();
+    const refContrato  = tsInicio(b.dataInicio);
+    const refMes       = tsInicioMes();
     // Conta a partir do mais recente: virada do mês OU início do contrato
-    const dataRef = dataContrato > inicioMes ? dataContrato : inicioMes;
-    const diasDecorridos = Math.max(0, (agora - dataRef) / MS_POR_DIA);
-    return b.capitalInicial * ROI_DIARIO * diasDecorridos;
+    const dataRef      = Math.max(refContrato, refMes);
+    const tempoDecorrido = Math.max(0, agora - dataRef);
+    const totalOps     = Math.floor(tempoDecorrido / INTERVALO_MS);
+    return b.capitalInicial * TAXA_POR_OP * totalOps;
 }
 
 // ROI% mensal
@@ -521,22 +530,20 @@ function calcROIMensal(mesaId) {
     return (calcProfitMensal(mesaId) / b.capitalInicial) * 100;
 }
 
-// Profit MASTER do mês atual (tempo contínuo)
+// Profit MASTER do mês atual
 function calcProfitMensalMaster() {
-    const agora = new Date();
-    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
-    const diasDecorridos = Math.max(0, (agora - inicioMes) / MS_POR_DIA);
-    return MASTER_CAPITAL * ROI_DIARIO * diasDecorridos;
+    const agora          = Date.now();
+    const tempoDecorrido = Math.max(0, agora - tsInicioMes());
+    const totalOps       = Math.floor(tempoDecorrido / INTERVALO_MS);
+    return MASTER_CAPITAL * TAXA_POR_OP * totalOps;
 }
 
-// Dias inteiros no mês (para label descritivo)
-function diasInteirosMaster() {
-    const agora = new Date();
-    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
-    return Math.floor((agora - inicioMes) / MS_POR_DIA);
+// Operações do Master no mês (para label)
+function opsMasterNoMes() {
+    return Math.floor(Math.max(0, Date.now() - tsInicioMes()) / INTERVALO_MS);
 }
 
-// Atualiza todos os profits (roda a cada 30s)
+// Atualiza todos os profits (roda a cada 15s)
 function atualizarTodosProfits() {
     MESAS.forEach(m => {
         m.profitTotal  = calcProfitTotal(m.id);
@@ -562,7 +569,7 @@ let btcBase = 72400;
 let maxSp = 0, maxPair = '--';
 const TOTAL_CLIENT_BTC = MESAS.reduce((s, m) => s + m.poolBtc, 0);
 const TOTAL_CAPITAL_OP = 523162;
-const DAILY_MAX_PROFIT = TOTAL_CAPITAL_OP * ROI_DIARIO;
+const DAILY_MAX_PROFIT = TOTAL_CAPITAL_OP * TAXA_POR_OP * 5760; // 5760 ops/dia
 const ROI_PER_OP = DAILY_MAX_PROFIT / 5760;
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────
@@ -808,7 +815,6 @@ function updateMinhasMesaLive(){
 
 // ─── MASTER PAGE ─────────────────────────────────────────────────────────
 function updateMasterPage(){
-    const dias    = diasInteirosMaster();
     const roiStr  = fmtR(MASTER.roiMensal);
     const profStr = '+$' + fmt(MASTER.profitMensal);
     const masterBtcUsd = MASTER_BTC_FIXED * btcBase;
@@ -820,7 +826,7 @@ function updateMasterPage(){
     set('mp-pool-sub',    MASTER_BTC_FIXED.toFixed(5) + ' BTC + $250.000 USDT');
     set('mp-btc-amt',     MASTER_BTC_FIXED.toFixed(5) + ' BTC');
     set('mp-btc-usd-val', '≈ $' + fmt(masterBtcUsd, 0));
-    set('mp-dias-label',  `${dias} dias completos + fração · 0,1%/dia`);
+    set('mp-dias-label',  `${opsMasterNoMes().toLocaleString('pt-BR')} ops · 15s/op · linear`);
     set('mp-btc-price-hdr', '$' + fmt(btcBase));
     set('mesa-master-roi',        '≈ ' + roiStr);
     set('mesa-master-hdr-profit', profStr);
@@ -905,7 +911,7 @@ function renderMinhasMesa(container, mesa){
     const meta      = cap * 0.03;
     const pct       = Math.min(100, (mesa.profitMensal / meta * 100)).toFixed(1);
     const dataInicioObj = new Date(mesa.inicio.split('/').reverse().join('-'));
-    const diasAtivo = Math.floor((new Date() - dataInicioObj) / MS_POR_DIA);
+    const diasAtivo = Math.floor((new Date() - dataInicioObj) / 86400000);
 
     container.innerHTML = `
         <div style="margin-bottom:20px;">
@@ -1043,25 +1049,25 @@ function init(){
     setInterval(renderOB,    2000);   // orderbook
     setInterval(renderMatrix,15000);  // tabela de operações
     setInterval(updateClock, 1000);   // relógio
-    setInterval(profitTick,  30000);  // ← PROFIT: recalcula a cada 30 segundos
+    setInterval(profitTick,  15000);  // ← PROFIT: recalcula a cada 15s (1 operação)
 }
 
 if(currentUser) init();
 
-// ─── MENU MOBILE ─────────────────────────────────────────────────────────
+// ─── MENU (hambúrguer sempre visível) ────────────────────────────────────
 function toggleMobileMenu(){
     document.querySelector('.sidebar').classList.toggle('active');
     document.querySelector('.sidebar-overlay').classList.toggle('active');
     document.querySelector('.menu-toggle').classList.toggle('active');
 }
-function checkMobileMenu(){
-    const toggle = document.querySelector('.menu-toggle');
-    if(window.innerWidth <= 768){ toggle.style.display = 'flex'; }
-    else { toggle.style.display = 'none'; document.querySelector('.sidebar').classList.remove('active'); document.querySelector('.sidebar-overlay').classList.remove('active'); toggle.classList.remove('active'); }
-}
-document.querySelectorAll('.nav-tab').forEach(tab => { tab.addEventListener('click', () => { if(window.innerWidth <= 768) toggleMobileMenu(); }); });
-window.addEventListener('resize', checkMobileMenu);
-checkMobileMenu();
+// Fecha menu ao clicar em qualquer aba de navegação
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.remove('active');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+        document.querySelector('.menu-toggle').classList.remove('active');
+    });
+});
 </script>
 </body>
 </html>
