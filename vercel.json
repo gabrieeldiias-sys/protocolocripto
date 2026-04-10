@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/kassem", "destination": "/kassem.html" },
     { "source": "/acesso-kassem", "destination": "/acesso_kassem.html" },
-    { "source": "/ali-ataya", "destination": "/aliataya.html" }
+    { "source": "/ali-ataya", "destination": "/aliataya.html" },
+    { "source": "/felipe-campos", "destination": "/felipecampos.html" }
   ]
 }
