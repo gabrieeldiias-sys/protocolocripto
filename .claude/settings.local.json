@@ -3,7 +3,10 @@
     "allow": [
       "Bash(where node:*)",
       "Bash(where python:*)",
-      "Bash(where python3:*)"
+      "Bash(where python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
