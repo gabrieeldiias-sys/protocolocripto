@@ -199,64 +199,40 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   background:radial-gradient(circle,rgba(232,184,75,0.06) 0%,transparent 65%);
 }
 
-/* ── LAYOUT GERAL: 2 colunas ── */
+/* ══ CARD — LAYOUT FIXO UNIVERSAL ══ */
+/* Identidade sempre em cima (horizontal), métricas sempre em 4 colunas */
 .cc-body{
   display:grid;
-  grid-template-columns:minmax(220px,1.2fr) minmax(400px,2.8fr);
+  grid-template-columns:1fr;
   position:relative;z-index:1;
-  min-height:210px;
 }
 
-/* Coluna direita: pools + resultados alinhados em grid interno */
-.cc-right{
-  display:flex;flex-direction:column;
-  border-left:1px solid rgba(255,255,255,0.04);
-}
-.cc-right-top{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr;
-  flex:1;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.cc-pool-btc-inline,.cc-pool-usdt-inline{
-  display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(14px,1.8vw,22px) clamp(14px,1.8vw,22px);
-}
-.cc-pool-btc-inline{border-right:1px solid rgba(255,255,255,0.04);}
-.cc-pool-usdt-inline{border-right:1px solid rgba(255,255,255,0.04);}
-
-/* ── COL 1: Identidade ── */
 .cc-identity{
-  padding:22px 20px 20px 24px;
-  display:flex;flex-direction:column;justify-content:space-between;
-  border-right:1px solid rgba(255,255,255,0.04);
-  background:linear-gradient(160deg,rgba(232,184,75,0.04) 0%,rgba(232,184,75,0.01) 40%,transparent 70%);
-  position:relative;
+  padding:14px 20px 12px;
+  display:flex;flex-direction:column;gap:10px;
+  border-right:none;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:linear-gradient(160deg,rgba(232,184,75,0.04) 0%,transparent 70%);
+  position:relative;overflow:hidden;
 }
 
-/* SYNC — canto superior direito absoluto */
+/* SYNC estático, inline no topbar */
 .cc-sync-badge{
   display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,229,160,.07);
-  border:1px solid rgba(0,229,160,.22);
+  background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.22);
   border-radius:5px;padding:5px 12px;
   font-family:var(--mono);font-size:8px;color:var(--green);
   letter-spacing:2px;font-weight:700;
-  box-shadow:0 0 12px rgba(0,229,160,.06);
-  position:absolute;top:14px;left:20px;
+  flex-shrink:0;
 }
-
-/* Bloco topo: chip + nome */
 .cc-id-topbar{
-  display:flex;flex-direction:column;gap:4px;
-  align-items:flex-start;
-  padding-top:28px;
+  display:flex;flex-direction:row;align-items:center;
+  gap:14px;flex-wrap:wrap;padding-top:0;
 }
 .cc-chip{
   font-family:var(--mono);font-size:7px;font-weight:700;
   color:rgba(232,184,75,0.45);letter-spacing:2.5px;
-  display:flex;align-items:center;gap:7px;
-  text-transform:uppercase;
+  display:flex;align-items:center;gap:7px;text-transform:uppercase;
 }
 .cc-chip::before{
   content:'';width:16px;height:1px;
@@ -265,145 +241,116 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 .cc-name{
   font-family:'Orbitron',sans-serif;font-weight:900;
-  font-size:clamp(20px,2.8vw,34px);
-  color:#fff;letter-spacing:1px;line-height:1;
-  text-shadow:0 0 30px rgba(255,255,255,0.06);
+  font-size:clamp(18px,2.8vw,30px);
+  color:#fff;letter-spacing:1px;line-height:1.05;
 }
-
-/* Separador sutil entre nome e stats */
-.cc-id-divider{
-  height:1px;
-  background:linear-gradient(90deg,rgba(232,184,75,0.12),transparent);
-  margin:2px 0;
-}
-
-/* Stats + livebar */
 .cc-id-center{
-  display:flex;flex-direction:column;gap:12px;flex:1;
-  justify-content:flex-end;
-}
-
-.cc-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.18);
-  border-radius:5px;padding:4px 9px;
-  font-family:var(--mono);font-size:7px;color:var(--green);letter-spacing:1.5px;
-  white-space:nowrap;flex-shrink:0;
-}
-.cc-pm-row{display:flex;flex-direction:column;gap:3px;}
-.cc-pm-label{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:2px;}
-.cc-pm-val{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.3vw,15px);font-weight:700;
-  color:rgba(232,184,75,0.8);letter-spacing:.5px;
-}
-.cc-name-sub{
-  font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1.5px;
-}
-
-/* ── COL 2: Pools ── */
-.cc-pools{
   display:flex;flex-direction:column;
+  gap:10px;
+}
+.cc-id-divider{display:none;}
+
+/* MÉTRICAS: sempre 4 colunas */
+.cc-right{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:1fr auto;
+  border-left:none;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.cc-pool-btc-inline{
+  grid-column:1;grid-row:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
   border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
 }
-.cc-pool{
-  flex:1;display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(18px,2.2vw,28px) clamp(18px,2.4vw,28px);
-  position:relative;
+.cc-pool-usdt-inline{
+  grid-column:2;grid-row:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
 }
-.cc-pool:first-child{border-bottom:1px solid rgba(255,255,255,0.04);}
+.cc-r-profit{
+  grid-column:3;grid-row:1;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+.cc-r-roi{
+  grid-column:4;grid-row:1;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  background:linear-gradient(135deg,rgba(0,229,160,0.05) 0%,transparent 70%);
+}
+.cc-r-capital{
+  grid-column:1 / span 3;grid-row:2;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  display:flex;flex-direction:column;justify-content:center;
+  background:linear-gradient(90deg,rgba(232,184,75,0.08),rgba(232,184,75,0.02) 60%,transparent);
+}
+.cc-r-pm{
+  grid-column:4;grid-row:2;
+  padding:clamp(12px,1.5vw,18px) clamp(12px,1.4vw,16px);
+  display:flex;flex-direction:column;justify-content:center;
+  border-left:1px solid rgba(255,255,255,0.04);
+  border-radius:0 0 16px 0;
+}
+
+/* Pools antigas */
+.cc-pools{display:none;}
+.cc-results{display:none;}
+
+/* Pool nums */
 .cc-pool-tag{
-  font-family:var(--mono);font-size:8px;font-weight:700;
+  font-family:var(--mono);font-size:7px;font-weight:700;
   letter-spacing:2px;color:var(--text2);
-  display:flex;align-items:center;gap:5px;margin-bottom:12px;
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
 }
 .cc-pool-tag-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .cc-pool-num{
   font-family:'JetBrains Mono',monospace;font-weight:700;
-  font-size:clamp(24px,3vw,38px);
-  line-height:1;letter-spacing:-1px;margin-bottom:7px;
+  font-size:clamp(18px,2.2vw,30px);
+  line-height:1;letter-spacing:-0.5px;margin-bottom:2px;
 }
-.cc-pool-usd{
-  font-family:var(--mono);font-size:clamp(10px,0.9vw,13px);
-  color:var(--text2);letter-spacing:.5px;
-}
-/* Micro barra de fundo decorativa */
-.cc-pool::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;opacity:.3;
-}
-.cc-pool:first-child::after{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.cc-pool-usd{font-family:var(--mono);font-size:clamp(9px,0.8vw,11px);color:var(--text2);}
 
-/* ── COL 3: Resultados ── */
-.cc-results{
-  display:grid;
-  grid-template-rows:1fr 1fr;
-  grid-template-columns:1fr 1fr;
-}
-
-/* Profit — topo esquerda */
-.cc-r-profit{
-  padding:clamp(14px,1.8vw,22px) clamp(14px,1.8vw,20px);
-  border-right:1px solid rgba(255,255,255,0.04);
-  display:flex;flex-direction:column;justify-content:center;
-}
-/* ROI */
-.cc-r-roi{
-  padding:clamp(14px,1.8vw,22px) clamp(14px,1.8vw,20px);
-  display:flex;flex-direction:column;justify-content:center;
-  background:linear-gradient(135deg,rgba(0,229,160,0.05) 0%,transparent 70%);
-}
-
-/* Capital Total — linha inteira na base do cc-right */
-.cc-r-capital{
-  display:grid;
-  grid-template-columns:3fr 1fr;
-  background:linear-gradient(90deg,rgba(232,184,75,0.08) 0%,rgba(232,184,75,0.03) 50%,transparent 100%);
-  border-radius:0 0 16px 0;
-}
-.cc-r-capital-main{
-  padding:clamp(14px,1.8vw,20px) clamp(14px,1.8vw,22px);
-  display:flex;flex-direction:column;justify-content:center;
-}
-.cc-r-capital-pm{
-  padding:clamp(14px,1.8vw,20px) clamp(12px,1.4vw,18px);
-  display:flex;flex-direction:column;justify-content:center;
-  border-left:1px solid rgba(255,255,255,0.04);
-}
-
-/* Células de resultado */
+/* Células resultado */
 .cc-r-label{
   font-family:var(--mono);font-size:7px;font-weight:700;
   color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;
-  display:flex;align-items:center;gap:5px;margin-bottom:10px;
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
 }
 .cc-r-label-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
 .cc-r-val{
   font-family:'JetBrains Mono',monospace;font-weight:700;
-  font-size:clamp(20px,2.8vw,36px);
-  line-height:1;letter-spacing:-1px;margin-bottom:6px;
+  font-size:clamp(16px,2.2vw,28px);
+  line-height:1;letter-spacing:-0.5px;margin-bottom:4px;
 }
-.cc-r-sub{font-family:var(--mono);font-size:clamp(8px,0.7vw,10px);color:var(--text2);letter-spacing:.5px;}
-
-/* Capital valor grande */
+.cc-r-sub{font-family:var(--mono);font-size:clamp(7px,0.6vw,9px);color:var(--text2);letter-spacing:.5px;}
 .cc-cap-val{
   font-family:'JetBrains Mono',monospace;font-weight:700;
-  font-size:clamp(26px,4vw,52px);
-  color:var(--gold);letter-spacing:-2px;line-height:1;
-  text-shadow:0 0 40px rgba(232,184,75,0.45);
+  font-size:clamp(22px,3.2vw,44px);
+  color:var(--gold);letter-spacing:-1.5px;line-height:1;
+  text-shadow:0 0 40px rgba(232,184,75,0.4);
 }
-.cc-cap-sub{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:5px;letter-spacing:1px;}
+.cc-cap-sub{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:4px;letter-spacing:1px;}
 
-/* ── FOOTER META ── */
+/* FOOTER META */
 .cc-footer{
-  padding:14px clamp(18px,2.5vw,28px) 18px;
+  padding:14px clamp(16px,2vw,28px) 18px;
   border-top:1px solid rgba(255,255,255,0.04);
   position:relative;z-index:1;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  display:flex;align-items:center;gap:16px;
 }
 .cc-prog-wrap{flex:1;min-width:0;}
 .cc-prog-label{
   display:flex;justify-content:space-between;align-items:center;
-  font-family:var(--mono);font-size:8px;letter-spacing:1px;
-  margin-bottom:8px;
+  font-family:var(--mono);font-size:8px;letter-spacing:1px;margin-bottom:8px;
+  flex-wrap:wrap;gap:4px;
 }
 .cc-prog-left{display:flex;align-items:center;gap:6px;color:var(--text2);}
 .cc-prog-star{color:var(--gold);}
@@ -413,15 +360,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .cc-prog-target{color:var(--text2);}
 .cc-prog-pct{color:var(--green);font-weight:700;min-width:44px;text-align:right;}
 .cc-prog-track{
-  height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;
-  position:relative;
+  height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;position:relative;
 }
 .cc-prog-fill{
   height:100%;border-radius:3px;
   background:linear-gradient(90deg,rgba(232,184,75,0.4),var(--gold),#FFD54F);
   box-shadow:0 0 12px rgba(232,184,75,0.35);
-  transition:width 1.8s cubic-bezier(.4,0,.2,1);
-  position:relative;
+  transition:width 1.8s cubic-bezier(.4,0,.2,1);position:relative;
 }
 .cc-prog-fill::after{
   content:'';position:absolute;right:-1px;top:-3px;bottom:-3px;
@@ -429,52 +374,33 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   box-shadow:0 0 10px rgba(255,213,79,0.8);
 }
 
-/* ── RESPONSIVO ── */
-@media(max-width:1050px){
-  .cc-body{grid-template-columns:1fr 1fr;}
-  .cc-identity{grid-column:span 2;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);
-    flex-direction:row;align-items:center;gap:20px;padding:18px 22px;}
-  .cc-name-sub{margin-bottom:0;}
-  .cc-id-bottom{display:flex;align-items:center;gap:16px;}
-}
-@media(max-width:700px){
-  .cc-body{grid-template-columns:1fr;}
-  .cc-identity{grid-column:1;flex-direction:column;align-items:flex-start;}
-  .cc-pools{flex-direction:row;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);}
-  .cc-pool:first-child{border-bottom:none;border-right:1px solid rgba(255,255,255,0.04);}
-  .cc-results{grid-template-columns:1fr 1fr;}
-}
-@media(max-width:460px){
-  .cc-r-capital{flex-direction:column;align-items:flex-start;gap:8px;}
-  .cc-r-capital-right{text-align:left;}
-  .cc-footer{flex-direction:column;align-items:stretch;}
+/* ══ RESPONSIVO CARD — mobile pequeno <480px ══ */
+@media(max-width:480px){
+  .cc-right{grid-template-columns:1fr 1fr;}
+  .cc-pool-btc-inline{grid-column:1;grid-row:1;}
+  .cc-pool-usdt-inline{grid-column:2;grid-row:1;border-right:none;}
+  .cc-r-profit{grid-column:1;grid-row:2;border-right:1px solid rgba(255,255,255,0.04);}
+  .cc-r-roi{grid-column:2;grid-row:2;border-right:none;}
+  .cc-r-capital{grid-column:1 / span 2;grid-row:3;}
+  .cc-r-pm{grid-column:1 / span 2;grid-row:4;border-left:none;border-top:1px solid rgba(255,255,255,0.04);border-radius:0 0 16px 16px;}
+  .cc-pool-num{font-size:clamp(14px,4vw,18px);}
+  .cc-r-val{font-size:clamp(12px,3.5vw,16px);}
+  .cc-cap-val{font-size:clamp(16px,6vw,22px);}
 }
 
-/* ── STATS OPERACIONAIS (col identidade) ── */
-.cc-id-center{display:flex;flex-direction:column;justify-content:center;gap:14px;flex:1;}
-
-.cc-op-stats{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:12px 20px;
-  padding-left:56px;
-}
-.cc-op-full{ grid-column:span 2; }
-.cc-op-stat{ text-align:left; }
+/* STATS OPERACIONAIS */
+.cc-op-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+.cc-op-full{grid-column:span 2;}
+.cc-op-stat{text-align:left;}
 .cc-op-stat-label{
   font-family:var(--mono);font-size:8px;color:var(--text2);
-  letter-spacing:2px;font-weight:700;margin-bottom:5px;
-  text-transform:uppercase;
+  letter-spacing:2px;font-weight:700;margin-bottom:5px;text-transform:uppercase;
 }
 .cc-op-stat-val{
   font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.1vw,14px);font-weight:700;
   color:var(--text);letter-spacing:.3px;white-space:nowrap;
 }
-
-/* Barra de atividade ao vivo */
-.cc-live-bar{
-  display:flex;align-items:center;gap:8px;
-  padding-left:56px;
-}
+.cc-live-bar{display:flex;align-items:center;gap:8px;}
 .cc-live-bar-txt{
   font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text2);
   letter-spacing:1.5px;white-space:nowrap;flex-shrink:0;
@@ -482,21 +408,89 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .cc-live-bar-line{
   flex:1;height:3px;background:rgba(255,255,255,0.06);
   border-radius:2px;overflow:hidden;
-  min-width:160px;
 }
 .cc-live-bar-fill{
   height:100%;width:30%;
   background:linear-gradient(90deg,rgba(0,229,160,0.3),var(--green));
-  border-radius:1px;
-  animation:liveBarAnim 2s ease infinite;
+  border-radius:1px;animation:liveBarAnim 2s ease infinite;
 }
 @keyframes liveBarAnim{
-  0%  {width:0%;opacity:.5;}
-  50% {width:100%;opacity:1;}
-  100%{width:100%;opacity:.3;}
+  0%{width:0%;opacity:.5;}50%{width:100%;opacity:1;}100%{width:100%;opacity:.3;}
 }
 
-/* ── MÉTRICAS ANTIGAS (mantidas para outros usos) ── */
+/* ── CAPITAL TOTAL LAYOUT 3 ZONAS ── */
+.cc-cap-layout{
+  display:grid;
+  grid-template-columns:auto 1fr 1fr;
+  gap:0;
+  height:100%;
+  align-items:center;
+}
+.cc-cap-zone{
+  padding:0 20px;
+  border-right:1px solid rgba(255,255,255,0.04);
+  height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.cc-cap-zone:first-child{ padding-left:0; }
+.cc-cap-zone:last-child{ border-right:none; }
+.cc-cap-mid{ min-width:0; }
+.cc-cap-spark{ min-width:0; }
+
+/* Barras */
+.cc-balance-bars{ display:flex;flex-direction:column;gap:0;width:100%; }
+.cc-bal-row{ display:flex;align-items:center;gap:10px; }
+.cc-bal-label{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  letter-spacing:1.5px;width:30px;flex-shrink:0;
+}
+.cc-bal-track{
+  flex:1;height:5px;background:rgba(255,255,255,0.06);
+  border-radius:3px;overflow:hidden;
+}
+.cc-bal-fill{
+  height:100%;border-radius:3px;
+  transition:width 1.5s cubic-bezier(.4,0,.2,1);
+}
+.cc-bal-btc{ background:linear-gradient(90deg,rgba(232,184,75,0.4),#E8B84B); box-shadow:0 0 6px rgba(232,184,75,0.3); }
+.cc-bal-usdt{ background:linear-gradient(90deg,rgba(77,159,255,0.4),#4D9FFF); box-shadow:0 0 6px rgba(77,159,255,0.3); }
+.cc-bal-pct{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  width:36px;text-align:right;flex-shrink:0;
+}
+
+/* ── SPARKLINE CAPITAL ── */
+.cc-sparkline{
+  width:100%;height:52px;
+  flex-shrink:0;
+  opacity:0.95;
+}
+@media(max-width:700px){ .cc-sparkline{height:36px;} }
+@media(max-width:500px){ .cc-sparkline{display:none;} }
+
+/* ── STATUS ROW ── */
+.cc-status-row{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+}
+.cc-status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:5px;
+  padding:4px 10px;
+  font-family:var(--mono);font-size:7px;
+  color:var(--text2);letter-spacing:1.5px;font-weight:700;
+  text-transform:uppercase;
+}
+.cc-status-dot{
+  width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--green);box-shadow:0 0 4px var(--green);
+  animation:pulse 1.8s ease infinite;
+}
+.cc-status-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;font-weight:700;letter-spacing:.5px;
+}
 
 /* ── SECTION HEADER ── */
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -915,23 +909,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .metric-value{font-size:16px;}
   .metric-label{font-size:7px;}
 
-  /* Novo card OKX — mobile */
-  .cc-body{grid-template-columns:1fr;}
-  .cc-right{border-left:none;border-top:1px solid rgba(255,255,255,0.04);}
-  .cc-right-top{grid-template-columns:1fr 1fr;}
-  .cc-pool-usdt-inline{border-right:none;}
-  .cc-r-profit{border-right:1px solid rgba(255,255,255,0.04);}
-  .cc-identity{border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);padding:16px 14px 14px;}
+  /* Card mobile — mantém layout fixo universal, ajusta só fontes */
+  .cc-identity{padding:14px 14px 10px;}
   .cc-sync-badge{font-size:8px;padding:4px 10px;}
-  .cc-name{font-size:clamp(20px,6vw,28px);}
-  .cc-col-pools{flex-direction:row;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);}
-  .cc-pool:first-child{border-bottom:none;border-right:1px solid rgba(255,255,255,0.04);}
-  .cc-results-top{grid-template-columns:1fr 1fr;}
-  .cc-metric.is-capital{grid-column:span 2;border-right:none;}
-  .cc-metric.is-capital .cc-metric-value{font-size:clamp(22px,7vw,34px);}
-  .cc-op-stats{grid-template-columns:1fr 1fr;}
-  .cc-op-full{grid-column:span 2;}
-  .cc-live-bar-line{max-width:60px;}
+  .cc-name{font-size:clamp(16px,5vw,24px);}
+  .cc-op-stats{gap:8px 14px;}
 
   /* Radar mobile — 2 colunas */
   .radar-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px;}
@@ -1099,21 +1081,36 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
         <!-- COL ESQUERDA: Identidade -->
         <div class="cc-identity">
+          <!-- Topbar: SYNC + Nome + Chip -->
           <div class="cc-id-topbar">
             <div class="cc-sync-badge"><span class="pulse"></span>SYNC</div>
-            <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
             <div class="cc-name">ANDRE HORNUNG</div>
+            <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
           </div>
           <div class="cc-id-center">
+            <!-- Stats + pills na mesma linha -->
             <div class="cc-op-stats">
               <div class="cc-op-stat">
                 <div class="cc-op-stat-label">ESTRATÉGIA</div>
                 <div class="cc-op-stat-val">ARB · SPOT</div>
               </div>
-              <div class="cc-op-stat">
-                <div class="cc-op-stat-label">CICLO</div>
-                <div class="cc-op-stat-val" style="white-space:nowrap;">15s · COMPOSTO</div>
+              <!-- Pills coladas na borda direita, alinhadas com Estratégia -->
+              <div class="cc-op-stat" style="display:flex;align-items:flex-end;justify-content:flex-end;gap:5px;grid-column:2;">
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot"></span>
+                  <span>LAT</span>
+                  <span id="st-latency" class="cc-status-val" style="color:var(--green);">--ms</span>
+                </div>
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+                  <span>240/H</span>
+                </div>
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot" style="background:var(--blue);box-shadow:0 0 4px var(--blue);animation:none;"></span>
+                  <span>99.9%</span>
+                </div>
               </div>
+
               <div class="cc-op-stat cc-op-full">
                 <div class="cc-op-stat-label">RENDIMENTO</div>
                 <div class="cc-op-stat-val" style="color:var(--green);">0.00001736% / TICK</div>
@@ -1127,75 +1124,88 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           </div>
         </div>
 
-        <!-- COL DIREITA: Pools + Resultados alinhados -->
+        <!-- COL DIREITA: grid 4x2, células diretas sem wrappers -->
         <div class="cc-right">
 
-          <!-- Linha superior: Pool BTC | Pool USDT | Profit | ROI -->
-          <div class="cc-right-top">
-
-            <div class="cc-pool cc-pool-btc-inline">
-              <div class="cc-pool-tag">
-                <span class="cc-pool-tag-dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold);"></span>
-                POOL BTC
-              </div>
-              <div class="cc-pool-num" style="color:var(--gold);">0.34295 <span style="font-size:.55em;font-weight:400;color:rgba(232,184,75,0.4);letter-spacing:1px;">BTC</span></div>
-              <div class="cc-pool-usd">≈ <span id="pool-btc-usd" style="color:rgba(232,184,75,0.7);">$--</span></div>
-            </div>
-
-            <div class="cc-pool cc-pool-usdt-inline">
-              <div class="cc-pool-tag">
-                <span class="cc-pool-tag-dot" style="background:var(--blue);box-shadow:0 0 5px var(--blue);"></span>
-                POOL USDT
-              </div>
-              <div class="cc-pool-num" style="color:var(--blue);">$25.000 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
-              <div class="cc-pool-usd" style="color:var(--text2);">ESTÁTICO</div>
-            </div>
-
-            <div class="cc-r-profit">
-              <div class="cc-r-label">
-                <span class="cc-r-label-dot" style="background:var(--green);box-shadow:0 0 5px var(--green);"></span>
-                PROFIT TOTAL
-              </div>
-              <div class="cc-r-val" style="color:var(--green);" id="profit-total">+$0.000000</div>
-              <div class="cc-r-sub">USDT ACUMULADO</div>
-            </div>
-
-            <div class="cc-r-roi">
-              <div class="cc-r-label">
-                <span class="cc-r-label-dot" style="background:var(--green);"></span>
-                ROI <span style="color:rgba(0,229,160,0.35);margin-left:3px;font-size:6px;letter-spacing:1px;">↑ COMPOSTO</span>
-              </div>
-              <div class="cc-r-val" style="color:var(--green);" id="profit-roi">0.000000%</div>
-              <div class="cc-r-sub">SOBRE APORTE $50K</div>
-            </div>
-
-
+          <div class="cc-pool-btc-inline">
+            <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold);"></span>POOL BTC</div>
+            <div class="cc-pool-num" style="color:var(--gold);">0.34295 <span style="font-size:.55em;font-weight:400;color:rgba(232,184,75,0.4);letter-spacing:1px;">BTC</span></div>
+            <div class="cc-pool-usd">≈ <span id="pool-btc-usd" style="color:rgba(232,184,75,0.7);">$--</span></div>
           </div>
 
-          <!-- Linha inferior: Capital Total + Preço Médio alinhado abaixo do ROI -->
+          <div class="cc-pool-usdt-inline">
+            <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--blue);box-shadow:0 0 5px var(--blue);"></span>POOL USDT</div>
+            <div class="cc-pool-num" style="color:var(--blue);">$25.000 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
+            <div class="cc-pool-usd" style="color:var(--text2);visibility:hidden;">≈ $--</div>
+          </div>
+
+          <div class="cc-r-profit">
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);box-shadow:0 0 5px var(--green);"></span>PROFIT TOTAL</div>
+            <div class="cc-r-val" style="color:var(--green);" id="profit-total">+$0.000000</div>
+            <div class="cc-r-sub">USDT ACUMULADO</div>
+          </div>
+
+          <div class="cc-r-roi">
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);"></span>ROI <span style="color:rgba(0,229,160,0.35);margin-left:3px;font-size:6px;letter-spacing:1px;">↑ COMPOSTO</span></div>
+            <div class="cc-r-val" style="color:var(--green);" id="profit-roi">0.000000%</div>
+            <div class="cc-r-sub">SOBRE APORTE $50K</div>
+          </div>
+
           <div class="cc-r-capital">
+            <!-- Layout: 3 zonas — Capital | Balanceamento | Sparkline -->
+            <div class="cc-cap-layout">
 
-            <!-- Lado esquerdo: Capital Total (ocupa 3 das 4 colunas) -->
-            <div class="cc-r-capital-main">
-              <div class="cc-r-label" style="margin-bottom:10px;">
-                <span class="cc-r-label-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold);"></span>
-                CAPITAL TOTAL
-                <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
+              <!-- Zona 1: Capital -->
+              <div class="cc-cap-zone">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold);"></span>
+                  CAPITAL TOTAL
+                  <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
+                </div>
+                <div class="cc-cap-val" id="cap-total">$--</div>
+                <div class="cc-cap-sub">POOL + PROFIT · JUROS COMPOSTOS</div>
               </div>
-              <div class="cc-cap-val" id="cap-total">$--</div>
-              <div class="cc-cap-sub">POOL + PROFIT · JUROS COMPOSTOS</div>
-            </div>
 
-            <!-- Lado direito: Preço Médio — alinhado sob o ROI -->
-            <div class="cc-r-capital-pm">
-              <div class="cc-r-label">
-                <span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>
-                PREÇO MÉDIO ENTRADA
+              <!-- Zona 2: Balanceamento -->
+              <div class="cc-cap-zone cc-cap-mid">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--text2);"></span>
+                  ALOCAÇÃO
+                </div>
+                <div class="cc-balance-bars">
+                  <div class="cc-bal-row">
+                    <span class="cc-bal-label" style="color:var(--gold);">BTC</span>
+                    <div class="cc-bal-track">
+                      <div class="cc-bal-fill cc-bal-btc" id="bal-btc" style="width:50%"></div>
+                    </div>
+                    <span class="cc-bal-pct" id="bal-btc-pct" style="color:var(--gold);">50.0%</span>
+                  </div>
+                  <div class="cc-bal-row" style="margin-top:8px;">
+                    <span class="cc-bal-label" style="color:var(--blue);">USDT</span>
+                    <div class="cc-bal-track">
+                      <div class="cc-bal-fill cc-bal-usdt" id="bal-usdt" style="width:50%"></div>
+                    </div>
+                    <span class="cc-bal-pct" id="bal-usdt-pct" style="color:var(--blue);">50.0%</span>
+                  </div>
+                </div>
               </div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(14px,1.5vw,18px);font-weight:700;color:rgba(232,184,75,0.75);letter-spacing:-.3px;line-height:1;margin-bottom:4px;">$72.898,93</div>
-              <div class="cc-r-sub">BTC · ENTRADA FIXO</div>
-            </div>
 
+              <!-- Zona 3: Sparkline -->
+              <div class="cc-cap-zone cc-cap-spark">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--gold);"></span>
+                  EVOLUÇÃO
+                </div>
+                <canvas id="sparkline-cap" class="cc-sparkline"></canvas>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="cc-r-pm">
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>PREÇO MÉDIO ENTRADA</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(13px,1.4vw,17px);font-weight:700;color:rgba(232,184,75,0.75);letter-spacing:-.3px;line-height:1;margin-bottom:4px;">$72.898,93</div>
+            <div class="cc-r-sub">BTC · FIXO</div>
           </div>
 
         </div>
@@ -1545,21 +1555,38 @@ const setW= (id, w)  => { const e=$(id); if(e) e.style.width=w; };
 function lsGet(k)    { try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v) { try{ localStorage.setItem(k, v); }catch(e){} }
 
-// ── CHECKPOINT (primeira vez que abre — persiste) ──────────────
+// ══════════════════════════════════════════════════════════════
+//  CHECKPOINT FIXO — determinístico, independente de cache
+//  Data de início da operação: 11/04/2026 às 07:00 (BRT = UTC-3)
+//  Profit = sempre recalculado a partir dessa data
+//  Se limpar cache: zero bug, zero perda — recalcula automaticamente
+// ══════════════════════════════════════════════════════════════
+const CHECKPOINT_FIXO = new Date('2026-04-11T07:00:00-03:00').getTime();
+
 function getCheckpoint() {
-    const key = 'ah_checkpoint_v3';
-    let cp = lsGet(key);
-    if(!cp){ cp = Date.now().toString(); lsSet(key, cp); }
-    return parseInt(cp);
+    return CHECKPOINT_FIXO;
 }
 
-// ── PROFIT ACUMULADO ────────────────────────────────────────────
-function getProfit()     { return parseFloat(lsGet('ah_profit_v3') || '0') || 0; }
-function setProfit(val)  { lsSet('ah_profit_v3', val.toString()); }
+// Profit e ticks: calculados em tempo real a partir do checkpoint fixo
+// Não usa localStorage — sempre determinístico
+function getTotalTicksElapsed() {
+    return Math.floor((Date.now() - CHECKPOINT_FIXO) / INTERVALO_MS);
+}
 
-// ── TICKS PROCESSADOS ──────────────────────────────────────────
-function getTicks()     { return parseInt(lsGet('ah_ticks_v3') || '0') || 0; }
-function setTicks(val)  { lsSet('ah_ticks_v3', val.toString()); }
+function getProfit() {
+    // Juros compostos exatos desde o início: P = base × ((1+r)^n - 1)
+    const poolBase = getPoolBase();
+    const n = getTotalTicksElapsed();
+    return poolBase * (Math.pow(1 + TAXA_TICK, n) - 1);
+}
+
+function getTicks() {
+    return getTotalTicksElapsed();
+}
+
+// Mantém funções de compatibilidade (não fazem nada — profit é calculado)
+function setProfit(val)  { /* determinístico — não salva */ }
+function setTicks(val)   { /* determinístico — não salva */ }
 
 // ── CÁLCULOS PRINCIPAIS ────────────────────────────────────────
 function getPoolTotal() {
@@ -1572,39 +1599,19 @@ function getCapitalTotal() {
     return getPoolTotal() + getProfit();
 }
 
-// ── RECUPERA RENDIMENTO OFFLINE (missed yield) ─────────────────
-// Simula os ticks que aconteceriam enquanto a página estava fechada.
-// Usa aproximação: aplica todos os ticks perdidos com capital médio
-// (capital inicial do período × fator de crescimento composto)
+// ── MISSED YIELD — não necessário (profit é determinístico) ────
 function applyMissedYield() {
-    const agora       = Date.now();
-    const cp          = getCheckpoint();
-    const totalTicks  = Math.floor((agora - cp) / INTERVALO_MS);
-    const ticksFeitos = getTicks();
-    const ticksPerd   = Math.max(0, totalTicks - ticksFeitos);
-
-    if(ticksPerd <= 0) return;
-
-    // Juros compostos exatos para N ticks ausentes:
-    // P_final = P_inicial × (1 + r)^N  → lucro = P_final - P_inicial
-    const capitalAntes = getPoolTotal() + getProfit();
-    const capitalDepois = capitalAntes * Math.pow(1 + TAXA_TICK, ticksPerd);
-    const lucroRecuperado = capitalDepois - capitalAntes;
-
-    setProfit(getProfit() + lucroRecuperado);
-    setTicks(totalTicks);
+    // Profit calculado sempre em tempo real a partir do CHECKPOINT_FIXO
+    // Fechar/abrir o browser, limpar cache: zero impacto
 }
 
-// ── LOOP DE RENDIMENTO COMPOSTO ────────────────────────────────
+// ── LOOP DE ATUALIZAÇÃO — profit calculado em tempo real ───────
 function startYieldSimulation() {
     setInterval(() => {
-        const cap  = getCapitalTotal();          // base composta
-        const tick = cap * TAXA_TICK;            // lucro deste tick
-        setProfit(getProfit() + tick);
-        setTicks(getTicks() + 1);
+        // Profit sempre recalculado do CHECKPOINT_FIXO — sem acumulação manual
         updateClientCard();
-        addChartPoint();                         // atualiza gráfico ao vivo
-        renderOps();                             // sincronia: op aparece = lucro acrescido
+        addChartPoint();
+        renderOps();
     }, INTERVALO_MS);
 }
 
@@ -1632,6 +1639,18 @@ function updateClientCard() {
     set('prog-pct', metaPct.toFixed(2) + '%');
     setW('prog-bar', metaPct.toFixed(2) + '%');
     set('cc-ticks-live', getTicks().toLocaleString('pt-BR'));
+    updateSparkline();
+    // Balanceamento BTC vs USDT
+    const poolBtcUSD2 = POOL_BTC * btcBase;
+    const totalPool2 = poolBtcUSD2 + POOL_USDT;
+    const btcPct = totalPool2 > 0 ? (poolBtcUSD2 / totalPool2 * 100) : 50;
+    const usdtPct = 100 - btcPct;
+    const bBtc = document.getElementById('bal-btc');
+    const bUsdt = document.getElementById('bal-usdt');
+    if(bBtc) bBtc.style.width = btcPct.toFixed(1) + '%';
+    if(bUsdt) bUsdt.style.width = usdtPct.toFixed(1) + '%';
+    set('bal-btc-pct', btcPct.toFixed(1) + '%');
+    set('bal-usdt-pct', usdtPct.toFixed(1) + '%');
 }
 
 // ── EXCHANGES ──────────────────────────────────────────────────
@@ -1816,6 +1835,73 @@ window.renderOB = function() {
         while(trades.children.length>12) trades.lastChild.remove();
     }
 };
+
+// ── SPARKLINE CAPITAL TOTAL ────────────────────────────────────
+let sparkData = [];
+const SPARK_MAX = 40;
+
+function drawSparkline() {
+    const canvas = document.getElementById('sparkline-cap');
+    if(!canvas || sparkData.length < 2) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    if(!w || !h) return;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const mn = Math.min(...sparkData), mx = Math.max(...sparkData);
+    const range = mx - mn || 1;
+    const pad = 4;
+    const xStep = (w - pad*2) / (sparkData.length - 1);
+    const toY = v => h - pad - ((v - mn) / range) * (h - pad*2);
+
+    // Gradiente de preenchimento
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(232,184,75,0.3)');
+    grad.addColorStop(1, 'rgba(232,184,75,0.0)');
+
+    // Área preenchida
+    ctx.beginPath();
+    sparkData.forEach((v, i) => {
+        const x = pad + i * xStep, y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.lineTo(pad + (sparkData.length-1)*xStep, h);
+    ctx.lineTo(pad, h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Linha principal
+    ctx.beginPath();
+    sparkData.forEach((v, i) => {
+        const x = pad + i * xStep, y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#E8B84B';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(232,184,75,0.8)';
+    ctx.shadowBlur = 4;
+    ctx.stroke();
+
+    // Ponto final pulsante
+    const lastX = pad + (sparkData.length-1)*xStep;
+    const lastY = toY(sparkData[sparkData.length-1]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = '#E8B84B';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+}
+
+function updateSparkline() {
+    sparkData.push(getCapitalTotal());
+    if(sparkData.length > SPARK_MAX) sparkData.shift();
+    drawSparkline();
+}
 
 // ── GRÁFICO DE CRESCIMENTO ─────────────────────────────────────
 // Começa do zero (checkpoint = primeiro acesso)
@@ -2108,6 +2194,7 @@ function init() {
     // 2. Inicializa preços e UI
     updatePrices();
     updateClientCard();
+    updateSparkline();
     renderRadar('radar');
     renderRadar('radar-btc');
     renderOB();
@@ -2120,6 +2207,9 @@ function init() {
         renderRadar('radar-btc');
         renderOB();
         updateClientCard();
+        // Latência simulada realista
+        const lat = (Math.random()*18+4).toFixed(0);
+        set('st-latency', lat + 'ms');
     }, 4000);
 
     setInterval(updateClock, 1000);
