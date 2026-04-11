@@ -823,12 +823,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 // ══ LOGIN ══
-const ANDRE_USER = 'andre';
-const ANDRE_PASS = 'andre2025';
+const ANDRE_USER = 'andrehornung';
+const ANDRE_PASS = 'chacall';
 
 function doLogin(){
     const u   = document.getElementById('l-user').value.trim().toLowerCase();
-    const p   = document.getElementById('l-pass').value.trim();
+    const p   = document.getElementById('l-pass').value.trim().toLowerCase();
     const err = document.getElementById('l-err');
     if(u === ANDRE_USER && p === ANDRE_PASS){
         sessionStorage.setItem('andre_auth','1');
