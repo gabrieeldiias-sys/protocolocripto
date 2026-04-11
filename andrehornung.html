@@ -1803,13 +1803,67 @@ function renderRadar(elId) {
 
 // ── TABELA DE OPERAÇÕES ────────────────────────────────────────
 // Sincronizada com o tick: cada vez que roda = lucro foi acrescido
+// ── Gera uma linha de operação determinística para um tick passado ──
+function buildOpRow(tickIndex, basePrice) {
+    // Seed determinístico baseado no índice do tick
+    const seed = (tickIndex * 9301 + 49297) % 233280;
+    const rng = seed / 233280;
+    const seed2 = (tickIndex * 1234 + 5678) % 9999;
+    const rng2 = seed2 / 9999;
+
+    // Escolhe par compra/venda de forma determinística
+    const exIds = EX.map(e => e.id);
+    const buyIdx  = Math.floor(rng  * exIds.length);
+    const sellIdx = Math.floor(rng2 * exIds.length);
+    const buyId   = exIds[buyIdx];
+    const sellId  = exIds[sellIdx === buyIdx ? (buyIdx + 1) % exIds.length : sellIdx];
+    const buyEx   = EX.find(e => e.id === buyId);
+    const sellEx  = EX.find(e => e.id === sellId);
+
+    const spread  = 0.002 + rng * 0.08; // 0.002% ~ 0.082%
+    const buyP    = basePrice * (1 - spread * 0.005);
+    const sellP   = basePrice * (1 + spread * 0.005);
+
+    // Capital e lucro naquele instante
+    const poolBase = getPoolBase();
+    const capitalN = poolBase * Math.pow(1 + TAXA_TICK, tickIndex);
+    const lucroTick = capitalN * TAXA_TICK;
+
+    // Hora daquele tick
+    const ts = new Date(CHECKPOINT_FIXO + tickIndex * INTERVALO_MS);
+    const hora = ts.toLocaleTimeString('pt-BR');
+
+    return `<tr style="opacity:1;">
+        <td style="color:var(--text2);font-size:9px;">${hora}</td>
+        <td><span class="tag-buy"><img src="${buyEx?.logo||''}" alt="${buyEx?.name||''}"></span></td>
+        <td><span class="tag-sell"><img src="${sellEx?.logo||''}" alt="${sellEx?.name||''}"></span></td>
+        <td style="color:var(--green);">$${buyP.toFixed(2)}</td>
+        <td style="color:var(--red);">$${sellP.toFixed(2)}</td>
+        <td style="color:var(--gold);font-weight:700;">${spread.toFixed(4)}%</td>
+        <td style="color:var(--green);font-weight:700;">+$${lucroTick.toFixed(6)}</td>
+    </tr>`;
+}
+
+// ── Popula tabela com as últimas 20 ops históricas ao abrir ──
+function initOpsHistory() {
+    const tbody = $('ops-tbody'); if(!tbody) return;
+    const totalTicks = getTotalTicksElapsed();
+    const showCount = Math.min(20, totalTicks);
+    const base = btcBase || PRECO_MEDIO;
+    let html = '';
+    for(let i = showCount; i >= 1; i--) {
+        const tickIdx = totalTicks - i;
+        html += buildOpRow(tickIdx, base);
+    }
+    tbody.innerHTML = html;
+}
+
 function renderOps() {
     const tbody=$('ops-tbody'); if(!tbody) return;
     const result=updatePrices(); if(result.spread<=0) return;
     const hora=new Date().toLocaleTimeString('pt-BR');
     const buyEx =EX.find(e=>e.id===result.minId);
     const sellEx=EX.find(e=>e.id===result.maxId);
-    // ROI da op = exatamente o lucro deste tick
     const lucroTick = getCapitalTotal() * TAXA_TICK;
     const r=document.createElement('tr');
     r.style.cssText='opacity:0;transition:opacity .4s;';
@@ -2213,6 +2267,7 @@ function init() {
     updatePrices();
     updateClientCard();
     updateSparkline();
+    initOpsHistory();
     renderRadar('radar');
     renderRadar('radar-btc');
     renderOB();
