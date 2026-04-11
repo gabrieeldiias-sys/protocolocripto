@@ -20,7 +20,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;}
 /* Mobile: permite scroll no body */
-@media(max-width:899px){html,body{overflow:auto;}}
+@media(max-width:899px){html,body{overflow-x:hidden;overflow-y:auto;height:auto;}}
 
 /* ── SCANLINE OVERLAY ── */
 body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9998;}
@@ -165,8 +165,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ══ MOBILE — sidebar vira drawer ══ */
 @media(max-width:899px){
-  .dashboard-layout{display:block;}
-  .content-area{height:100vh;display:flex;flex-direction:column;}
+  .dashboard-layout{display:block;overflow:visible;}
+  .content-area{
+    height:auto;min-height:100vh;
+    display:flex;flex-direction:column;
+    overflow:visible;
+  }
   .sidebar{
     position:fixed;top:0;left:-240px;bottom:0;width:220px;
     transition:left .3s cubic-bezier(.4,0,.2,1);
@@ -175,7 +179,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .sidebar.open{left:0;}
   .hamburger{display:flex;}
   .topbar{padding-left:56px;}
-  .main{padding:14px;}
+  .main{
+    padding:14px;
+    flex:1;
+    overflow-y:visible;
+    height:auto;
+  }
 }
 
 /* ══ CLIENT CARD — OKX/BYBIT STYLE ══ */
