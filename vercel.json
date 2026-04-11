@@ -4,6 +4,7 @@
     { "source": "/acesso-kassem", "destination": "/acesso_kassem.html" },
     { "source": "/ali-ataya", "destination": "/aliataya.html" },
     { "source": "/felipe-campos", "destination": "/felipecampos.html" },
-    { "source": "/felipe-vaz", "destination": "/felipevaz.html" }
+    { "source": "/felipe-vaz", "destination": "/felipevaz.html" },
+    { "source": "/andre-hornung", "destination": "/andrehornung.html" }
   ]
 }
