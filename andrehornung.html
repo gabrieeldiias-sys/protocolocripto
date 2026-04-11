@@ -1186,8 +1186,8 @@ window.renderOB = function() {
 let chartInstance = null;
 
 function buildChartData() {
-    // Andre Hornung: início 27/08/2024, capital base = poolBtc×preçoMédio + poolUSDT
-    // preço médio entrada: $68,036.56
+    // Andre Hornung: início 10/04/2026, capital base = poolBtc×preçoMédio + poolUSDT
+    // preço médio entrada: $73,019.31
     const PRECO_MEDIO_ENTRADA = 73019.31;
     const capitalBase = (POOL_BTC * PRECO_MEDIO_ENTRADA) + POOL_USDT; // ~$50,000
     const startDate   = new Date('2026-04-10T00:00:00');
@@ -1195,29 +1195,23 @@ function buildChartData() {
     const totalDias   = Math.floor((hoje - startDate) / 86400000);
     const TAXA_DIA    = 0.001; // 0,1%/dia linear
 
-    // Gera pontos diários: 1 ponto por semana para não sobrecarregar
-    // Com variação mínima de ±0.01% pra dar vida, nunca negativo
     const labels = [];
     const patrimonio = [];
     const lucroAcum  = [];
     const baseFlat   = [];
 
     const msDay = 86400000;
-    let lucroAcc = 0;
-    let lastVal = capitalBase;
+    let lastVal = capitalBase + PROFIT_ATUAL; // parte do lucro real já acumulado
 
     for(let d = 0; d <= totalDias; d++) {
-        // Ponto apenas a cada 7 dias + último dia
         if(d % 7 !== 0 && d !== totalDias) continue;
 
         const dataPoint = new Date(startDate.getTime() + d * msDay);
         const label = dataPoint.toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'2-digit'});
 
-        // Lucro linear do dia (0,1%/dia)
-        const lucroHoje = capitalBase * TAXA_DIA * d;
-
-        // Adiciona micro-variação: ±0 a +0.05% (nunca negativo, tendência sempre positiva)
-        const noise = lucroHoje * (Math.random() * 0.004); // ruído de 0 a 0,4% do lucro
+        // Lucro = profit já acumulado + crescimento linear dos dias
+        const lucroHoje = PROFIT_ATUAL + (capitalBase * TAXA_DIA * d);
+        const noise = lucroHoje > 0 ? lucroHoje * (Math.random() * 0.004) : 0;
         const totalVal = capitalBase + lucroHoje + noise;
 
         labels.push(label);
