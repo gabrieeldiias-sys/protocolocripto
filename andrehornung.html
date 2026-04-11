@@ -374,7 +374,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   box-shadow:0 0 10px rgba(255,213,79,0.8);
 }
 
-/* ══ RESPONSIVO CARD — mobile pequeno <480px ══ */
+/* ══ RESPONSIVO CARD — mobile ══ */
+@media(max-width:899px){
+  /* Capital layout: coluna simples no mobile */
+  .cc-cap-layout{
+    grid-template-columns:1fr;
+  }
+  .cc-cap-mid,.cc-cap-spark{display:none;}
+  .cc-cap-zone{border-right:none;padding:0;}
+}
 @media(max-width:480px){
   .cc-right{grid-template-columns:1fr 1fr;}
   .cc-pool-btc-inline{grid-column:1;grid-row:1;}
@@ -467,6 +475,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 @media(max-width:700px){ .cc-sparkline{height:36px;} }
 @media(max-width:500px){ .cc-sparkline{display:none;} }
+@media(max-width:899px){ .cc-status-row{display:none;} }
 
 /* ── STATUS ROW ── */
 .cc-status-row{
