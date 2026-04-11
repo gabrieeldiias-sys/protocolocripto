@@ -202,7 +202,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── LAYOUT GERAL: 2 colunas ── */
 .cc-body{
   display:grid;
-  grid-template-columns:minmax(180px,1fr) minmax(400px,2.8fr);
+  grid-template-columns:minmax(220px,1.2fr) minmax(400px,2.8fr);
   position:relative;z-index:1;
   min-height:210px;
 }
@@ -351,12 +351,22 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   display:flex;flex-direction:column;justify-content:center;
   background:linear-gradient(135deg,rgba(0,229,160,0.05) 0%,transparent 70%);
 }
+
 /* Capital Total — linha inteira na base do cc-right */
 .cc-r-capital{
-  padding:clamp(14px,1.8vw,20px) clamp(14px,1.8vw,22px);
-  display:flex;flex-direction:column;justify-content:center;
+  display:grid;
+  grid-template-columns:3fr 1fr;
   background:linear-gradient(90deg,rgba(232,184,75,0.08) 0%,rgba(232,184,75,0.03) 50%,transparent 100%);
   border-radius:0 0 16px 0;
+}
+.cc-r-capital-main{
+  padding:clamp(14px,1.8vw,20px) clamp(14px,1.8vw,22px);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.cc-r-capital-pm{
+  padding:clamp(14px,1.8vw,20px) clamp(12px,1.4vw,18px);
+  display:flex;flex-direction:column;justify-content:center;
+  border-left:1px solid rgba(255,255,255,0.04);
 }
 
 /* Células de resultado */
@@ -445,8 +455,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 .cc-op-stats{
   display:grid;grid-template-columns:1fr 1fr;
-  gap:14px 28px;
-  padding-left:48px;
+  gap:12px 20px;
+  padding-left:56px;
 }
 .cc-op-full{ grid-column:span 2; }
 .cc-op-stat{ text-align:left; }
@@ -456,14 +466,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   text-transform:uppercase;
 }
 .cc-op-stat-val{
-  font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.2vw,15px);font-weight:700;
-  color:var(--text);letter-spacing:.3px;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.1vw,14px);font-weight:700;
+  color:var(--text);letter-spacing:.3px;white-space:nowrap;
 }
 
 /* Barra de atividade ao vivo */
 .cc-live-bar{
   display:flex;align-items:center;gap:8px;
-  padding-left:48px;
+  padding-left:56px;
 }
 .cc-live-bar-txt{
   font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text2);
@@ -1102,7 +1112,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               </div>
               <div class="cc-op-stat">
                 <div class="cc-op-stat-label">CICLO</div>
-                <div class="cc-op-stat-val">15s · COMPOSTO</div>
+                <div class="cc-op-stat-val" style="white-space:nowrap;">15s · COMPOSTO</div>
               </div>
               <div class="cc-op-stat cc-op-full">
                 <div class="cc-op-stat-label">RENDIMENTO</div>
@@ -1159,21 +1169,33 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               <div class="cc-r-sub">SOBRE APORTE $50K</div>
             </div>
 
+
           </div>
 
-          <!-- Linha inferior: Capital Total — largura total -->
+          <!-- Linha inferior: Capital Total + Preço Médio alinhado abaixo do ROI -->
           <div class="cc-r-capital">
-            <div class="cc-r-label" style="margin-bottom:10px;">
-              <span class="cc-r-label-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold);"></span>
-              CAPITAL TOTAL
-              <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
+
+            <!-- Lado esquerdo: Capital Total (ocupa 3 das 4 colunas) -->
+            <div class="cc-r-capital-main">
+              <div class="cc-r-label" style="margin-bottom:10px;">
+                <span class="cc-r-label-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold);"></span>
+                CAPITAL TOTAL
+                <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
+              </div>
+              <div class="cc-cap-val" id="cap-total">$--</div>
+              <div class="cc-cap-sub">POOL + PROFIT · JUROS COMPOSTOS</div>
             </div>
-            <div class="cc-cap-val" id="cap-total">$--</div>
-            <div class="cc-cap-sub">POOL + PROFIT · JUROS COMPOSTOS</div>
-            <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-              <span style="font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:2px;">PREÇO MÉDIO ENTRADA</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(232,184,75,0.5);letter-spacing:.5px;">$72.898,93</span>
+
+            <!-- Lado direito: Preço Médio — alinhado sob o ROI -->
+            <div class="cc-r-capital-pm">
+              <div class="cc-r-label">
+                <span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>
+                PREÇO MÉDIO ENTRADA
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(14px,1.5vw,18px);font-weight:700;color:rgba(232,184,75,0.75);letter-spacing:-.3px;line-height:1;margin-bottom:4px;">$72.898,93</div>
+              <div class="cc-r-sub">BTC · ENTRADA FIXO</div>
             </div>
+
           </div>
 
         </div>
