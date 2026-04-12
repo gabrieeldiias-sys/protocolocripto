@@ -2262,11 +2262,23 @@ function getCheckpoint()         { return CHECKPOINT_FIXO; }
 function getTotalTicksElapsed()  { return Math.floor((Date.now()-CHECKPOINT_FIXO)/INTERVALO_MS); }
 function getTicks()              { return getTotalTicksElapsed(); }
 function getPoolBase()           { return APORTE_BASE; }
-function getProfit()             { return APORTE_BASE * TAXA_TICK * getTotalTicksElapsed(); }
+
+// Profit calculado sobre o capital real em tempo real:
+// capital = (POOL_BTC × preço_atual) + POOL_USDT
+// A cada tick, rendimento = capital_atual × TAXA_TICK
+// Como o preço do BTC varia, usamos o preço atual para calcular o capital base
+function getProfit() {
+  const ticks = getTotalTicksElapsed();
+  // Usa o preço atual do BTC se disponível, senão usa o preço médio de entrada
+  const precoBTC = btcBase || PRECO_MEDIO;
+  const capitalBase = (POOL_BTC * precoBTC) + POOL_USDT;
+  return capitalBase * TAXA_TICK * ticks;
+}
+
 function setProfit(){} function setTicks(){}
 function applyMissedYield(){}
-function getPoolTotal()          { if(!btcBase) return null; return (POOL_BTC*btcBase)+POOL_USDT; }
-function getCapitalTotal()       { const p=getPoolTotal(); if(p===null) return null; return p+getProfit(); }
+function getPoolTotal()    { if(!btcBase) return null; return (POOL_BTC*btcBase)+POOL_USDT; }
+function getCapitalTotal() { const p=getPoolTotal(); if(p===null) return null; return p+getProfit(); }
 
 // ── LOOP DE ATUALIZAÇÃO ────────────────────────────────────────
 function startYieldSimulation() {
