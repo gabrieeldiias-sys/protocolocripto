@@ -1386,7 +1386,7 @@ body.lite-mode .lite-view{ display:block !important; }
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
           <div style="text-align:left;">
             <div class="lite-greeting">● SISTEMA ATIVO</div>
-            <div class="lite-name" style="text-align:left;">EDUARDO SANTI</div>
+            <div class="lite-name" style="text-align:left;" id="client-lite-name">EDUARDO SANTI</div>
           </div>
           <!-- Tags status -->
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;">
@@ -1507,7 +1507,7 @@ body.lite-mode .lite-view{ display:block !important; }
                 </div>
               </div>
             </div>
-            <div class="cc-name">EDUARDO SANTI</div>
+            <div class="cc-name" id="client-cc-name">EDUARDO SANTI</div>
             <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
           </div>
           <div class="cc-id-center">
@@ -1805,7 +1805,7 @@ body.lite-mode .lite-view{ display:block !important; }
         <div class="ch-title-block">
           <div class="ch-eyebrow">CRESCIMENTO DE BANCA · TEMPO REAL</div>
           <div class="ch-title">EVOLUÇÃO DO PATRIMÔNIO</div>
-          <div class="ch-sub">EDUARDO SANTI · BTC/USDT ARB · 0.00001736%/TICK</div>
+          <div class="ch-sub" id="client-ch-sub">EDUARDO SANTI · BTC/USDT ARB · 0.00001736%/TICK</div>
         </div>
         <div class="ch-kpis">
           <div class="ch-kpi">
@@ -2116,8 +2116,10 @@ function carregarCliente(dados) {
   if(window._ws) { try{ window._ws.close(); }catch(e){} window._ws = null; }
   setTimeout(connectWS, 500);
 
-  // Nome
+  // Nome — todos os elementos com nome do cliente
   document.querySelectorAll('.cc-name, .lite-name').forEach(el => el.textContent = dados.nome);
+  const chSub = document.getElementById('client-ch-sub');
+  if(chSub) chSub.textContent = dados.nome + ' · BTC/USDT ARB · 0.00001736%/TICK';
 
   // Pool BTC — valor numérico
   const poolBtcNum = document.getElementById('pool-btc-num');
