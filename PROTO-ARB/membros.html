@@ -2559,11 +2559,20 @@ function buildOpRow(tickIndex, basePrice) {
 }
 
 // ── Popula tabela com as últimas 20 ops históricas ao abrir ──
-function initOpsHistory() {
+async function initOpsHistory() {
     const tbody = $('ops-tbody'); if(!tbody) return;
+
+    // Busca preço real do BTC antes de renderizar
+    let base = btcBase || PRECO_MEDIO;
+    try {
+        const res  = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        const fetched = parseFloat(data.price);
+        if(fetched > 0) { base = fetched; if(!btcBase) btcBase = fetched; }
+    } catch(e) {}
+
     const totalTicks = getTotalTicksElapsed();
-    const showCount = Math.min(20, totalTicks);
-    const base = btcBase || PRECO_MEDIO;
+    const showCount  = Math.min(20, totalTicks);
     let html = '';
     for(let i = showCount; i >= 1; i--) {
         const tickIdx = totalTicks - i;
