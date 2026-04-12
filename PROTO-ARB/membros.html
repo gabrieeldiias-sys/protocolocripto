@@ -2160,28 +2160,65 @@ function carregarCliente(dados) {
 }
 
 // ══ LOGIN ══════════════════════════════════════════════════════
+function mostrarDashboard(dados) {
+  CLIENTE = dados;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display    = 'block';
+
+  // Atualiza todas as referências de nome
+  const nome = dados.nome;
+  ['client-lite-name','client-cc-name'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = nome;
+  });
+  const chSub = document.getElementById('client-ch-sub');
+  if(chSub) chSub.textContent = nome + ' · BTC/USDT ARB · 0.00001736%/TICK';
+  document.querySelectorAll('.cc-name, .lite-name').forEach(el => el.textContent = nome);
+
+  // Carrega dados do cliente
+  POOL_BTC        = dados.pool_btc;
+  POOL_USDT       = dados.pool_usdt;
+  PRECO_MEDIO     = dados.preco_medio;
+  APORTE_BASE     = dados.aporte_base;
+  META_PROFIT     = dados.meta;
+  CHECKPOINT_FIXO = new Date(dados.checkpoint).getTime();
+  btcBase         = null;
+  btcPrev         = null;
+
+  // Pool BTC e USDT no HTML
+  const poolBtcNum = document.getElementById('pool-btc-num');
+  if(poolBtcNum) poolBtcNum.textContent = dados.pool_btc.toFixed(5);
+  const poolUsdtNum = document.getElementById('pool-usdt-num');
+  if(poolUsdtNum) poolUsdtNum.textContent = '$' + fmt(dados.pool_usdt, 0);
+
+  // Sobre aporte, preço médio, meta
+  document.querySelectorAll('.sobre-aporte').forEach(el => el.textContent = 'SOBRE APORTE ' + dados.sobre_aporte);
+  document.querySelectorAll('.preco-medio-val').forEach(el => el.textContent = '$' + dados.preco_medio.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+  document.querySelectorAll('.meta-val').forEach(el => el.textContent = '$' + fmt(dados.meta,0) + ' USDT');
+  document.querySelectorAll('.meta-target').forEach(el => el.textContent = '$' + fmt(dados.meta,2));
+  set('prog-meta-label', '◆ META · $' + fmt(dados.meta,0) + ' USDT');
+
+  // Link indicação
+  const refUrl = 'protocolocripto.com/membros?ref=' + dados.ref_code;
+  document.querySelectorAll('.ind-ref-url').forEach(el => el.textContent = refUrl);
+  const indLinkEl = document.getElementById('ind-link-url');
+  if(indLinkEl) indLinkEl.textContent = refUrl;
+
+  // Reconectar WebSocket
+  if(window._ws) { try{ window._ws.close(); }catch(e){} window._ws = null; }
+
+  // Inicia tudo
+  init();
+}
+
 function doLogin() {
   const u   = document.getElementById('l-user').value.trim().toLowerCase();
   const p   = document.getElementById('l-pass').value.trim().toLowerCase();
   const err = document.getElementById('l-err');
-  
   const cliente = CLIENTES[u];
   if(cliente && p === cliente.senha) {
-    CLIENTE = {...cliente, user: u};
-    sessionStorage.setItem('proto_auth', JSON.stringify({user: u, nome: cliente.nome}));
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display    = 'block';
-    carregarCliente(CLIENTE);
-    // Força atualização do nome após render do DOM
-    setTimeout(() => {
-      const liteName = document.getElementById('client-lite-name');
-      const ccName   = document.getElementById('client-cc-name');
-      const chSub    = document.getElementById('client-ch-sub');
-      if(liteName) liteName.textContent = CLIENTE.nome;
-      if(ccName)   ccName.textContent   = CLIENTE.nome;
-      if(chSub)    chSub.textContent    = CLIENTE.nome + ' · BTC/USDT ARB · 0.00001736%/TICK';
-    }, 50);
-    init();
+    sessionStorage.setItem('proto_auth', JSON.stringify({user: u}));
+    mostrarDashboard({...cliente, user: u});
   } else {
     err.textContent = 'Usuário ou senha incorretos.';
     setTimeout(() => err.textContent = '', 3000);
@@ -2189,26 +2226,16 @@ function doLogin() {
 }
 document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
 
-// Auto-login se sessão ativa (F5 dentro do dashboard)
+// Auto-login ao recarregar página (F5)
 const savedAuth = sessionStorage.getItem('proto_auth');
 if(savedAuth) {
   try {
-    const auth = JSON.parse(savedAuth);
+    const auth    = JSON.parse(savedAuth);
     const cliente = CLIENTES[auth.user];
     if(cliente) {
-      CLIENTE = {...cliente, user: auth.user};
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display    = 'block';
-      carregarCliente(CLIENTE);
-      setTimeout(() => {
-        const liteName = document.getElementById('client-lite-name');
-        const ccName   = document.getElementById('client-cc-name');
-        const chSub    = document.getElementById('client-ch-sub');
-        if(liteName) liteName.textContent = CLIENTE.nome;
-        if(ccName)   ccName.textContent   = CLIENTE.nome;
-        if(chSub)    chSub.textContent    = CLIENTE.nome + ' · BTC/USDT ARB · 0.00001736%/TICK';
-      }, 50);
-      init();
+      mostrarDashboard({...cliente, user: auth.user});
+    } else {
+      sessionStorage.removeItem('proto_auth');
     }
   } catch(e) {
     sessionStorage.removeItem('proto_auth');
@@ -3027,10 +3054,10 @@ function init() {
   renderOB();
   connectWS();
 
-  // Só registra os loops uma vez para não duplicar ao fazer login/logout
   if(!_initDone) {
     _initDone = true;
     setInterval(()=>{
+      if(!CLIENTE) return;
       updatePrices();
       renderRadar('radar');
       renderRadar('radar-btc');
