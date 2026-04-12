@@ -5,6 +5,7 @@
     { "source": "/ali-ataya", "destination": "/aliataya.html" },
     { "source": "/felipe-campos", "destination": "/felipecampos.html" },
     { "source": "/felipe-vaz", "destination": "/felipevaz.html" },
-    { "source": "/andre-hornung", "destination": "/andrehornung.html" }
+    { "source": "/andre-hornung", "destination": "/andrehornung.html" },
+    { "source": "/eduardo-santi", "destination": "/eduardosanti.html" }
   ]
 }
