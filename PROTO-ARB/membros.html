@@ -2226,22 +2226,6 @@ function doLogin() {
 }
 document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
 
-// Auto-login ao recarregar página (F5)
-const savedAuth = sessionStorage.getItem('proto_auth');
-if(savedAuth) {
-  try {
-    const auth    = JSON.parse(savedAuth);
-    const cliente = CLIENTES[auth.user];
-    if(cliente) {
-      mostrarDashboard({...cliente, user: auth.user});
-    } else {
-      sessionStorage.removeItem('proto_auth');
-    }
-  } catch(e) {
-    sessionStorage.removeItem('proto_auth');
-  }
-}
-
 function doLogout() {
   sessionStorage.removeItem('proto_auth');
   document.getElementById('dashboard').style.display = 'none';
@@ -3001,13 +2985,6 @@ function confirmarSaque() {
     }, 300);
 }
 
-function doLogout(){
-    sessionStorage.removeItem('andre_auth');
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('l-user').value = '';
-    document.getElementById('l-pass').value = '';
-}
 
 function updateClock(){
     set('clock', new Date().toLocaleTimeString('pt-BR'));
@@ -3072,6 +3049,22 @@ function init() {
   }
 
   setMode('pro');
+}
+
+// Auto-login ao recarregar página (F5) — sempre após init estar declarado
+const savedAuth = sessionStorage.getItem('proto_auth');
+if(savedAuth) {
+  try {
+    const auth    = JSON.parse(savedAuth);
+    const cliente = CLIENTES[auth.user];
+    if(cliente) {
+      mostrarDashboard({...cliente, user: auth.user});
+    } else {
+      sessionStorage.removeItem('proto_auth');
+    }
+  } catch(e) {
+    sessionStorage.removeItem('proto_auth');
+  }
 }
 
 </script>
