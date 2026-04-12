@@ -1535,13 +1535,13 @@ body.lite-mode .lite-view{ display:block !important; }
 
           <div class="cc-pool-btc-inline">
             <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold);"></span>POOL BTC</div>
-            <div class="cc-pool-num" style="color:var(--gold);">0.00719 <span style="font-size:.55em;font-weight:400;color:rgba(232,184,75,0.4);letter-spacing:1px;">BTC</span></div>
+            <div class="cc-pool-num" style="color:var(--gold);"><span id="pool-btc-num">0.00719</span> <span style="font-size:.55em;font-weight:400;color:rgba(232,184,75,0.4);letter-spacing:1px;">BTC</span></div>
             <div class="cc-pool-usd">≈ <span id="pool-btc-usd" style="color:rgba(232,184,75,0.7);">$--</span></div>
           </div>
 
           <div class="cc-pool-usdt-inline">
             <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--blue);box-shadow:0 0 5px var(--blue);"></span>POOL USDT</div>
-            <div class="cc-pool-num" style="color:var(--blue);">$600 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
+            <div class="cc-pool-num" style="color:var(--blue);"><span id="pool-usdt-num">$600</span> <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
             <div class="cc-pool-usd" style="color:var(--text2);visibility:hidden;">≈ $--</div>
           </div>
 
@@ -2103,32 +2103,48 @@ const TAXA_TICK   = 0.0000001736;
 const INTERVALO_MS = 15000;
 
 function carregarCliente(dados) {
-  POOL_BTC       = dados.pool_btc;
-  POOL_USDT      = dados.pool_usdt;
-  PRECO_MEDIO    = dados.preco_medio;
-  APORTE_BASE    = dados.aporte_base;
-  META_PROFIT    = dados.meta;
+  POOL_BTC        = dados.pool_btc;
+  POOL_USDT       = dados.pool_usdt;
+  PRECO_MEDIO     = dados.preco_medio;
+  APORTE_BASE     = dados.aporte_base;
+  META_PROFIT     = dados.meta;
   CHECKPOINT_FIXO = new Date(dados.checkpoint).getTime();
-  btcBase        = null;
-  btcPrev        = null;
+  btcBase         = null;
+  btcPrev         = null;
 
-  // Atualizar elementos visuais com dados do cliente
-  document.querySelectorAll('.cc-name').forEach(el => el.textContent = dados.nome);
-  document.querySelectorAll('.lite-name').forEach(el => el.textContent = dados.nome);
-  // Pool BTC display
-  const poolBtcEl = document.querySelector('.cc-pool-num[data-btc]');
+  // Nome
+  document.querySelectorAll('.cc-name, .lite-name').forEach(el => el.textContent = dados.nome);
+
+  // Pool BTC — valor numérico
+  const poolBtcNum = document.getElementById('pool-btc-num');
+  if(poolBtcNum) poolBtcNum.textContent = dados.pool_btc.toFixed(5);
+
+  // Pool USDT — valor numérico
+  const poolUsdtNum = document.getElementById('pool-usdt-num');
+  if(poolUsdtNum) poolUsdtNum.textContent = '$' + fmt(dados.pool_usdt, 0);
+
   // Sobre aporte
   document.querySelectorAll('.sobre-aporte').forEach(el => el.textContent = 'SOBRE APORTE ' + dados.sobre_aporte);
+
   // Preço médio
   document.querySelectorAll('.preco-medio-val').forEach(el => {
     el.textContent = '$' + dados.preco_medio.toLocaleString('pt-BR', {minimumFractionDigits:2});
   });
+
   // Meta
   document.querySelectorAll('.meta-val').forEach(el => el.textContent = '$' + fmt(dados.meta, 0) + ' USDT');
-  document.querySelectorAll('.meta-target').forEach(el => el.textContent = '$' + fmt(dados.meta, 2) + ',00');
+  document.querySelectorAll('.meta-target').forEach(el => el.textContent = '$' + fmt(dados.meta, 2));
+  set('prog-meta-label', '◆ META · $' + fmt(dados.meta, 0) + ' USDT');
+
   // Link de indicação
-  const refUrl = 'protocolocripto.com/dashboard?ref=' + dados.ref_code;
+  const refUrl = 'protocolocripto.com/membros?ref=' + dados.ref_code;
   document.querySelectorAll('.ind-ref-url').forEach(el => el.textContent = refUrl);
+  const indLinkEl = document.getElementById('ind-link-url');
+  if(indLinkEl) indLinkEl.textContent = refUrl;
+
+  // Lite pool BTC
+  const liteBtcPool = document.querySelector('.lite-stat .lite-stat-val[data-btc]');
+  if(liteBtcPool) liteBtcPool.textContent = dados.pool_btc.toFixed(5);
 }
 
 // ══ LOGIN ══════════════════════════════════════════════════════
