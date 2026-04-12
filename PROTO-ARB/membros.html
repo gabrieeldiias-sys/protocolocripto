@@ -2183,6 +2183,7 @@ if(savedAuth) {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('dashboard').style.display    = 'block';
       carregarCliente(CLIENTE);
+      init();
     }
   } catch(e) {}
 }
@@ -2987,43 +2988,7 @@ function closeSidebar(){
 }
 
 // ── INIT ───────────────────────────────────────────────────────
-function init() {
-    // 1. Recupera rendimento gerado enquanto estava offline (juros compostos exatos)
-    applyMissedYield();
-
-    // 2. Inicializa preços e UI
-    updatePrices();
-    updateClientCard();
-    updateSparkline();
-    initOpsHistory();
-    renderRadar('radar');
-    renderRadar('radar-btc');
-    renderOB();
-    connectWS();
-
-    // 3. Loop de atualização de radar e orderbook (4s)
-    setInterval(()=>{
-        updatePrices();
-        renderRadar('radar');
-        renderRadar('radar-btc');
-        renderOB();
-        updateClientCard();
-        // Latência simulada realista
-        const lat = (Math.random()*18+4).toFixed(0);
-        set('st-latency', lat + 'ms');
-        updateLite();
-    }, 4000);
-
-    setInterval(updateClock, 1000);
-
-    // 4. Loop principal de rendimento: 1 tick a cada 15s
-    //    renderOps() é chamado dentro do tick para sincronizar
-    startYieldSimulation();
-}
-
-
-
-// ── INIT ───────────────────────────────────────────────────────
+let _initDone = false;
 function init() {
   applyMissedYield();
   updatePrices();
@@ -3034,18 +2999,24 @@ function init() {
   renderRadar('radar-btc');
   renderOB();
   connectWS();
-  setInterval(()=>{
-    updatePrices();
-    renderRadar('radar');
-    renderRadar('radar-btc');
-    renderOB();
-    updateClientCard();
-    const lat=(Math.random()*18+4).toFixed(0);
-    set('st-latency',lat+'ms');
-    updateLite();
-  },4000);
-  setInterval(updateClock,1000);
-  startYieldSimulation();
+
+  // Só registra os loops uma vez para não duplicar ao fazer login/logout
+  if(!_initDone) {
+    _initDone = true;
+    setInterval(()=>{
+      updatePrices();
+      renderRadar('radar');
+      renderRadar('radar-btc');
+      renderOB();
+      updateClientCard();
+      const lat=(Math.random()*18+4).toFixed(0);
+      set('st-latency',lat+'ms');
+      updateLite();
+    }, 4000);
+    setInterval(updateClock, 1000);
+    startYieldSimulation();
+  }
+
   setMode('pro');
 }
 
