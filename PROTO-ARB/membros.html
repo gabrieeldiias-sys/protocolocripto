@@ -2116,10 +2116,16 @@ function carregarCliente(dados) {
   if(window._ws) { try{ window._ws.close(); }catch(e){} window._ws = null; }
   setTimeout(connectWS, 500);
 
-  // Nome — todos os elementos com nome do cliente
-  document.querySelectorAll('.cc-name, .lite-name').forEach(el => el.textContent = dados.nome);
+  // Nome — atualiza todos os elementos com nome do cliente
+  const nomeEls = document.querySelectorAll('.cc-name, .lite-name, #client-lite-name, #client-cc-name');
+  nomeEls.forEach(el => el.textContent = dados.nome);
   const chSub = document.getElementById('client-ch-sub');
   if(chSub) chSub.textContent = dados.nome + ' · BTC/USDT ARB · 0.00001736%/TICK';
+  // Força atualização direta pelos IDs também
+  const liteName = document.getElementById('client-lite-name');
+  const ccName   = document.getElementById('client-cc-name');
+  if(liteName) liteName.textContent = dados.nome;
+  if(ccName)   ccName.textContent   = dados.nome;
 
   // Pool BTC — valor numérico
   const poolBtcNum = document.getElementById('pool-btc-num');
@@ -2174,21 +2180,8 @@ function doLogin() {
 }
 document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
 
-// Auto-login se sessão ativa
-const savedAuth = sessionStorage.getItem('proto_auth');
-if(savedAuth) {
-  try {
-    const auth = JSON.parse(savedAuth);
-    const cliente = CLIENTES[auth.user];
-    if(cliente) {
-      CLIENTE = {...cliente, user: auth.user};
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display    = 'block';
-      carregarCliente(CLIENTE);
-      init();
-    }
-  } catch(e) {}
-}
+// Limpa sessão ao carregar — sempre exige login
+sessionStorage.removeItem('proto_auth');
 
 function doLogout() {
   sessionStorage.removeItem('proto_auth');
@@ -3022,12 +3015,6 @@ function init() {
   setMode('pro');
 }
 
-if(savedAuth) {
-  try {
-    const auth = JSON.parse(savedAuth);
-    if(CLIENTES[auth.user]) init();
-  } catch(e) {}
-}
 </script>
 </body>
 </html>
