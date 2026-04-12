@@ -2111,6 +2111,10 @@ function carregarCliente(dados) {
   CHECKPOINT_FIXO = new Date(dados.checkpoint).getTime();
   btcBase         = null;
   btcPrev         = null;
+  prices          = {};
+  // Reconectar WebSocket para novo cliente
+  if(window._ws) { try{ window._ws.close(); }catch(e){} window._ws = null; }
+  setTimeout(connectWS, 500);
 
   // Nome
   document.querySelectorAll('.cc-name, .lite-name').forEach(el => el.textContent = dados.nome);
@@ -2294,6 +2298,7 @@ function updatePrices() {
 function connectWS() {
     try {
         const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+    window._ws = ws;
         ws.onopen = () => set('ws-status', 'CONECTADO ✓');
         ws.onmessage_first = true;
         ws.onmessage = e => {
