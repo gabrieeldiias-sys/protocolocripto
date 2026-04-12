@@ -2079,7 +2079,7 @@ const CLIENTES = {
     sobre_aporte:'$6.499',
   },
   'kelvinbueno': {
-    senha:       'kelvin2025',
+    senha:       'kelvin123',
     nome:        'KELVIN BUENO',
     pool_btc:    0.06954,
     pool_usdt:   5000.00,
@@ -2156,7 +2156,7 @@ function carregarCliente(dados) {
 // ══ LOGIN ══════════════════════════════════════════════════════
 function doLogin() {
   const u   = document.getElementById('l-user').value.trim().toLowerCase();
-  const p   = document.getElementById('l-pass').value.trim();
+  const p   = document.getElementById('l-pass').value.trim().toLowerCase();
   const err = document.getElementById('l-err');
   
   const cliente = CLIENTES[u];
