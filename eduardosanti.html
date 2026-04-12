@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eduardo Santi · BTC Arbitrage</title>
+<title>Eduardo Santi · Protocolo Cripto</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -64,7 +64,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   background:linear-gradient(90deg,transparent,rgba(232,184,75,0.5),transparent);
 }
 .sid-brand{
-  padding:22px 20px 18px;
+  padding:28px 20px 24px;
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .sid-brand-top{
@@ -72,8 +72,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   letter-spacing:3px;margin-bottom:8px;font-weight:700;
 }
 .sid-brand-name{
-  font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;
-  color:#fff;letter-spacing:.5px;line-height:1.2;
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;
+  color:#fff;letter-spacing:1px;line-height:1.2;
 }
 .sid-nav{flex:1;padding:8px 0;overflow-y:auto;}
 .nav-item{
@@ -297,14 +297,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 .cc-r-capital{
   grid-column:1 / span 3;grid-row:2;
-  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
-  display:flex;flex-direction:column;justify-content:center;
+  padding:14px clamp(12px,1.6vw,20px);
+  display:flex;flex-direction:column;justify-content:flex-start;
   background:linear-gradient(90deg,rgba(232,184,75,0.08),rgba(232,184,75,0.02) 60%,transparent);
 }
 .cc-r-pm{
   grid-column:4;grid-row:2;
-  padding:clamp(12px,1.5vw,18px) clamp(12px,1.4vw,16px);
-  display:flex;flex-direction:column;justify-content:center;
+  padding:14px clamp(12px,1.4vw,16px);
+  display:flex;flex-direction:column;justify-content:flex-start;
   border-left:1px solid rgba(255,255,255,0.04);
   border-radius:0 0 16px 0;
 }
@@ -447,7 +447,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   padding:0 20px;
   border-right:1px solid rgba(255,255,255,0.04);
   height:100%;
-  display:flex;flex-direction:column;justify-content:center;
+  display:flex;flex-direction:column;justify-content:flex-start;padding-top:14px;
 }
 .cc-cap-zone:first-child{ padding-left:0; }
 .cc-cap-zone:last-child{ border-right:none; }
@@ -510,6 +510,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   font-size:8px;font-weight:700;letter-spacing:.5px;
 }
 
+/* ── LOADER SVG ── */
+#pool-btc-usd svg, #cap-total svg, #top-price svg{
+  vertical-align:middle;
+  display:inline-block;
+}
 /* ── SECTION HEADER ── */
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .sec-title{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
@@ -1002,13 +1007,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 </style>
 </head>
+<body>
 <!-- LOGIN -->
 <div id="login-screen">
     <canvas id="login-canvas"></canvas>
     <div class="login-wrap">
         <div class="login-top">
             <div class="login-logo-txt">[ PROTOCOLO CRIPTO ]</div>
-            <div class="login-brand">BTC ARBITRAGE</div>
+            <div class="login-brand">PROTOCOLO CRIPTO</div>
             <div class="login-sub">&gt;_ ACESSO RESTRITO &middot; CLIENTES</div>
         </div>
         <div class="login-box">
@@ -1036,9 +1042,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <!-- SIDEBAR — fixa no desktop, drawer no mobile -->
 <nav class="sidebar" id="sidebar">
-  <div class="sid-brand">
-    <div class="sid-brand-top">PROTOCOLO CRIPTO</div>
-    <div class="sid-brand-name">BTC<br>ARBITRAGE</div>
+  <div class="sid-brand" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div class="sid-brand-name"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(232,184,75,0.45);margin-top:4px;letter-spacing:4px;">ARBITRAGE BTC</div>
   </div>
   <div class="sid-nav">
     <div class="nav-item active" onclick="showPage('overview',this)">
@@ -1081,7 +1087,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <span class="btc-live-label">BTC/USDT</span>
       <span class="btc-live-price" id="top-price">$--</span>
     </div>
-    <div class="sys-badge"><span class="pulse"></span>BTC ARBITRAGE</div>
+    <div class="sys-badge"><span class="pulse"></span>PROTOCOLO CRIPTO</div>
   </div>
 </header>
 
@@ -1101,10 +1107,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="cc-identity">
           <!-- Topbar: SYNC + Nome + Chip -->
           <div class="cc-id-topbar">
-            <div class="cc-sync-badge"><span class="pulse"></span>SYNC</div>
-            <div class="cc-name">EDUARDO SANTI</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;">
-              <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+              <div class="cc-sync-badge"><span class="pulse"></span>SYNC</div>
               <div class="cc-status-row">
                 <div class="cc-status-pill">
                   <span class="cc-status-dot"></span>
@@ -1121,6 +1125,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
                 </div>
               </div>
             </div>
+            <div class="cc-name">EDUARDO SANTI</div>
+            <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
           </div>
           <div class="cc-id-center">
             <div class="cc-op-stats">
@@ -1153,7 +1159,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
           <div class="cc-pool-usdt-inline">
             <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--blue);box-shadow:0 0 5px var(--blue);"></span>POOL USDT</div>
-            <div class="cc-pool-num" style="color:var(--blue);">$535 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
+            <div class="cc-pool-num" style="color:var(--blue);">$600 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
             <div class="cc-pool-usd" style="color:var(--text2);visibility:hidden;">≈ $--</div>
           </div>
 
@@ -1164,7 +1170,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           </div>
 
           <div class="cc-r-roi">
-            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);"></span>ROI <span style="color:rgba(0,229,160,0.35);margin-left:3px;font-size:6px;letter-spacing:1px;">↑ COMPOSTO</span></div>
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);"></span>ROI</div>
             <div class="cc-r-val" style="color:var(--green);" id="profit-roi">0.000000%</div>
             <div class="cc-r-sub">SOBRE APORTE $1.026</div>
           </div>
@@ -1181,7 +1187,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
                   <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
                 </div>
                 <div class="cc-cap-val" id="cap-total">$--</div>
-                <div class="cc-cap-sub">POOL + PROFIT · JUROS COMPOSTOS · VENC. 08/05/2027</div>
+                <div class="cc-cap-sub">POOL + PROFIT</div>
               </div>
 
               <!-- Zona 2: Balanceamento -->
@@ -1221,7 +1227,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           </div>
 
           <div class="cc-r-pm">
-            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>PREÇO MÉDIO ENTRADA</div>
+            <div class="cc-r-label" style="margin-bottom:10px;"><span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>PREÇO MÉDIO ENTRADA</div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(13px,1.4vw,17px);font-weight:700;color:rgba(232,184,75,0.75);letter-spacing:-.3px;line-height:1;margin-bottom:4px;">$104.064,56</div>
             <div class="cc-r-sub">BTC · FIXO</div>
           </div>
@@ -1359,6 +1365,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="sec-title">Estimativa de Performance</div>
       <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">VALORES HISTÓRICOS · FAIXA DE VARIAÇÃO</div>
     </div>
+    <!-- Vencimento do contrato -->
+    <div style="background:rgba(232,184,75,0.04);border:1px solid rgba(232,184,75,0.15);border-radius:14px;padding:18px 24px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;">VENCIMENTO DO CONTRATO</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">08 / 05 / 2027</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;">DIAS RESTANTES</div>
+        <div id="dias-venc" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">--</div>
+      </div>
+    </div>
+
     <div class="perf-grid">
       <div class="perf-card" style="--c:var(--gold)">
         <div class="perf-label">Lucro Médio Diário</div>
@@ -1403,7 +1421,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="ch-title-block">
           <div class="ch-eyebrow">CRESCIMENTO DE BANCA · TEMPO REAL</div>
           <div class="ch-title">EVOLUÇÃO DO PATRIMÔNIO</div>
-          <div class="ch-sub">EDUARDO SANTI · BTC/USDT ARB · JUROS COMPOSTOS · 0.00001736%/TICK</div>
+          <div class="ch-sub">EDUARDO SANTI · BTC/USDT ARB · 0.00001736%/TICK</div>
         </div>
         <div class="ch-kpis">
           <div class="ch-kpi">
@@ -1534,7 +1552,7 @@ if(sessionStorage.getItem('andre_auth') === '1'){
 //  POOL_USDT = 3250.00 USDT
 //  PREÇO MÉDIO ENTRADA = $72.898,93
 //
-//  JUROS COMPOSTOS — a cada 15s (1 tick):
+//  RENDIMENTO — a cada 15s (1 tick):
 //  capitalTotal(t) = poolTotal(t) + profitAcumulado(t)
 //  lucroTick       = capitalTotal(t) × TAXA_TICK
 //  profitAcumulado = profitAcumulado + lucroTick
@@ -1545,7 +1563,7 @@ if(sessionStorage.getItem('andre_auth') === '1'){
 
 // ── PARÂMETROS FIXOS ───────────────────────────────────────────
 const POOL_BTC       = 0.00719;   // $748,22 ÷ $104.064,56 = 0.00719 BTC
-const POOL_USDT      = 535.00;    // pool USDT do cliente
+const POOL_USDT      = 600.00;    // pool USDT: $535 + $65 lucro reinvestido
 const PRECO_MEDIO    = 104064.56; // preço médio real de entrada
 const TAXA_TICK      = 0.0000001736;   // 0.00001736% por tick
 const INTERVALO_MS   = 15000;          // 15 segundos
@@ -1555,12 +1573,12 @@ const META_PROFIT    = 100.00;          // Meta fixa $100 USDT
 
 // ── BASE DO GRÁFICO: capital no preço médio de entrada (fixo) ──
 function getPoolBase() {
-    return 1026.00; // aporte base real para cálculo dos juros compostos
+    return 1026.00; // aporte base original (reaporte veio do lucro)
 }
 
 // ── ESTADO ─────────────────────────────────────────────────────
-let btcBase = 73000;  // preço live atual do mercado
-let btcPrev = 73000;
+let btcBase = null;
+let btcPrev = null;
 const prices = {};
 
 // ── HELPERS DOM ────────────────────────────────────────────────
@@ -1579,7 +1597,7 @@ function lsSet(k, v) { try{ localStorage.setItem(k, v); }catch(e){} }
 //  Profit = sempre recalculado a partir dessa data
 //  Se limpar cache: zero bug, zero perda — recalcula automaticamente
 // ══════════════════════════════════════════════════════════════
-const CHECKPOINT_FIXO = new Date('2026-02-08T06:00:00-03:00').getTime();
+const CHECKPOINT_FIXO = new Date('2026-04-11T22:00:00-03:00').getTime();
 
 function getCheckpoint() {
     return CHECKPOINT_FIXO;
@@ -1592,10 +1610,9 @@ function getTotalTicksElapsed() {
 }
 
 function getProfit() {
-    // Juros compostos exatos desde o início: P = base × ((1+r)^n - 1)
-    const poolBase = getPoolBase();
+    // Rendimento simples: aporte fixo × taxa × ticks decorridos
     const n = getTotalTicksElapsed();
-    return poolBase * (Math.pow(1 + TAXA_TICK, n) - 1);
+    return 1026.00 * TAXA_TICK * n;
 }
 
 function getTicks() {
@@ -1608,13 +1625,14 @@ function setTicks(val)   { /* determinístico — não salva */ }
 
 // ── CÁLCULOS PRINCIPAIS ────────────────────────────────────────
 function getPoolTotal() {
-    // Pool total = BTC ao preço atual + USDT
+    if(!btcBase) return null;
     return (POOL_BTC * btcBase) + POOL_USDT;
 }
 
 function getCapitalTotal() {
-    // Capital total = Pool Total + Profit acumulado (base dos juros compostos)
-    return getPoolTotal() + getProfit();
+    const p = getPoolTotal();
+    if(p === null) return null;
+    return p + getProfit();
 }
 
 // ── MISSED YIELD — não necessário (profit é determinístico) ────
@@ -1635,11 +1653,21 @@ function startYieldSimulation() {
 
 // ── ATUALIZA O CARD ────────────────────────────────────────────
 function updateClientCard() {
+    if(!btcBase) {
+        const loader = `<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="7" fill="none" stroke="rgba(232,184,75,0.2)" stroke-width="2"/><circle cx="9" cy="9" r="7" fill="none" stroke="#E8B84B" stroke-width="2" stroke-dasharray="12 32" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 9 9" to="360 9 9" dur="0.9s" repeatCount="indefinite"/></circle></svg>`;
+        const el = document.getElementById('pool-btc-usd');
+        if(el && !el.querySelector('svg')) el.innerHTML = loader;
+        const el2 = document.getElementById('cap-total');
+        if(el2 && !el2.querySelector('svg')) el2.innerHTML = loader;
+        const el3 = document.getElementById('top-price');
+        if(el3 && !el3.querySelector('svg')) el3.innerHTML = loader;
+        return;
+    }
     const poolBtcUSD  = POOL_BTC * btcBase;
     const poolTotal   = getPoolTotal();
     const profit      = getProfit();
     const capTotal    = getCapitalTotal();
-    const aporte      = 1026.00; // aporte base real informado pelo gestor
+    const aporte      = 1026.00; // aporte base original (reaporte veio do lucro)
     const roi         = aporte > 0 ? (profit / aporte) * 100 : 0;
     const metaPct     = Math.min(100, (profit / META_PROFIT) * 100);
 
@@ -1687,6 +1715,7 @@ const EX = [
 
 // ── PREÇOS E WEBSOCKET ─────────────────────────────────────────
 function updatePrices() {
+    if(!btcBase) return { min:0, max:0, minId:'', maxId:'', spread:0 };
     let mn = Infinity, mx = -Infinity, mnId = '', mxId = '';
     EX.forEach(ex => {
         prices[ex.id] = btcBase + (Math.random() * 60 - 30);
@@ -1700,6 +1729,7 @@ function connectWS() {
     try {
         const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
         ws.onopen = () => set('ws-status', 'CONECTADO ✓');
+        ws.onmessage_first = true;
         ws.onmessage = e => {
             const data = JSON.parse(e.data);
             btcPrev = btcBase;
@@ -1864,7 +1894,7 @@ function renderOps() {
     const hora=new Date().toLocaleTimeString('pt-BR');
     const buyEx =EX.find(e=>e.id===result.minId);
     const sellEx=EX.find(e=>e.id===result.maxId);
-    const lucroTick = getCapitalTotal() * TAXA_TICK;
+    const lucroTick = 1026.0 * TAXA_TICK; // rendimento simples sobre aporte fixo
     const r=document.createElement('tr');
     r.style.cssText='opacity:0;transition:opacity .4s;';
     r.innerHTML=`
@@ -2005,8 +2035,8 @@ function initChartData() {
     let acc = 0;
     for(let i = step; i <= totalTicks; i += step) {
         // Juros compostos: capital(i) = poolBase × (1+r)^i
-        const capitalI = poolBase * Math.pow(1 + TAXA_TICK, i);
-        acc = capitalI - poolBase;
+        acc = 1026.0 * TAXA_TICK * i;
+        const capitalI = poolBase + acc;
         const ts = new Date(cp + i * INTERVALO_MS);
         chartLabels.push(ts.toLocaleTimeString('pt-BR'));
         chartProfit.push(parseFloat(acc.toFixed(6)));
@@ -2233,7 +2263,13 @@ function renderExchanges() {
 }
 
 // ── CLOCK ──────────────────────────────────────────────────────
-function updateClock(){ set('clock', new Date().toLocaleTimeString('pt-BR')); }
+function updateClock(){
+    set('clock', new Date().toLocaleTimeString('pt-BR'));
+    // Dias restantes para vencimento
+    const venc = new Date('2027-05-08T00:00:00-03:00');
+    const diff = Math.ceil((venc - new Date()) / 86400000);
+    set('dias-venc', diff > 0 ? diff + ' dias' : 'Vencido');
+}
 
 // ── NAVEGAÇÃO ──────────────────────────────────────────────────
 function showPage(page, el) {
