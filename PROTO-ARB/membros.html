@@ -2000,8 +2000,8 @@ body.lite-mode .lite-view{ display:block !important; }
 //  Cada objeto representa uma mesa ativa
 // ══════════════════════════════════════════════════════════════
 const CLIENTES = {
-  'andrehornung': {
-    senha:       'chacall',
+  'andrehornung@protoarb.com': {
+    senha:       'protocolo@hornung',
     nome:        'ANDRE HORNUNG',
     pool_btc:    0.34770,
     pool_usdt:   25000.00,
@@ -2013,8 +2013,8 @@ const CLIENTES = {
     ref_code:    'AND001',
     sobre_aporte:'$50.000',
   },
-  'eduardosanti': {
-    senha:       'dusanti2025',
+  'eduardosanti@protoarb.com': {
+    senha:       'protocolo@santi',
     nome:        'EDUARDO SANTI',
     pool_btc:    0.00719,
     pool_usdt:   600.00,
@@ -2026,8 +2026,8 @@ const CLIENTES = {
     ref_code:    'EDU001',
     sobre_aporte:'$1.026',
   },
-  'aliataya': {
-    senha:       'ali2025',
+  'aliataya@protoarb.com': {
+    senha:       'protocolo@ataya',
     nome:        'ALI ATAYA',
     pool_btc:    0.01664,
     pool_usdt:   1500.00,
@@ -2039,8 +2039,8 @@ const CLIENTES = {
     ref_code:    'ALI001',
     sobre_aporte:'$2.704',
   },
-  'felipecampos': {
-    senha:       'felipe2025',
+  'felipecampos@protoarb.com': {
+    senha:       'protocolo@campos',
     nome:        'FELIPE CAMPOS',
     pool_btc:    0.01988,
     pool_usdt:   1780.00,
@@ -2052,8 +2052,8 @@ const CLIENTES = {
     ref_code:    'FEC001',
     sobre_aporte:'$3.219',
   },
-  'felipevaz': {
-    senha:       'felipevaz2025',
+  'felipevaz@protoarb.com': {
+    senha:       'protocolo@vaz',
     nome:        'FELIPE VAZ',
     pool_btc:    0.06954,
     pool_usdt:   5000.00,
@@ -2065,8 +2065,8 @@ const CLIENTES = {
     ref_code:    'FEV001',
     sobre_aporte:'$10.000',
   },
-  'kassem': {
-    senha:       'kassem2025',
+  'kassem@protoarb.com': {
+    senha:       'protocolo@kassem',
     nome:        'KASSEM',
     pool_btc:    0.03805,
     pool_usdt:   3250.00,
@@ -2078,8 +2078,8 @@ const CLIENTES = {
     ref_code:    'KAS001',
     sobre_aporte:'$6.499',
   },
-  'kelvinbueno': {
-    senha:       'kelvin123',
+  'kelvinbueno@protoarb.com': {
+    senha:       'protocolo@bueno',
     nome:        'KELVIN BUENO',
     pool_btc:    0.06954,
     pool_usdt:   5000.00,
@@ -2091,8 +2091,8 @@ const CLIENTES = {
     ref_code:    'KEL001',
     sobre_aporte:'$10.000',
   },
-  'pedrospena': {
-    senha:       'mukirana123',
+  'pedrospena@protoarb.com': {
+    senha:       'protocolo@spena',
     nome:        'PEDRO SPENA',
     pool_btc:    0.03517,
     pool_usdt:   2500.00,
@@ -2103,6 +2103,32 @@ const CLIENTES = {
     checkpoint:  '2026-04-12T15:00:00-03:00',
     ref_code:    'PED001',
     sobre_aporte:'$5.000',
+  },
+  'gustavorink@protoarb.com': {
+    senha:       'protocolo@rink',
+    nome:        'GUSTAVO RINK',
+    pool_btc:    0.03376,
+    pool_usdt:   2400.00,
+    preco_medio: 89214.89,
+    btc_inicial: 89214.89,
+    aporte_base: 4800.00,
+    meta:        144.00,
+    checkpoint:  '2026-04-12T16:00:00-03:00',
+    ref_code:    'GUS001',
+    sobre_aporte:'$4.800',
+  },
+  'giselegodk@protoarb.com': {
+    senha:       'protocolo@godk',
+    nome:        'GISELE GODK',
+    pool_btc:    0.04149,
+    pool_usdt:   2950.00,
+    preco_medio: 91512.44,
+    btc_inicial: 91512.44,
+    aporte_base: 5900.00,
+    meta:        177.00,
+    checkpoint:  '2026-04-12T16:00:00-03:00',
+    ref_code:    'GIS001',
+    sobre_aporte:'$5.900',
   },
 };
 
@@ -2225,7 +2251,7 @@ function mostrarDashboard(dados) {
 }
 
 function doLogin() {
-  const u   = document.getElementById('l-user').value.trim().toLowerCase();
+  const u   = document.getElementById('l-user').value.trim().toLowerCase().replace(/\s/g,'');
   const p   = document.getElementById('l-pass').value.trim().toLowerCase();
   const err = document.getElementById('l-err');
   const cliente = CLIENTES[u];
