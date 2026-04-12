@@ -2000,7 +2000,8 @@ body.lite-mode .lite-view{ display:block !important; }
 //  Cada objeto representa uma mesa ativa
 // ══════════════════════════════════════════════════════════════
 const CLIENTES = {
-  'andrehornung@protoarb.com': {
+  'andrehornung': {
+    login:       'andrehornung@protoarb.com',
     senha:       'protocolo@hornung',
     nome:        'ANDRE HORNUNG',
     pool_btc:    0.34770,
@@ -2013,7 +2014,8 @@ const CLIENTES = {
     ref_code:    'AND001',
     sobre_aporte:'$50.000',
   },
-  'eduardosanti@protoarb.com': {
+  'eduardosanti': {
+    login:       'eduardosanti@protoarb.com',
     senha:       'protocolo@santi',
     nome:        'EDUARDO SANTI',
     pool_btc:    0.00719,
@@ -2026,7 +2028,8 @@ const CLIENTES = {
     ref_code:    'EDU001',
     sobre_aporte:'$1.026',
   },
-  'aliataya@protoarb.com': {
+  'aliataya': {
+    login:       'aliataya@protoarb.com',
     senha:       'protocolo@ataya',
     nome:        'ALI ATAYA',
     pool_btc:    0.01664,
@@ -2039,7 +2042,8 @@ const CLIENTES = {
     ref_code:    'ALI001',
     sobre_aporte:'$2.704',
   },
-  'felipecampos@protoarb.com': {
+  'felipecampos': {
+    login:       'felipecampos@protoarb.com',
     senha:       'protocolo@campos',
     nome:        'FELIPE CAMPOS',
     pool_btc:    0.01988,
@@ -2052,7 +2056,8 @@ const CLIENTES = {
     ref_code:    'FEC001',
     sobre_aporte:'$3.219',
   },
-  'felipevaz@protoarb.com': {
+  'felipevaz': {
+    login:       'felipevaz@protoarb.com',
     senha:       'protocolo@vaz',
     nome:        'FELIPE VAZ',
     pool_btc:    0.06954,
@@ -2065,7 +2070,8 @@ const CLIENTES = {
     ref_code:    'FEV001',
     sobre_aporte:'$10.000',
   },
-  'kassem@protoarb.com': {
+  'kassem': {
+    login:       'kassem@protoarb.com',
     senha:       'protocolo@kassem',
     nome:        'KASSEM',
     pool_btc:    0.03805,
@@ -2078,7 +2084,8 @@ const CLIENTES = {
     ref_code:    'KAS001',
     sobre_aporte:'$6.499',
   },
-  'kelvinbueno@protoarb.com': {
+  'kelvinbueno': {
+    login:       'kelvinbueno@protoarb.com',
     senha:       'protocolo@bueno',
     nome:        'KELVIN BUENO',
     pool_btc:    0.06954,
@@ -2091,7 +2098,8 @@ const CLIENTES = {
     ref_code:    'KEL001',
     sobre_aporte:'$10.000',
   },
-  'pedrospena@protoarb.com': {
+  'pedrospena': {
+    login:       'pedrospena@protoarb.com',
     senha:       'protocolo@spena',
     nome:        'PEDRO SPENA',
     pool_btc:    0.03517,
@@ -2104,7 +2112,8 @@ const CLIENTES = {
     ref_code:    'PED001',
     sobre_aporte:'$5.000',
   },
-  'gustavorink@protoarb.com': {
+  'gustavorink': {
+    login:       'gustavorink@protoarb.com',
     senha:       'protocolo@rink',
     nome:        'GUSTAVO RINK',
     pool_btc:    0.03376,
@@ -2117,7 +2126,8 @@ const CLIENTES = {
     ref_code:    'GUS001',
     sobre_aporte:'$4.800',
   },
-  'giselegodk@protoarb.com': {
+  'giselegodk': {
+    login:       'giselegodk@protoarb.com',
     senha:       'protocolo@godk',
     nome:        'GISELE GODK',
     pool_btc:    0.04149,
@@ -2251,13 +2261,23 @@ function mostrarDashboard(dados) {
 }
 
 function doLogin() {
-  const u   = document.getElementById('l-user').value.trim().toLowerCase();
-  const p   = document.getElementById('l-pass').value.trim();
-  const err = document.getElementById('l-err');
-  const cliente = CLIENTES[u];
+  const inputU = document.getElementById('l-user').value.trim().toLowerCase();
+  const p      = document.getElementById('l-pass').value.trim();
+  const err    = document.getElementById('l-err');
+
+  // Busca pelo campo login (email) OU pela chave direta
+  let chave = null;
+  for(const key of Object.keys(CLIENTES)) {
+    const c = CLIENTES[key];
+    if((c.login && c.login.toLowerCase() === inputU) || key === inputU) {
+      chave = key; break;
+    }
+  }
+  const cliente = chave ? CLIENTES[chave] : null;
+
   if(cliente && p === cliente.senha) {
-    sessionStorage.setItem('proto_auth', JSON.stringify({user: u}));
-    mostrarDashboard({...cliente, user: u});
+    sessionStorage.setItem('proto_auth', JSON.stringify({user: chave}));
+    mostrarDashboard({...cliente, user: chave});
   } else {
     err.textContent = 'Usuário ou senha incorretos.';
     setTimeout(() => err.textContent = '', 3000);
