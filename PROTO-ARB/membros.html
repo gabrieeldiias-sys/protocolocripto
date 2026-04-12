@@ -2180,8 +2180,23 @@ function doLogin() {
 }
 document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
 
-// Limpa sessão ao carregar — sempre exige login
-sessionStorage.removeItem('proto_auth');
+// Auto-login se sessão ativa (F5 dentro do dashboard)
+const savedAuth = sessionStorage.getItem('proto_auth');
+if(savedAuth) {
+  try {
+    const auth = JSON.parse(savedAuth);
+    const cliente = CLIENTES[auth.user];
+    if(cliente) {
+      CLIENTE = {...cliente, user: auth.user};
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display    = 'block';
+      carregarCliente(CLIENTE);
+      init();
+    }
+  } catch(e) {
+    sessionStorage.removeItem('proto_auth');
+  }
+}
 
 function doLogout() {
   sessionStorage.removeItem('proto_auth');
