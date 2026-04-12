@@ -6,6 +6,7 @@
     { "source": "/felipe-campos", "destination": "/felipecampos.html" },
     { "source": "/felipe-vaz", "destination": "/felipevaz.html" },
     { "source": "/andre-hornung", "destination": "/andrehornung.html" },
-    { "source": "/eduardo-santi", "destination": "/eduardosanti.html" }
+    { "source": "/eduardo-santi", "destination": "/eduardosanti.html" },
+    { "source": "/membros", "destination": "/PROTO-ARB/membros.html" }
   ]
 }

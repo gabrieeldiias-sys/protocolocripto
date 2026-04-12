@@ -1,0 +1,2969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocolo ARB · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#080808;--bg1:#0e0e0e;--bg2:#141414;--bg3:#1a1a1a;
+  --gold:#E8B84B;--gold2:#F5D07A;--golddim:rgba(232,184,75,0.10);
+  --green:#00E5A0;--greendim:rgba(0,229,160,0.08);
+  --red:#FF4D6A;--reddim:rgba(255,77,106,0.08);
+  --blue:#4D9FFF;
+  --text:#EEEEF5;--text2:#7A7A9A;--text3:#35354A;
+  --border:rgba(255,255,255,0.05);--bordergold:rgba(232,184,75,0.18);
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;}
+/* Mobile: permite scroll no body */
+@media(max-width:899px){html,body{overflow-x:hidden;overflow-y:auto;height:auto;}}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9998;}
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+#login-canvas{position:absolute;inset:0;opacity:.55;pointer-events:none;}
+.login-wrap{position:relative;z-index:2;width:100%;max-width:420px;margin:20px;animation:fadeUp .5s ease;}
+.login-top{text-align:center;margin-bottom:32px;}
+.login-logo-txt{font-family:var(--mono);font-size:11px;color:rgba(232,184,75,0.7);letter-spacing:5px;margin-bottom:0;font-weight:700;}
+.login-brand{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:0;line-height:1;}
+.login-sub{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:3px;}
+.login-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(232,184,75,0.3),transparent);margin:18px 0;}
+.login-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2);
+  border-radius:20px;padding:5px 14px;margin-bottom:20px;
+  font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:2px;font-weight:700;
+}
+.login-box{background:linear-gradient(145deg,#111111,#0a0a0a);border:1px solid var(--bordergold);border-radius:16px;padding:32px 28px;}
+.lf{margin-bottom:16px;}
+.lf label{display:block;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2px;margin-bottom:7px;text-transform:uppercase;}
+.lf input{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;color:#fff;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .3s;}
+.lf input:focus{border-color:var(--bordergold);}
+.login-btn{width:100%;padding:14px;background:linear-gradient(45deg,var(--gold),#FFD54F);border:none;border-radius:8px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:2px;transition:all .3s;margin-top:4px;}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(232,184,75,.35);}
+.login-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;margin-top:12px;min-height:16px;}
+.login-foot{text-align:center;margin-top:18px;font-family:var(--mono);font-size:10px;color:#1a1a1a;letter-spacing:1px;}
+
+/* ══ LAYOUT PRINCIPAL ══ */
+/* Desktop: sidebar fixa + conteúdo ao lado */
+.dashboard-layout{
+  display:flex;height:100vh;overflow:hidden;
+}
+
+/* ── SIDEBAR — fixa no desktop ── */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:#0d0d0d;
+  border-right:1px solid rgba(232,184,75,0.1);
+  display:flex;flex-direction:column;
+  z-index:200;
+  position:relative;
+}
+/* Linha dourada topo da sidebar */
+.sidebar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(232,184,75,0.5),transparent);
+}
+.sid-brand{
+  padding:28px 20px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.sid-brand-top{
+  font-family:var(--mono);font-size:7px;color:rgba(232,184,75,0.5);
+  letter-spacing:3px;margin-bottom:8px;font-weight:700;
+}
+.sid-brand-name{
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;
+  color:#fff;letter-spacing:1px;line-height:1.2;
+}
+.sid-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 20px;cursor:pointer;
+  transition:all .18s;
+  border-left:2px solid transparent;
+  font-family:var(--mono);font-size:9px;
+  color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;
+}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.nav-item.active{
+  color:var(--gold);border-left-color:var(--gold);
+  background:rgba(232,184,75,0.06);
+}
+.nav-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.sid-foot{
+  padding:16px 20px;
+  border-top:1px solid rgba(255,255,255,0.05);
+}
+.sid-status{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;
+}
+.pulse{
+  width:6px;height:6px;background:var(--green);border-radius:50%;
+  box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* ── ÁREA DIREITA: topbar + conteúdo ── */
+.content-area{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;min-width:0;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:52px;flex-shrink:0;
+  background:rgba(8,8,8,.98);border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.topbar-clock{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:1px;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.btc-live-badge{
+  display:flex;align-items:center;gap:8px;
+  background:var(--golddim);border:1px solid var(--bordergold);
+  border-radius:7px;padding:5px 12px;
+}
+.btc-live-label{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:2px;}
+.btc-live-price{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);}
+.sys-badge{
+  font-family:var(--mono);font-size:8px;color:var(--green);
+  letter-spacing:1.5px;display:flex;align-items:center;gap:5px;
+}
+
+/* ── MAIN (scroll interno) ── */
+.main{
+  flex:1;overflow-y:auto;padding:20px 22px;
+  height:0; /* forçar scroll interno no flex */
+}
+.page{display:none;animation:fadeUp .3s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── OVERLAY (só mobile) ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);z-index:999;backdrop-filter:blur(2px);
+}
+.overlay.show{display:block;}
+
+/* ── HAMBURGER — só mobile ── */
+.hamburger{
+  display:none; /* oculto no desktop */
+  position:fixed;top:10px;left:10px;z-index:1001;
+  width:38px;height:38px;border-radius:9px;
+  background:var(--gold);border:none;cursor:pointer;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 4px 16px rgba(232,184,75,.35);transition:all .3s;
+}
+.hamburger:hover{transform:scale(1.07);}
+.hamburger span{display:block;width:16px;height:2px;background:#000;border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+
+/* ══ MOBILE — sidebar vira drawer ══ */
+@media(max-width:899px){
+  .dashboard-layout{display:block;overflow:visible;}
+  .content-area{
+    height:auto;min-height:100vh;
+    display:flex;flex-direction:column;
+    overflow:visible;
+  }
+  .sidebar{
+    position:fixed;top:0;left:-240px;bottom:0;width:220px;
+    transition:left .3s cubic-bezier(.4,0,.2,1);
+    z-index:1000;
+  }
+  .sidebar.open{left:0;}
+  .hamburger{display:flex;}
+  .topbar{padding-left:56px;}
+  .main{
+    padding:14px;
+    flex:1;
+    overflow-y:visible;
+    height:auto;
+  }
+}
+
+/* ══ CLIENT CARD — OKX/BYBIT STYLE ══ */
+.client-card{
+  position:relative;overflow:hidden;margin-bottom:18px;
+  border-radius:16px;padding:0;
+  background:linear-gradient(120deg,#101010 0%,#111111 40%,#0d0d0d 100%);
+  border:1px solid rgba(232,184,75,0.14);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+}
+/* Faixa lateral dourada esquerda */
+.client-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;z-index:2;
+  background:linear-gradient(180deg,transparent 0%,var(--gold) 20%,var(--gold) 80%,transparent 100%);
+  box-shadow:0 0 18px rgba(232,184,75,0.5);
+}
+/* Glow radial canto superior direito */
+.client-card::after{
+  content:'';position:absolute;top:-100px;right:-100px;
+  width:380px;height:380px;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,rgba(232,184,75,0.06) 0%,transparent 65%);
+}
+
+/* ══ CARD — LAYOUT FIXO UNIVERSAL ══ */
+/* Identidade sempre em cima (horizontal), métricas sempre em 4 colunas */
+.cc-body{
+  display:grid;
+  grid-template-columns:1fr;
+  position:relative;z-index:1;
+}
+
+.cc-identity{
+  padding:14px 20px 12px;
+  display:flex;flex-direction:column;gap:10px;
+  border-right:none;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  background:linear-gradient(160deg,rgba(232,184,75,0.04) 0%,transparent 70%);
+  position:relative;overflow:hidden;
+}
+
+/* SYNC estático, inline no topbar */
+.cc-sync-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.22);
+  border-radius:5px;padding:5px 12px;
+  font-family:var(--mono);font-size:8px;color:var(--green);
+  letter-spacing:2px;font-weight:700;
+  flex-shrink:0;
+}
+.cc-id-topbar{
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:6px;padding-top:0;width:100%;
+}
+.cc-chip{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  color:rgba(232,184,75,0.45);letter-spacing:2.5px;
+  display:flex;align-items:center;gap:7px;text-transform:uppercase;
+}
+.cc-chip::before{
+  content:'';width:16px;height:1px;
+  background:linear-gradient(90deg,rgba(232,184,75,0.5),rgba(232,184,75,0.1));
+  flex-shrink:0;
+}
+.cc-name{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(18px,2.8vw,30px);
+  color:#fff;letter-spacing:1px;line-height:1.05;
+}
+.cc-id-center{
+  display:flex;flex-direction:column;
+  gap:10px;
+}
+.cc-id-divider{display:none;}
+
+/* MÉTRICAS: sempre 4 colunas */
+.cc-right{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:1fr auto;
+  border-left:none;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.cc-pool-btc-inline{
+  grid-column:1;grid-row:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.cc-pool-usdt-inline{
+  grid-column:2;grid-row:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.cc-r-profit{
+  grid-column:3;grid-row:1;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-right:1px solid rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+.cc-r-roi{
+  grid-column:4;grid-row:1;
+  padding:clamp(12px,1.8vw,22px) clamp(12px,1.6vw,20px);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  background:linear-gradient(135deg,rgba(0,229,160,0.05) 0%,transparent 70%);
+}
+.cc-r-capital{
+  grid-column:1 / span 3;grid-row:2;
+  padding:14px clamp(12px,1.6vw,20px);
+  display:flex;flex-direction:column;justify-content:flex-start;
+  background:linear-gradient(90deg,rgba(232,184,75,0.08),rgba(232,184,75,0.02) 60%,transparent);
+}
+.cc-r-pm{
+  grid-column:4;grid-row:2;
+  padding:14px clamp(12px,1.4vw,16px);
+  display:flex;flex-direction:column;justify-content:flex-start;
+  border-left:1px solid rgba(255,255,255,0.04);
+  border-radius:0 0 16px 0;
+}
+
+/* Pools antigas */
+.cc-pools{display:none;}
+.cc-results{display:none;}
+
+/* Pool nums */
+.cc-pool-tag{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  letter-spacing:2px;color:var(--text2);
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
+}
+.cc-pool-tag-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.cc-pool-num{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(18px,2.2vw,30px);
+  line-height:1;letter-spacing:-0.5px;margin-bottom:2px;
+}
+.cc-pool-usd{font-family:var(--mono);font-size:clamp(9px,0.8vw,11px);color:var(--text2);}
+
+/* Células resultado */
+.cc-r-label{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
+}
+.cc-r-label-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+.cc-r-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(16px,2.2vw,28px);
+  line-height:1;letter-spacing:-0.5px;margin-bottom:4px;
+}
+.cc-r-sub{font-family:var(--mono);font-size:clamp(7px,0.6vw,9px);color:var(--text2);letter-spacing:.5px;}
+.cc-cap-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(22px,3.2vw,44px);
+  color:var(--gold);letter-spacing:-1.5px;line-height:1;
+  text-shadow:0 0 40px rgba(232,184,75,0.4);
+}
+.cc-cap-sub{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:4px;letter-spacing:1px;}
+
+/* FOOTER META */
+.cc-footer{
+  padding:14px clamp(16px,2vw,28px) 18px;
+  border-top:1px solid rgba(255,255,255,0.04);
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:16px;
+}
+.cc-prog-wrap{flex:1;min-width:0;}
+.cc-prog-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:8px;letter-spacing:1px;margin-bottom:8px;
+  flex-wrap:wrap;gap:4px;
+}
+.cc-prog-left{display:flex;align-items:center;gap:6px;color:var(--text2);}
+.cc-prog-star{color:var(--gold);}
+.cc-prog-right{display:flex;align-items:center;gap:5px;}
+.cc-prog-cur{color:var(--gold);font-weight:700;}
+.cc-prog-sep{color:var(--text3);}
+.cc-prog-target{color:var(--text2);}
+.cc-prog-pct{color:var(--green);font-weight:700;min-width:44px;text-align:right;}
+.cc-prog-track{
+  height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;position:relative;
+}
+.cc-prog-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,rgba(232,184,75,0.4),var(--gold),#FFD54F);
+  box-shadow:0 0 12px rgba(232,184,75,0.35);
+  transition:width 1.8s cubic-bezier(.4,0,.2,1);position:relative;
+}
+.cc-prog-fill::after{
+  content:'';position:absolute;right:-1px;top:-3px;bottom:-3px;
+  width:4px;background:#FFD54F;border-radius:3px;
+  box-shadow:0 0 10px rgba(255,213,79,0.8);
+}
+
+/* ══ RESPONSIVO CARD — mobile ══ */
+@media(max-width:899px){
+  /* Capital layout: coluna simples no mobile */
+  .cc-cap-layout{
+    grid-template-columns:1fr;
+  }
+  .cc-cap-mid,.cc-cap-spark{display:none;}
+  .cc-cap-zone{border-right:none;padding:0;}
+}
+@media(max-width:480px){
+  .cc-right{grid-template-columns:1fr 1fr;}
+  .cc-pool-btc-inline{grid-column:1;grid-row:1;}
+  .cc-pool-usdt-inline{grid-column:2;grid-row:1;border-right:none;}
+  .cc-r-profit{grid-column:1;grid-row:2;border-right:1px solid rgba(255,255,255,0.04);}
+  .cc-r-roi{grid-column:2;grid-row:2;border-right:none;}
+  .cc-r-capital{grid-column:1 / span 2;grid-row:3;}
+  .cc-r-pm{grid-column:1 / span 2;grid-row:4;border-left:none;border-top:1px solid rgba(255,255,255,0.04);border-radius:0 0 16px 16px;}
+  .cc-pool-num{font-size:clamp(14px,4vw,18px);}
+  .cc-r-val{font-size:clamp(12px,3.5vw,16px);}
+  .cc-cap-val{font-size:clamp(16px,6vw,22px);}
+}
+
+/* STATS OPERACIONAIS */
+.cc-op-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+.cc-op-full{grid-column:span 2;}
+.cc-op-stat{text-align:left;}
+.cc-op-stat-label{
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  letter-spacing:2px;font-weight:700;margin-bottom:5px;text-transform:uppercase;
+}
+.cc-op-stat-val{
+  font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.1vw,14px);font-weight:700;
+  color:var(--text);letter-spacing:.3px;white-space:nowrap;
+}
+.cc-live-bar{display:flex;align-items:center;gap:8px;}
+.cc-live-bar-txt{
+  font-family:var(--mono);font-size:9px;font-weight:700;color:var(--text2);
+  letter-spacing:1.5px;white-space:nowrap;flex-shrink:0;
+}
+.cc-live-bar-line{
+  flex:1;height:3px;background:rgba(255,255,255,0.06);
+  border-radius:2px;overflow:hidden;
+}
+.cc-live-bar-fill{
+  height:100%;width:30%;
+  background:linear-gradient(90deg,rgba(0,229,160,0.3),var(--green));
+  border-radius:1px;animation:liveBarAnim 2s ease infinite;
+}
+@keyframes liveBarAnim{
+  0%{width:0%;opacity:.5;}50%{width:100%;opacity:1;}100%{width:100%;opacity:.3;}
+}
+
+/* ── CAPITAL TOTAL LAYOUT 3 ZONAS ── */
+.cc-cap-layout{
+  display:grid;
+  grid-template-columns:auto 1fr 1fr;
+  gap:0;
+  height:100%;
+  align-items:center;
+}
+.cc-cap-zone{
+  padding:0 20px;
+  border-right:1px solid rgba(255,255,255,0.04);
+  height:100%;
+  display:flex;flex-direction:column;justify-content:flex-start;padding-top:14px;
+}
+.cc-cap-zone:first-child{ padding-left:0; }
+.cc-cap-zone:last-child{ border-right:none; }
+.cc-cap-mid{ min-width:0; }
+.cc-cap-spark{ min-width:0; }
+
+/* Barras */
+.cc-balance-bars{ display:flex;flex-direction:column;gap:0;width:100%; }
+.cc-bal-row{ display:flex;align-items:center;gap:10px; }
+.cc-bal-label{
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  letter-spacing:1.5px;width:30px;flex-shrink:0;
+}
+.cc-bal-track{
+  flex:1;height:5px;background:rgba(255,255,255,0.06);
+  border-radius:3px;overflow:hidden;
+}
+.cc-bal-fill{
+  height:100%;border-radius:3px;
+  transition:width 1.5s cubic-bezier(.4,0,.2,1);
+}
+.cc-bal-btc{ background:linear-gradient(90deg,rgba(232,184,75,0.4),#E8B84B); box-shadow:0 0 6px rgba(232,184,75,0.3); }
+.cc-bal-usdt{ background:linear-gradient(90deg,rgba(77,159,255,0.4),#4D9FFF); box-shadow:0 0 6px rgba(77,159,255,0.3); }
+.cc-bal-pct{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  width:36px;text-align:right;flex-shrink:0;
+}
+
+/* ── SPARKLINE CAPITAL ── */
+.cc-sparkline{
+  width:100%;height:52px;
+  flex-shrink:0;
+  opacity:0.95;
+}
+@media(max-width:700px){ .cc-sparkline{height:36px;} }
+@media(max-width:500px){ .cc-sparkline{display:none;} }
+@media(max-width:899px){ .cc-status-row{display:none;} }
+
+/* ── STATUS ROW ── */
+.cc-status-row{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+}
+.cc-status-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:5px;
+  padding:3px 8px;
+  font-family:var(--mono);font-size:6px;
+  color:rgba(255,255,255,0.2);letter-spacing:1px;font-weight:600;
+  text-transform:uppercase;
+}
+.cc-status-dot{
+  width:4px;height:4px;border-radius:50%;flex-shrink:0;
+  background:var(--green);opacity:0.4;
+  animation:pulse 1.8s ease infinite;
+}
+.cc-status-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:6px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,0.2);
+}
+
+/* ── LOADER SVG ── */
+#pool-btc-usd svg, #cap-total svg, #top-price svg{
+  vertical-align:middle;
+  display:inline-block;
+}
+
+/* ══ LITE MODE ══ */
+.lite-view{ display:none; }
+.pro-view{ display:block; }
+body.lite-mode .pro-view{ display:none !important; }
+body.lite-mode .lite-view{ display:block !important; }
+
+
+/* Card Lite */
+.lite-card{
+  border-radius:20px;
+  background:linear-gradient(135deg,#101010,#0d0d0d);
+  border:1px solid rgba(232,184,75,0.14);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  padding:36px 32px;
+  margin-bottom:18px;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.lite-card::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,184,75,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.lite-greeting{
+  font-family:var(--mono);font-size:9px;color:var(--text2);
+  letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-name{
+  font-family:'Orbitron',sans-serif;font-size:clamp(20px,3vw,32px);
+  font-weight:900;color:#fff;margin-bottom:32px;
+}
+.lite-patrimonio-label{
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-patrimonio-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(36px,6vw,64px);
+  color:var(--gold);letter-spacing:-2px;line-height:1;
+  text-shadow:0 0 40px rgba(232,184,75,0.3);
+  margin-bottom:6px;
+}
+.lite-patrimonio-sub{
+  font-family:var(--mono);font-size:9px;color:var(--text2);
+  margin-bottom:32px;
+}
+.lite-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:14px;margin-bottom:28px;
+}
+.lite-stat{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:18px 12px;
+}
+.lite-stat-label{
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  letter-spacing:1.5px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-stat-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(16px,2.5vw,22px);color:var(--text);
+  line-height:1;
+}
+/* Meta Lite */
+.lite-meta{margin-top:4px;}
+.lite-meta-header{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:9px;margin-bottom:10px;
+}
+.lite-meta-label{color:var(--text2);letter-spacing:1px;}
+.lite-meta-pct{color:var(--green);font-weight:700;}
+.lite-meta-track{
+  height:10px;background:rgba(255,255,255,0.06);
+  border-radius:5px;overflow:hidden;position:relative;
+}
+.lite-meta-fill{
+  height:100%;border-radius:5px;
+  background:linear-gradient(90deg,rgba(232,184,75,0.5),var(--gold),#FFD54F);
+  box-shadow:0 0 12px rgba(232,184,75,0.4);
+  transition:width 1.8s cubic-bezier(.4,0,.2,1);
+}
+.lite-meta-footer{
+  display:flex;justify-content:space-between;
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  margin-top:6px;
+}
+/* BTC Lite */
+.lite-btc{
+  background:rgba(232,184,75,0.04);
+  border:1px solid rgba(232,184,75,0.12);
+  border-radius:14px;padding:20px 24px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.lite-btc-left{ text-align:left; }
+.lite-btc-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;}
+.lite-btc-price{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--gold);}
+.lite-btc-change{font-family:var(--mono);font-size:10px;margin-top:4px;}
+.lite-status{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:9px;color:var(--green);
+  letter-spacing:1px;
+}
+@media(max-width:600px){
+  .lite-stats{grid-template-columns:1fr 1fr;}
+  .lite-patrimonio-val{font-size:clamp(28px,8vw,44px);}
+}
+
+
+/* ══ INDICAÇÕES ══ */
+.ind-hero{
+  background:linear-gradient(135deg,rgba(232,184,75,0.08),rgba(232,184,75,0.02));
+  border:1px solid rgba(232,184,75,0.2);
+  border-radius:20px;padding:32px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.ind-hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(232,184,75,0.1) 0%,transparent 70%);
+}
+.ind-hero-label{font-family:var(--mono);font-size:8px;color:rgba(232,184,75,0.5);letter-spacing:3px;margin-bottom:8px;}
+.ind-hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(18px,2.5vw,26px);font-weight:900;color:#fff;margin-bottom:6px;}
+.ind-hero-sub{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.6;max-width:600px;}
+
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.ind-card{
+  background:#0e0e0e;border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+}
+.ind-card-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
+.ind-card-val{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1;}
+.ind-card-sub{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:6px;}
+
+.ind-link-box{
+  background:#0e0e0e;border:1px solid rgba(232,184,75,0.2);
+  border-radius:14px;padding:20px 24px;margin-bottom:18px;
+}
+.ind-link-label{font-family:var(--mono);font-size:8px;color:rgba(232,184,75,0.5);letter-spacing:2px;margin-bottom:10px;}
+.ind-link-row{display:flex;align-items:center;gap:10px;}
+.ind-link-url{
+  flex:1;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--gold);background:rgba(232,184,75,0.05);
+  border:1px solid rgba(232,184,75,0.15);border-radius:8px;
+  padding:10px 14px;letter-spacing:.3px;word-break:break-all;
+}
+.ind-copy-btn{
+  flex-shrink:0;background:var(--gold);border:none;border-radius:8px;
+  padding:10px 18px;cursor:pointer;font-family:var(--mono);
+  font-size:9px;font-weight:700;color:#000;letter-spacing:1.5px;
+  transition:all .2s;
+}
+.ind-copy-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,184,75,0.3);}
+
+.ind-como{
+  background:#0e0e0e;border:1px solid var(--border);
+  border-radius:16px;padding:28px;margin-bottom:18px;
+}
+.ind-como-title{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:20px;font-weight:700;}
+.ind-step{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+.ind-step:last-child{margin-bottom:0;}
+.ind-step-num{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(232,184,75,0.1);border:1px solid rgba(232,184,75,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);
+}
+.ind-step-body{}
+.ind-step-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:.5px;}
+.ind-step-desc{font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.6;}
+
+.ind-saque-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(45deg,rgba(0,229,160,0.1),rgba(0,229,160,0.05));
+  border:1px solid rgba(0,229,160,0.3);border-radius:10px;
+  cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;
+  color:var(--green);letter-spacing:2px;transition:all .2s;
+}
+.ind-saque-btn:hover{background:rgba(0,229,160,0.15);transform:translateY(-1px);}
+
+/* Modal saque */
+.ind-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.ind-modal-overlay.show{display:flex;}
+.ind-modal{
+  background:#111;border:1px solid rgba(232,184,75,0.2);
+  border-radius:20px;padding:32px;width:100%;max-width:440px;margin:20px;
+}
+.ind-modal-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#fff;margin-bottom:6px;}
+.ind-modal-sub{font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:24px;letter-spacing:1px;}
+.ind-modal label{display:block;font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:7px;}
+.ind-modal input{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:12px 14px;color:#fff;font-family:var(--mono);font-size:12px;
+  outline:none;transition:border-color .3s;margin-bottom:16px;
+}
+.ind-modal input:focus{border-color:rgba(0,229,160,0.4);}
+.ind-modal-btns{display:flex;gap:10px;}
+.ind-modal-confirm{
+  flex:1;padding:13px;background:linear-gradient(45deg,var(--green),#00C880);
+  border:none;border-radius:8px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:#000;letter-spacing:1.5px;
+}
+.ind-modal-cancel{
+  padding:13px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;
+}
+
+@media(max-width:600px){
+  .ind-grid{grid-template-columns:1fr;}
+  .ind-link-row{flex-direction:column;}
+  .ind-copy-btn{width:100%;}
+  .lite-stats{grid-template-columns:1fr 1fr !important;}
+}
+
+
+/* ── BOTÃO HOME FLUTUANTE ── */
+.home-fab{
+  display:none;
+  position:fixed;bottom:24px;right:24px;z-index:500;
+  background:rgba(232,184,75,0.12);
+  border:1px solid rgba(232,184,75,0.3);
+  border-radius:12px;padding:10px 18px;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  color:var(--gold);letter-spacing:1.5px;cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(8px);
+  align-items:center;gap:8px;
+}
+.home-fab:hover{background:rgba(232,184,75,0.2);transform:translateY(-2px);}
+.home-fab.visible{display:flex;}
+@media(max-width:899px){.home-fab{bottom:16px;right:16px;}}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-title{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0;}
+.live-dot{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;}
+.live-dot::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 1.5s infinite;}
+
+/* ══ RADAR GRID — EXPERIENCE CARD ══ */
+.radar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;}
+
+@keyframes glowBuy{
+  0%,100%{box-shadow:0 0 0 1px rgba(0,229,160,.25),0 8px 32px rgba(0,229,160,.12)}
+  50%    {box-shadow:0 0 0 1px rgba(0,229,160,.5), 0 8px 40px rgba(0,229,160,.28)}
+}
+@keyframes glowSell{
+  0%,100%{box-shadow:0 0 0 1px rgba(255,77,106,.25),0 8px 32px rgba(255,77,106,.12)}
+  50%    {box-shadow:0 0 0 1px rgba(255,77,106,.5), 0 8px 40px rgba(255,77,106,.28)}
+}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(500%)}}
+@keyframes ticker{0%,100%{opacity:1}40%,60%{opacity:.35}}
+@keyframes sealPop{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* ══ RADAR CARD — EXCHANGE STYLE ══ */
+.radar-card{
+  background:#111111;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  position:relative;overflow:hidden;
+  transition:transform .2s ease, box-shadow .2s ease;
+  cursor:default;
+  display:flex;flex-direction:column;
+}
+.radar-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+/* Linha topo colorida */
+.radar-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;z-index:3;
+  background:rgba(255,255,255,.08);
+}
+.radar-card::after{content:none;}
+
+/* BUY */
+.radar-card.is-buy{
+  background:linear-gradient(180deg,rgba(0,229,160,.05) 0%,#111111 40%);
+  border-color:rgba(0,229,160,.2);
+  animation:glowBuy 3s ease infinite;
+}
+.radar-card.is-buy::before{
+  background:var(--green);opacity:.7;
+}
+/* SELL */
+.radar-card.is-sell{
+  background:linear-gradient(180deg,rgba(255,77,106,.05) 0%,#111111 40%);
+  border-color:rgba(255,77,106,.2);
+  animation:glowSell 3s ease infinite;
+}
+.radar-card.is-sell::before{
+  background:var(--red);opacity:.7;
+}
+
+/* ── HEADER: logo + exchange info + status ── */
+.rc-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 10px;
+  position:relative;z-index:1;
+}
+/* Logo quadrado com fundo sólido */
+.rc-logo{
+  width:38px;height:38px;border-radius:9px;flex-shrink:0;
+  background:#1e1e1e;border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.radar-card.is-buy  .rc-logo{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.06);}
+.radar-card.is-sell .rc-logo{border-color:rgba(255,77,106,.3);background:rgba(255,77,106,.06);}
+.rc-logo img{width:24px;height:24px;object-fit:contain;}
+.rc-logo img.invert{filter:invert(1) brightness(.85);}
+
+.rc-exinfo{flex:1;min-width:0;}
+.rc-exname{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--text);letter-spacing:.5px;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1;margin-bottom:3px;
+}
+.rc-pair{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:1.5px;}
+
+/* Status dot no canto */
+.rc-status{
+  width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0;
+}
+.radar-card.is-buy  .rc-status{background:var(--green);box-shadow:0 0 6px var(--green);}
+.radar-card.is-sell .rc-status{background:var(--red);box-shadow:0 0 6px var(--red);}
+
+/* ── PREÇO — destaque máximo ── */
+.rc-body{
+  padding:8px 14px 10px;
+  position:relative;z-index:1;flex:1;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.rc-price{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(16px,1.6vw,20px);font-weight:700;
+  color:#fff;letter-spacing:-.5px;line-height:1;margin-bottom:6px;
+}
+.radar-card.is-buy  .rc-price{color:var(--green);text-shadow:0 0 12px rgba(0,229,160,.35);animation:ticker 2s ease infinite;}
+.radar-card.is-sell .rc-price{color:var(--red);text-shadow:0 0 12px rgba(255,77,106,.35);animation:ticker 2s ease infinite;}
+
+.rc-row{display:flex;align-items:center;justify-content:space-between;}
+.rc-diff{
+  font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text2);
+  letter-spacing:.3px;
+}
+.radar-card.is-buy  .rc-diff{color:var(--green);}
+.radar-card.is-sell .rc-diff{color:var(--red);}
+.rc-latency-inline{font-family:var(--mono);font-size:8px;color:var(--text3);}
+
+/* ── MINI CHART — oculto nos radar cards ── */
+.radar-card .r-minichart{ display:none; }
+
+/* ── INDICADOR DE SINAL ── */
+.rc-signal{
+  margin:0 14px 12px;
+  border-radius:8px;
+  padding:9px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+  border:1px solid rgba(255,255,255,.05);
+  background:#0e0e0e;
+  position:relative;overflow:hidden;
+}
+/* Barra de progresso interna animada */
+.rc-signal::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:40%;
+  border-radius:8px;opacity:.12;transition:width .6s ease;
+}
+.radar-card.is-buy  .rc-signal{ border-color:rgba(0,229,160,.2); background:rgba(0,229,160,.04); }
+.radar-card.is-buy  .rc-signal::before{ background:var(--green); width:72%; animation:sigPulse 2.5s ease infinite; }
+.radar-card.is-sell .rc-signal{ border-color:rgba(255,77,106,.2); background:rgba(255,77,106,.04); }
+.radar-card.is-sell .rc-signal::before{ background:var(--red); width:85%; animation:sigPulse 2.5s ease infinite; }
+
+@keyframes sigPulse{ 0%,100%{opacity:.12} 50%{opacity:.22} }
+
+.rc-signal-icon{
+  font-size:16px;line-height:1;flex-shrink:0;
+}
+.rc-signal-body{ flex:1;min-width:0; }
+.rc-signal-label{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:2px;line-height:1;margin-bottom:3px;
+}
+.rc-signal-sub{
+  font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:1px;
+}
+.radar-card.is-buy  .rc-signal-label{ color:var(--green); }
+.radar-card.is-sell .rc-signal-label{ color:var(--red); }
+.radar-card         .rc-signal-label{ color:var(--text2); }
+
+/* Barrinhas de sinal estilo Wi-Fi / força */
+.rc-signal-bars{
+  display:flex;align-items:flex-end;gap:2px;flex-shrink:0;
+}
+.rc-signal-bars span{
+  display:block;width:4px;border-radius:1px;
+  background:rgba(255,255,255,.1);
+}
+.rc-signal-bars span:nth-child(1){ height:6px; }
+.rc-signal-bars span:nth-child(2){ height:10px; }
+.rc-signal-bars span:nth-child(3){ height:14px; }
+.rc-signal-bars span:nth-child(4){ height:18px; }
+/* BUY — 4 barras verdes */
+.radar-card.is-buy .rc-signal-bars span{ background:var(--green); opacity:.8; box-shadow:0 0 4px rgba(0,229,160,.4); }
+/* SELL — 4 barras vermelhas */
+.radar-card.is-sell .rc-signal-bars span{ background:var(--red); opacity:.8; box-shadow:0 0 4px rgba(255,77,106,.4); }
+/* NEUTRO — 2 barras acesas */
+.radar-card:not(.is-buy):not(.is-sell) .rc-signal-bars span:nth-child(1){ background:var(--text2);opacity:.5; }
+.radar-card:not(.is-buy):not(.is-sell) .rc-signal-bars span:nth-child(2){ background:var(--text2);opacity:.5; }
+
+/* ── SEAL RODAPÉ ── */
+.rc-seal-wrap{
+  padding:7px 12px;z-index:2;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#0e0e0e;
+}
+.radar-card.is-buy  .rc-seal-wrap{background:rgba(0,229,160,.05);}
+.radar-card.is-sell .rc-seal-wrap{background:rgba(255,77,106,.05);}
+
+.rc-seal{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;
+}
+.rc-seal.buy{color:var(--green);}
+.rc-seal.sell{color:var(--red);}
+.rc-seal.hold{color:var(--text2);font-size:7px;letter-spacing:.5px;}
+.rc-seal-icon{font-size:9px;line-height:1;}
+.rc-latency{font-family:var(--mono);font-size:7px;color:var(--text3);letter-spacing:.5px;}
+.radar-card.is-buy  .rc-latency{color:rgba(0,229,160,.4);}
+.radar-card.is-sell .rc-latency{color:rgba(255,77,106,.4);}
+
+/* ── OPS TABLE ── */
+.panel{background:#0e0e0e;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);}
+.panel-title{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.ops-table{width:100%;border-collapse:collapse;}
+.ops-table th{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+.ops-table td{font-family:var(--mono);font-size:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.025);vertical-align:middle;}
+.ops-table tr:hover td{background:rgba(255,255,255,.015);}
+.ops-table tr:last-child td{border-bottom:none;}
+.tag-buy{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.06);overflow:hidden;}
+.tag-sell{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,77,106,.3);background:rgba(255,77,106,.06);overflow:hidden;}
+.tag-buy img,.tag-sell img{width:18px;height:18px;object-fit:contain;border-radius:50%;}
+
+/* ── ORDERBOOK ── */
+.ob-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ob-side{background:#0e0e0e;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.ob-hdr-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;}
+.ob-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:5px 14px;font-family:var(--mono);font-size:10px;position:relative;overflow:hidden;}
+.ob-depth{position:absolute;top:0;bottom:0;right:0;opacity:.07;pointer-events:none;}
+.ob-ask .ob-row span:first-child{color:var(--red);font-weight:600;}
+.ob-bid .ob-row span:first-child{color:var(--green);font-weight:600;}
+.ob-ask .ob-depth{background:var(--red);}
+.ob-bid .ob-depth{background:var(--green);}
+.ob-spread{text-align:center;padding:7px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);background:var(--golddim);border-top:1px solid var(--border);border-bottom:1px solid var(--border);letter-spacing:1px;}
+
+/* ── BTC LIVE PAGE ── */
+.btc-hero{
+  background:linear-gradient(135deg,rgba(232,184,75,.08),var(--bg1));
+  border:1px solid var(--bordergold);border-radius:20px;
+  padding:36px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.btc-hero::before{content:'₿';position:absolute;right:-20px;top:-20px;font-size:160px;color:rgba(232,184,75,.04);font-weight:900;line-height:1;}
+.btc-hero-label{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:3px;margin-bottom:12px;opacity:.7;}
+.btc-hero-price{font-family:var(--mono);font-size:56px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-2px;margin-bottom:8px;}
+.btc-hero-change{font-family:var(--mono);font-size:12px;letter-spacing:1px;}
+.btc-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.btc-stat{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.btc-stat-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;}
+.btc-stat-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text);}
+
+/* ── PERFORMANCE PAGE ── */
+.perf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+.perf-card{
+  background:linear-gradient(135deg,var(--bg2),var(--bg1));
+  border:1px solid var(--border);border-radius:16px;padding:24px;
+  position:relative;overflow:hidden;
+}
+.perf-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,var(--gold));}
+.perf-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.perf-range{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+.perf-min{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--c,var(--gold));}
+.perf-sep{font-family:var(--mono);font-size:12px;color:var(--text2);}
+.perf-max{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--c,var(--gold));}
+.perf-sub{font-family:var(--mono);font-size:9px;color:var(--text2);}
+.perf-bar-wrap{margin-top:14px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.perf-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,rgba(232,184,75,.4),var(--c,var(--gold)));animation:barPulse 3s ease infinite alternate;}
+@keyframes barPulse{from{opacity:.6}to{opacity:1}}
+.perf-note{background:rgba(232,184,75,.05);border:1px solid rgba(232,184,75,.12);border-radius:12px;padding:18px;font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.7;letter-spacing:.3px;}
+.perf-note strong{color:var(--gold);}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{padding:0 0 4px;}
+.prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--text2);margin-bottom:6px;letter-spacing:1px;}
+.prog-bg{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,rgba(232,184,75,.5),var(--gold));border-radius:2px;transition:width 1.5s ease;}
+
+/* ── CHART PAGE ── */
+.chart-wrap{
+  background:#0e0e0e;border:1px solid rgba(232,184,75,0.14);
+  border-radius:16px;overflow:hidden;
+  position:relative;
+}
+.chart-wrap::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;z-index:2;
+  background:linear-gradient(90deg,transparent,rgba(232,184,75,0.6),transparent);
+}
+/* Topbar */
+.ch-topbar{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:22px 24px 18px;gap:16px;flex-wrap:wrap;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.ch-title-block{flex:1;min-width:0;}
+.ch-eyebrow{
+  font-family:var(--mono);font-size:8px;color:rgba(232,184,75,0.5);
+  letter-spacing:3px;font-weight:700;margin-bottom:6px;
+}
+.ch-title{
+  font-family:'Orbitron',sans-serif;font-size:clamp(14px,1.8vw,20px);
+  font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:4px;
+}
+.ch-sub{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;}
+/* KPIs */
+.ch-kpis{display:flex;align-items:center;flex-shrink:0;}
+.ch-kpi{padding:0 20px;text-align:right;}
+.ch-kpi:last-child{padding-right:0;}
+.ch-kpi-label{
+  font-family:var(--mono);font-size:7px;color:var(--text2);
+  letter-spacing:2px;font-weight:700;margin-bottom:6px;
+}
+.ch-kpi-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(14px,1.6vw,18px);font-weight:700;line-height:1;
+}
+.ch-kpi-divider{width:1px;height:36px;background:rgba(255,255,255,0.06);flex-shrink:0;}
+/* Canvas */
+.ch-canvas-wrap{
+  position:relative;width:100%;height:clamp(220px,35vh,360px);
+  background:linear-gradient(180deg,#0a0a0a 0%,#0d0d0d 100%);
+}
+#growth-chart{width:100%;height:100%;}
+/* Footer stats */
+.ch-footer{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.ch-stat{
+  padding:14px 20px;text-align:center;
+  border-right:1px solid rgba(255,255,255,0.04);
+}
+.ch-stat:last-child{border-right:none;}
+.ch-stat-label{
+  font-family:var(--mono);font-size:7px;color:var(--text2);
+  letter-spacing:2px;font-weight:700;margin-bottom:7px;
+}
+.ch-stat-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(14px,1.4vw,17px);font-weight:700;color:var(--gold);
+}
+@media(max-width:700px){
+  .ch-topbar{flex-direction:column;}
+  .ch-kpis{flex-wrap:wrap;gap:12px;}
+  .ch-kpi{text-align:left;padding:0;}
+  .ch-kpi-divider{display:none;}
+  .ch-footer{grid-template-columns:1fr 1fr;}
+  .ch-stat:nth-child(2){border-right:none;}
+}
+
+/* ── EXCHANGE CARDS ── */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.ex-card{
+  background:linear-gradient(135deg,rgba(0,229,160,.04),var(--bg1));
+  border:1px solid rgba(0,229,160,.18);border-radius:14px;
+  padding:16px;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+}
+.ex-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,160,.08);}
+.ex-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,160,.4),transparent);}
+.ex-seal{
+  position:absolute;top:10px;right:10px;
+  background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);
+  border-radius:6px;padding:2px 7px;
+  font-family:var(--mono);font-size:7px;font-weight:700;color:var(--green);letter-spacing:1.5px;
+}
+.ex-logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ex-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;border:1px solid rgba(255,255,255,.08);}
+.ex-logo.invert{filter:invert(1) brightness(.85);}
+.ex-logo-fallback{width:32px;height:32px;border-radius:50%;background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.15);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;color:var(--gold);}
+.ex-name{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);letter-spacing:.5px;}
+.ex-pair{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:2px;letter-spacing:1px;}
+.ex-status-row{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(0,229,160,.08);}
+.ex-live{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;}
+.ex-latency{font-family:var(--mono);font-size:7px;color:var(--text2);letter-spacing:.5px;}
+
+/* ── MINI CHART NO CARD ── */
+.r-minichart{
+  position:absolute;bottom:28px;left:0;right:0;height:36px;
+  overflow:hidden;opacity:.35;pointer-events:none;
+}
+.radar-card.is-buy .r-minichart{opacity:.5;}
+.radar-card.is-sell .r-minichart{opacity:.5;}
+.r-minichart canvas{width:100%;height:100%;}
+
+/* ══ RESPONSIVO — WEB FIRST ══ */
+@media(min-width:1400px){
+  .main{padding:24px 32px;}
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:14px;}
+  .client-metrics{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:1100px) and (max-width:1399px){
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:12px;}
+  .client-metrics{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:900px) and (max-width:1099px){
+  .radar-grid{grid-template-columns:repeat(5,1fr);gap:8px;}
+  .client-metrics{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ══ RESPONSIVO — MOBILE ══ */
+@media(max-width:899px){
+  /* Layout base mobile */
+  html,body{overflow:auto;}
+  .main{margin-top:52px;height:auto;overflow:visible;padding:12px;}
+
+  /* Topbar mobile */
+  .topbar{height:52px;padding:0 10px 0 56px;}
+  .topbar-clock{font-size:10px;}
+  .btc-live-badge{padding:5px 9px;gap:6px;}
+  .btc-live-label{display:none;} /* esconde label, mantém só o preço */
+  .btc-live-price{font-size:13px;}
+  .sys-badge{display:none;} /* remove badge sistema no mobile */
+
+  /* Hamburger mobile */
+  .hamburger{width:38px;height:38px;top:7px;left:8px;}
+
+  /* Sidebar mobile */
+  .sidebar{width:220px;left:-221px;}
+
+  /* Client card mobile */
+  .client-card{padding:18px 16px;}
+  .client-name{font-size:18px!important;}
+  .client-badge{font-size:7px;padding:4px 9px;}
+  .client-metrics{grid-template-columns:1fr 1fr;gap:8px;}
+  .metric{padding:12px 10px;}
+  .metric-value{font-size:16px;}
+  .metric-label{font-size:7px;}
+
+  /* Card mobile — mantém layout fixo universal, ajusta só fontes */
+  .cc-identity{padding:14px 14px 10px;}
+  .cc-sync-badge{font-size:8px;padding:4px 10px;}
+  .cc-name{font-size:clamp(16px,5vw,24px);}
+  .cc-op-stats{gap:8px 14px;}
+
+  /* Radar mobile — 2 colunas */
+  .radar-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px;}
+  .radar-card{padding:14px 8px 32px;}
+  .r-logo-ring{width:36px;height:36px;}
+  .r-img{width:22px;height:22px;}
+  .r-price{font-size:11px;}
+  .r-name{font-size:6px;letter-spacing:1px;}
+  .r-tag{font-size:7px;padding:3px 7px;}
+  .r-diff{font-size:7px;}
+
+  /* Ops table mobile — scroll horizontal */
+  .panel{overflow-x:auto;}
+  .ops-table{min-width:520px;font-size:9px;}
+  .ops-table th{font-size:7px;padding:7px 8px;}
+  .ops-table td{padding:7px 8px;}
+
+  /* Orderbook mobile */
+  .ob-wrap{grid-template-columns:1fr;}
+  .ob-hdr-row{font-size:7px;padding:6px 10px;}
+  .ob-row{font-size:9px;padding:4px 10px;}
+
+  /* BTC page mobile */
+  .btc-hero{padding:22px 16px;}
+  .btc-hero-price{font-size:36px;}
+  .btc-stats-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .btc-stat{padding:12px;}
+  .btc-stat-val{font-size:13px;}
+
+  /* Performance mobile */
+  .perf-grid{grid-template-columns:1fr;gap:10px;}
+  .perf-min,.perf-max{font-size:18px;}
+
+  /* Chart mobile */
+  .chart-wrap{padding:16px;}
+  .chart-header{flex-direction:column;gap:10px;}
+  .chart-kpis{flex-direction:row;gap:12px;flex-wrap:wrap;}
+  .chart-kpi{text-align:left;}
+  .chart-kpi-val{font-size:13px;}
+  .chart-canvas-wrap{height:200px;}
+  .chart-stats-row{grid-template-columns:1fr 1fr;gap:8px;}
+  .chart-stat{padding:12px;}
+  .chart-stat-val{font-size:14px;}
+
+  /* Exchange cards mobile */
+  .ex-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .ex-card{padding:12px;}
+  .ex-name{font-size:9px;}
+
+  /* Section headers mobile */
+  .sec-title{font-size:8px;letter-spacing:1.5px;}
+  .panel-title{font-size:8px;}
+}
+
+@media(max-width:480px){
+  .client-metrics{grid-template-columns:1fr 1fr;}
+  .radar-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px;}
+  .radar-card{padding:12px 6px 28px;}
+  .r-logo-ring{width:30px;height:30px;margin-bottom:6px;}
+  .r-img{width:18px;height:18px;}
+  .r-price{font-size:10px;}
+  .r-name{font-size:6px;}
+  .topbar-clock{font-size:9px;}
+  .btc-live-price{font-size:12px;}
+  .metric-value{font-size:15px;}
+  .chart-canvas-wrap{height:170px;}
+  .ex-grid{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <canvas id="login-canvas"></canvas>
+  <div class="login-wrap">
+    <div class="login-top">
+      <div style="margin-bottom:16px;">
+        <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(232,184,75,0.1)" stroke-width="2"/>
+          <circle cx="36" cy="36" r="30" fill="none" stroke="#E8B84B" stroke-width="2"
+            stroke-dasharray="50 140" stroke-linecap="round">
+            <animateTransform attributeName="transform" type="rotate"
+              from="0 36 36" to="360 36 36" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="36" cy="36" r="22" fill="none" stroke="rgba(232,184,75,0.06)" stroke-width="1"/>
+          <text x="36" y="44" text-anchor="middle"
+            font-family="'Orbitron',sans-serif" font-size="22" font-weight="900"
+            fill="#E8B84B">B</text>
+        </svg>
+      </div>
+      <div class="login-brand"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
+      <div class="login-logo-txt" style="margin-top:6px;">ARBITRAGE BTC</div>
+      <div class="login-divider"></div>
+      <div class="login-badge"><span class="pulse" style="width:5px;height:5px;"></span>SISTEMA ATIVO · ACESSO RESTRITO</div>
+      <div class="login-sub">Área exclusiva de clientes</div>
+    </div>
+    <div class="login-box">
+      <div class="lf"><label>Usuário</label><input type="text" id="l-user" placeholder="seu usuário" autocomplete="off"></div>
+      <div class="lf"><label>Senha</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+      <button class="login-btn" onclick="doLogin()">ACESSAR SISTEMA →</button>
+      <div class="login-err" id="l-err"></div>
+    </div>
+    <div class="login-foot">SISTEMA SEGURO · PROTOCOLO ARB © 2026</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+<div class="dashboard-layout">
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sid-brand" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div class="sid-brand-name"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(232,184,75,0.45);margin-top:4px;letter-spacing:4px;">ARBITRAGE BTC</div>
+  </div>
+  <div class="sid-nav">
+    <div class="nav-item active" onclick="showPage('overview',this)" title="Página inicial">
+      <span class="nav-icon">⌂</span>OVERVIEW
+    </div>
+    <div class="nav-item" onclick="showPage('btclive',this)">
+      <span class="nav-icon">₿</span>BTC LIVE-ON
+    </div>
+    <div class="nav-item" onclick="showPage('orderbook',this)">
+      <span class="nav-icon">≡</span>ORDERBOOK
+    </div>
+    <div class="nav-item" onclick="showPage('performance',this)">
+      <span class="nav-icon">↗</span>PERFORMANCE
+    </div>
+    <div class="nav-item" onclick="showPage('exchanges',this)">
+      <span class="nav-icon">⬡</span>EXCHANGES
+    </div>
+    <div class="nav-item" onclick="showPage('chart',this)">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <polyline points="1,11 4,7 6,9 9,4 11,6 13,2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <polyline points="10.5,2 13,2 13,4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg></span>CRESCIMENTO
+    </div>
+    <div class="nav-item" onclick="showPage('indicacoes',this)" style="color:var(--gold);">
+      <span class="nav-icon">◎</span>INDICAÇÕES
+    </div>
+  </div>
+  <div class="sid-foot">
+    <div class="sid-status"><span class="pulse"></span>SISTEMA ATIVO · LIVE</div>
+    <button onclick="doLogout()" style="
+      margin-top:12px;width:100%;
+      background:rgba(255,77,106,0.06);border:1px solid rgba(255,77,106,0.2);
+      border-radius:7px;padding:8px;cursor:pointer;
+      font-family:var(--mono);font-size:8px;font-weight:700;
+      color:rgba(255,77,106,0.7);letter-spacing:1.5px;transition:all .2s;
+    " onmouseover="this.style.background='rgba(255,77,106,0.12)';this.style.color='#FF4D6A'"
+       onmouseout="this.style.background='rgba(255,77,106,0.06)';this.style.color='rgba(255,77,106,0.7)'">
+      ⏻ &nbsp;SAIR
+    </button>
+  </div>
+</nav>
+
+<div class="content-area">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span class="topbar-clock" id="clock">--:--:--</span>
+    <span style="color:var(--text3);font-size:10px;">·</span>
+    <span id="breadcrumb" style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1.5px;">OVERVIEW</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:3px;gap:2px;">
+      <button id="btn-lite" onclick="setMode('lite')" style="background:transparent;color:var(--text2);border:none;border-radius:16px;padding:5px 14px;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;transition:all .2s;">LITE</button>
+      <button id="btn-pro" onclick="setMode('pro')" style="background:var(--gold);color:#000;border:none;border-radius:16px;padding:5px 14px;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;transition:all .2s;">PRO</button>
+    </div>
+    <div class="topbar-right">
+      <div class="btc-live-badge">
+        <span class="btc-live-label">BTC/USDT</span>
+        <span class="btc-live-price" id="top-price">$--</span>
+      </div>
+      <div class="sys-badge"><span class="pulse"></span>PROTOCOLO ARB</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+<!-- ══ OVERVIEW ══ -->
+  <div class="page active" id="page-overview">
+
+
+    <!-- ══ LITE VIEW ══ -->
+    <div class="lite-view">
+
+      <!-- Card principal -->
+      <div class="lite-card">
+
+        <!-- Topo: nome + tags de status -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <div style="text-align:left;">
+            <div class="lite-greeting">● SISTEMA ATIVO</div>
+            <div class="lite-name" style="text-align:left;">EDUARDO SANTI</div>
+          </div>
+          <!-- Tags status -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;">
+            <div class="cc-status-pill">
+              <span class="cc-status-dot"></span>
+              <span>LAT</span>
+              <span id="lite-latency" class="cc-status-val" style="color:var(--green);">--ms</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+              <span>240/H</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--blue);box-shadow:0 0 4px var(--blue);animation:none;"></span>
+              <span>99.9%</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+              <span>TICK</span>
+              <span id="lite-ticks" class="cc-status-val" style="color:var(--gold);">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patrimônio -->
+        <div style="margin-bottom:28px;">
+          <div class="lite-patrimonio-label">Seu patrimônio hoje</div>
+          <div class="lite-patrimonio-val" id="lite-cap">$--</div>
+          <div class="lite-patrimonio-sub">Atualizado em tempo real · BTC + USDT + Lucro</div>
+        </div>
+
+        <!-- Live bar ticks -->
+        <div class="cc-live-bar" style="margin-bottom:20px;">
+          <span class="pulse" style="width:5px;height:5px;"></span>
+          <span class="cc-live-bar-txt">OPERANDO · <span id="lite-ticks-bar" style="color:var(--gold);">0</span> TICKS</span>
+          <div class="cc-live-bar-line"><div class="cc-live-bar-fill"></div></div>
+        </div>
+
+        <!-- Stats: Lucro + ROI + Pools -->
+        <div class="lite-stats" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:28px;">
+          <div class="lite-stat">
+            <div class="lite-stat-label">Lucro acumulado</div>
+            <div class="lite-stat-val" style="color:var(--green);" id="lite-profit">+$--</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Rendimento</div>
+            <div class="lite-stat-val" style="color:var(--gold);" id="lite-roi">--%</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Pool BTC</div>
+            <div class="lite-stat-val" style="color:var(--gold);font-size:clamp(13px,2vw,18px);">0.00719 <span style="font-size:.6em;opacity:.5;">BTC</span></div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:4px;" id="lite-btc-pool-usd">≈ $--</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Pool USDT</div>
+            <div class="lite-stat-val" style="color:var(--blue);font-size:clamp(13px,2vw,18px);">$600 <span style="font-size:.6em;opacity:.5;">USDT</span></div>
+          </div>
+        </div>
+
+        <!-- Meta -->
+        <div class="lite-meta">
+          <div class="lite-meta-header">
+            <span class="lite-meta-label">◆ META DO CICLO · $100 USDT</span>
+            <span class="lite-meta-pct" id="lite-meta-pct">0%</span>
+          </div>
+          <div class="lite-meta-track">
+            <div class="lite-meta-fill" id="lite-meta-bar" style="width:0%"></div>
+          </div>
+          <div class="lite-meta-footer">
+            <span id="lite-meta-cur">$0,00 acumulado</span>
+            <span>Meta: $100,00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BTC ao vivo -->
+      <div class="lite-btc">
+        <div class="lite-btc-left">
+          <div class="lite-btc-label">BITCOIN · PREÇO AO VIVO</div>
+          <div class="lite-btc-price" id="lite-btc-price">$--</div>
+          <div class="lite-btc-change" id="lite-btc-change" style="color:var(--green);">carregando...</div>
+        </div>
+        <div class="lite-status">
+          <span class="pulse"></span>AO VIVO
+        </div>
+      </div>
+
+    </div>
+    <!-- /LITE VIEW -->
+
+    <!-- ══ PRO VIEW ══ -->
+    <div class="pro-view">
+    <!-- CLIENT CARD — OKX/BYBIT STYLE -->
+    <div class="client-card">
+
+      <!-- CORPO: 2 colunas principais -->
+      <div class="cc-body">
+
+        <!-- COL ESQUERDA: Identidade -->
+        <div class="cc-identity">
+          <!-- Topbar: SYNC + Nome + Chip -->
+          <div class="cc-id-topbar">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+              <div class="cc-sync-badge"><span class="pulse"></span>SYNC</div>
+              <div class="cc-status-row">
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot"></span>
+                  <span>LAT</span>
+                  <span id="st-latency" class="cc-status-val" style="color:var(--green);">--ms</span>
+                </div>
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+                  <span>240/H</span>
+                </div>
+                <div class="cc-status-pill">
+                  <span class="cc-status-dot" style="background:var(--blue);box-shadow:0 0 4px var(--blue);animation:none;"></span>
+                  <span>99.9%</span>
+                </div>
+              </div>
+            </div>
+            <div class="cc-name">EDUARDO SANTI</div>
+            <div class="cc-chip">BTC/USDT · ARB · PROTOCOLO CRIPTO</div>
+          </div>
+          <div class="cc-id-center">
+            <div class="cc-op-stats">
+              <div class="cc-op-stat">
+                <div class="cc-op-stat-label">ESTRATÉGIA</div>
+                <div class="cc-op-stat-val">ARB · SPOT</div>
+              </div>
+
+              <div class="cc-op-stat cc-op-full">
+                <div class="cc-op-stat-label">RENDIMENTO</div>
+                <div class="cc-op-stat-val" style="color:var(--green);">0.00001736% / TICK</div>
+              </div>
+            </div>
+            <div class="cc-live-bar">
+              <span class="pulse" style="width:5px;height:5px;"></span>
+              <span class="cc-live-bar-txt">OPERANDO · <span id="cc-ticks-live" style="color:var(--gold);">0</span> TICKS</span>
+              <div class="cc-live-bar-line"><div class="cc-live-bar-fill"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COL DIREITA: grid 4x2, células diretas sem wrappers -->
+        <div class="cc-right">
+
+          <div class="cc-pool-btc-inline">
+            <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold);"></span>POOL BTC</div>
+            <div class="cc-pool-num" style="color:var(--gold);">0.00719 <span style="font-size:.55em;font-weight:400;color:rgba(232,184,75,0.4);letter-spacing:1px;">BTC</span></div>
+            <div class="cc-pool-usd">≈ <span id="pool-btc-usd" style="color:rgba(232,184,75,0.7);">$--</span></div>
+          </div>
+
+          <div class="cc-pool-usdt-inline">
+            <div class="cc-pool-tag"><span class="cc-pool-tag-dot" style="background:var(--blue);box-shadow:0 0 5px var(--blue);"></span>POOL USDT</div>
+            <div class="cc-pool-num" style="color:var(--blue);">$600 <span style="font-size:.55em;font-weight:400;color:rgba(77,159,255,0.4);letter-spacing:1px;">USDT</span></div>
+            <div class="cc-pool-usd" style="color:var(--text2);visibility:hidden;">≈ $--</div>
+          </div>
+
+          <div class="cc-r-profit">
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);box-shadow:0 0 5px var(--green);"></span>PROFIT TOTAL</div>
+            <div class="cc-r-val" style="color:var(--green);" id="profit-total">+$0.000000</div>
+            <div class="cc-r-sub">USDT ACUMULADO</div>
+          </div>
+
+          <div class="cc-r-roi">
+            <div class="cc-r-label"><span class="cc-r-label-dot" style="background:var(--green);"></span>ROI</div>
+            <div class="cc-r-val" style="color:var(--green);" id="profit-roi">0.000000%</div>
+            <div class="cc-r-sub">SOBRE APORTE $1.026</div>
+          </div>
+
+          <div class="cc-r-capital">
+            <!-- Layout: 3 zonas — Capital | Balanceamento | Sparkline -->
+            <div class="cc-cap-layout">
+
+              <!-- Zona 1: Capital -->
+              <div class="cc-cap-zone">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold);"></span>
+                  CAPITAL TOTAL
+                  <span style="color:rgba(0,229,160,0.4);font-size:6px;letter-spacing:1.5px;margin-left:4px;">● LIVE</span>
+                </div>
+                <div class="cc-cap-val" id="cap-total">$--</div>
+                <div class="cc-cap-sub">POOL + PROFIT</div>
+              </div>
+
+              <!-- Zona 2: Balanceamento -->
+              <div class="cc-cap-zone cc-cap-mid">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--text2);"></span>
+                  ALOCAÇÃO
+                </div>
+                <div class="cc-balance-bars">
+                  <div class="cc-bal-row">
+                    <span class="cc-bal-label" style="color:var(--gold);">BTC</span>
+                    <div class="cc-bal-track">
+                      <div class="cc-bal-fill cc-bal-btc" id="bal-btc" style="width:50%"></div>
+                    </div>
+                    <span class="cc-bal-pct" id="bal-btc-pct" style="color:var(--gold);">50.0%</span>
+                  </div>
+                  <div class="cc-bal-row" style="margin-top:8px;">
+                    <span class="cc-bal-label" style="color:var(--blue);">USDT</span>
+                    <div class="cc-bal-track">
+                      <div class="cc-bal-fill cc-bal-usdt" id="bal-usdt" style="width:50%"></div>
+                    </div>
+                    <span class="cc-bal-pct" id="bal-usdt-pct" style="color:var(--blue);">50.0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Zona 3: Sparkline -->
+              <div class="cc-cap-zone cc-cap-spark">
+                <div class="cc-r-label" style="margin-bottom:10px;">
+                  <span class="cc-r-label-dot" style="background:var(--gold);"></span>
+                  EVOLUÇÃO
+                </div>
+                <canvas id="sparkline-cap" class="cc-sparkline"></canvas>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="cc-r-pm">
+            <div class="cc-r-label" style="margin-bottom:10px;"><span class="cc-r-label-dot" style="background:var(--gold);opacity:.5;"></span>PREÇO MÉDIO ENTRADA</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(13px,1.4vw,17px);font-weight:700;color:rgba(232,184,75,0.75);letter-spacing:-.3px;line-height:1;margin-bottom:4px;">$104.064,56</div>
+            <div class="cc-r-sub">BTC · FIXO</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- FOOTER: BARRA META -->
+      <div class="cc-footer">
+        <div class="cc-prog-wrap">
+          <div class="cc-prog-label">
+            <div class="cc-prog-left">
+              <span class="cc-prog-star">◆</span>
+              META · <span style="color:var(--gold);font-weight:700;margin-left:3px;">$100 USDT</span>
+            </div>
+            <div class="cc-prog-right">
+              <span class="cc-prog-cur" id="prog-val">$0.00</span>
+              <span class="cc-prog-sep">/</span>
+              <span class="cc-prog-target">$100,00</span>
+              <span class="cc-prog-pct" id="prog-pct">0.00%</span>
+            </div>
+          </div>
+          <div class="cc-prog-track"><div class="cc-prog-fill" id="prog-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    </div><!-- /PRO VIEW -->
+
+    <!-- RADAR -->
+    <div class="sec-hdr">
+      <div class="sec-title">Rastreador de Preços · 10 Exchanges</div>
+      <div class="live-dot">AO VIVO</div>
+    </div>
+    <div class="radar-grid" id="radar" style="margin-bottom:18px;"></div>
+
+    <!-- OPS TABLE -->
+    <div class="sec-hdr">
+      <div class="sec-title">Operações em Tempo Real</div>
+      <div class="live-dot">REAL TIME</div>
+    </div>
+    <div class="panel" style="overflow:auto;">
+      <div class="panel-hdr">
+        <div class="panel-title">ARBITRAGEM BTC/USDT</div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">1 OP / 15s</div>
+      </div>
+      <table class="ops-table">
+        <thead>
+          <tr>
+            <th>HORA</th><th>COMPRA</th><th>VENDA</th>
+            <th>PREÇO C.</th><th>PREÇO V.</th><th>SPREAD</th><th>ROI</th>
+          </tr>
+        </thead>
+        <tbody id="ops-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ BTC LIVE-ON ══ -->
+  <div class="page" id="page-btclive">
+    <div class="btc-hero">
+      <div class="btc-hero-label">BITCOIN · PREÇO EM TEMPO REAL</div>
+      <div class="btc-hero-price" id="btc-hero-price">$--</div>
+      <div class="btc-hero-change" id="btc-change" style="color:var(--green);">carregando...</div>
+    </div>
+    <div class="btc-stats-grid" style="margin-bottom:18px;">
+      <div class="btc-stat"><div class="btc-stat-label">PAR</div><div class="btc-stat-val" style="color:var(--gold);">BTC/USDT</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">FONTE</div><div class="btc-stat-val" style="font-size:11px;">BINANCE WS</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">ATUALIZAÇÃO</div><div class="btc-stat-val" style="font-size:11px;">TEMPO REAL</div></div>
+      <div class="btc-stat"><div class="btc-stat-label">STATUS</div><div class="btc-stat-val" style="color:var(--green);font-size:11px;" id="ws-status">CONECTANDO...</div></div>
+    </div>
+    <div class="sec-hdr"><div class="sec-title">Radar de Preços · Exchanges</div><div class="live-dot">AO VIVO</div></div>
+    <div class="radar-grid" id="radar-btc"></div>
+  </div>
+
+  <!-- ══ ORDERBOOK ══ -->
+  <div class="page" id="page-orderbook">
+    <div class="sec-hdr">
+      <div class="sec-title">Orderbook BTC/USDT</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="live-dot">LIVE</div>
+        <select id="ob-sel" onchange="renderOB()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:9px;padding:5px 10px;border-radius:7px;outline:none;">
+          <option value="bybit">Bybit</option><option value="binance">Binance</option>
+          <option value="okx">OKX</option><option value="kucoin">KuCoin</option>
+          <option value="coinbase">Coinbase</option><option value="bitget">Bitget</option>
+          <option value="kraken">Kraken</option>
+        </select>
+      </div>
+    </div>
+    <div class="ob-wrap">
+      <div class="ob-side">
+        <div class="panel-hdr"><div class="panel-title" style="color:var(--red);">ASKS (VENDA)</div></div>
+        <div class="ob-hdr-row"><span>PREÇO</span><span>VOLUME</span><span>TOTAL</span></div>
+        <div class="ob-ask" id="ob-asks"></div>
+        <div class="ob-spread" id="ob-spread">Spread: --</div>
+        <div class="ob-hdr-row" style="color:var(--green);opacity:.7;"><span>PREÇO</span><span>VOLUME</span><span>TOTAL</span></div>
+        <div class="ob-bid" id="ob-bids"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">PROFUNDIDADE</div></div>
+          <div style="padding:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+              <div style="background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.15);border-radius:10px;padding:14px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--green);margin-bottom:5px;letter-spacing:1px;">COMPRADORES</div>
+                <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green);" id="ob-bvol">--</div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:3px;" id="ob-bpct">--%</div>
+              </div>
+              <div style="background:rgba(255,77,106,.05);border:1px solid rgba(255,77,106,.15);border-radius:10px;padding:14px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--red);margin-bottom:5px;letter-spacing:1px;">VENDEDORES</div>
+                <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--red);" id="ob-avol">--</div>
+                <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:3px;" id="ob-apct">--%</div>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-bottom:7px;letter-spacing:1px;">BALANÇO BUY/SELL</div>
+            <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:flex;">
+              <div style="background:linear-gradient(90deg,#005533,var(--green));transition:width .6s;" id="ob-pb"></div>
+              <div style="background:linear-gradient(90deg,var(--red),#660022);flex:1;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="flex:1;">
+          <div class="panel-hdr"><div class="panel-title">TRADES RECENTES</div><div class="live-dot">LIVE</div></div>
+          <div style="overflow:auto;max-height:220px;">
+            <table class="ops-table"><thead><tr><th>PREÇO</th><th>VOLUME</th><th>LADO</th><th>HORA</th></tr></thead><tbody id="ob-trades"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PERFORMANCE ══ -->
+  <div class="page" id="page-performance">
+    <div class="sec-hdr" style="margin-bottom:16px;">
+      <div class="sec-title">Estimativa de Performance</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:1px;">VALORES HISTÓRICOS · FAIXA DE VARIAÇÃO</div>
+    </div>
+    <!-- Vencimento do contrato -->
+    <div style="background:rgba(232,184,75,0.04);border:1px solid rgba(232,184,75,0.15);border-radius:14px;padding:18px 24px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;">VENCIMENTO DO CONTRATO</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">08 / 05 / 2027</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;">DIAS RESTANTES</div>
+        <div id="dias-venc" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);">--</div>
+      </div>
+    </div>
+
+    <div class="perf-grid">
+      <div class="perf-card" style="--c:var(--gold)">
+        <div class="perf-label">Lucro Médio Diário</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--gold)">0,08%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--gold)">0,12%</span>
+        </div>
+        <div class="perf-sub">por dia de operação</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:70%;--c:var(--gold)"></div></div>
+      </div>
+      <div class="perf-card" style="--c:var(--blue)">
+        <div class="perf-label">Lucro Médio Semanal</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--blue)">0,50%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--blue)">0,90%</span>
+        </div>
+        <div class="perf-sub">por semana (7 dias)</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:65%;--c:var(--blue)"></div></div>
+      </div>
+      <div class="perf-card" style="--c:var(--green)">
+        <div class="perf-label">Lucro Médio Mensal</div>
+        <div class="perf-range">
+          <span class="perf-min" style="color:var(--green)">2,5%</span>
+          <span class="perf-sep">~</span>
+          <span class="perf-max" style="color:var(--green)">3,5%</span>
+        </div>
+        <div class="perf-sub">por mês (30 dias)</div>
+        <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:80%;--c:var(--green)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CRESCIMENTO ══ -->
+  <div class="page" id="page-chart">
+
+    <div class="chart-wrap">
+
+      <!-- Topo: título + KPIs em linha -->
+      <div class="ch-topbar">
+        <div class="ch-title-block">
+          <div class="ch-eyebrow">CRESCIMENTO DE BANCA · TEMPO REAL</div>
+          <div class="ch-title">EVOLUÇÃO DO PATRIMÔNIO</div>
+          <div class="ch-sub">EDUARDO SANTI · BTC/USDT ARB · 0.00001736%/TICK</div>
+        </div>
+        <div class="ch-kpis">
+          <div class="ch-kpi">
+            <div class="ch-kpi-label">CAPITAL INICIAL</div>
+            <div class="ch-kpi-val" style="color:var(--text2);" id="chart-inicial">$--</div>
+          </div>
+          <div class="ch-kpi-divider"></div>
+          <div class="ch-kpi">
+            <div class="ch-kpi-label">CAPITAL ATUAL</div>
+            <div class="ch-kpi-val" style="color:var(--gold);" id="chart-hoje">$--</div>
+          </div>
+          <div class="ch-kpi-divider"></div>
+          <div class="ch-kpi">
+            <div class="ch-kpi-label">PROFIT TOTAL</div>
+            <div class="ch-kpi-val" style="color:var(--green);" id="chart-lucro">+$--</div>
+          </div>
+          <div class="ch-kpi-divider"></div>
+          <div class="ch-kpi">
+            <div class="ch-kpi-label">ROI</div>
+            <div class="ch-kpi-val" style="color:var(--green);" id="chart-roi">--%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="ch-canvas-wrap">
+        <canvas id="growth-chart"></canvas>
+      </div>
+
+      <!-- Rodapé: stats -->
+      <div class="ch-footer">
+        <div class="ch-stat">
+          <div class="ch-stat-label">OPERAÇÕES</div>
+          <div class="ch-stat-val" id="chart-ops">--</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-stat-label">DIAS OPERANDO</div>
+          <div class="ch-stat-val" id="chart-dias">--</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-stat-label">TAXA / TICK</div>
+          <div class="ch-stat-val" style="color:var(--blue);">0.00001736%</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-stat-label">INTERVALO</div>
+          <div class="ch-stat-val" style="color:var(--text2);">15 SEG</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ EXCHANGES ══ -->
+  <div class="page" id="page-exchanges">
+    <div class="sec-hdr" style="margin-bottom:16px;">
+      <div class="sec-title">Exchanges Sincronizadas</div>
+      <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;"><span class="pulse"></span>10 CEX · ATIVAS</div>
+    </div>
+    <div class="ex-grid" id="ex-grid"></div>
+  </div>
+
+
+  <!-- ══ INDICAÇÕES ══ -->
+  <div class="page" id="page-indicacoes">
+
+    <!-- Hero -->
+    <div class="ind-hero">
+      <div class="ind-hero-label">◎ PROGRAMA DE INDICAÇÃO · PROTOCOLO ARB</div>
+      <div class="ind-hero-title">Indique e ganhe automaticamente</div>
+      <div class="ind-hero-sub">
+        Compartilhe seu link exclusivo. Para cada pessoa que entrar na mesa através de você,
+        o Protocolo repassa <strong style="color:var(--gold);">30% do rendimento mensal</strong> gerado pelo capital do indicado —
+        direto para sua conta, sem afetar nada para quem você indicou.
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="ind-grid">
+      <div class="ind-card" style="border-color:rgba(232,184,75,0.15);">
+        <div class="ind-card-label">Comissões acumuladas</div>
+        <div class="ind-card-val" style="color:var(--gold);" id="ind-total">$0,00</div>
+        <div class="ind-card-sub">USDT disponível</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-card-label">Indicações ativas</div>
+        <div class="ind-card-val" style="color:var(--green);" id="ind-count">0</div>
+        <div class="ind-card-sub">mesas operando pelo seu link</div>
+      </div>
+    </div>
+
+    <!-- Link exclusivo -->
+    <div class="ind-link-box">
+      <div class="ind-link-label">SEU LINK EXCLUSIVO DE INDICAÇÃO</div>
+      <div class="ind-link-row">
+        <div class="ind-link-url" id="ind-link-url">protocolocripto.com/eduardo-santi?ref=EDU001</div>
+        <button class="ind-copy-btn" onclick="copyIndLink()">COPIAR</button>
+      </div>
+    </div>
+
+    <!-- Como funciona -->
+    <div class="ind-como">
+      <div class="ind-como-title">◈ COMO FUNCIONA O SISTEMA POOL-TO-POOL</div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">1</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">COMPARTILHE SEU LINK</div>
+          <div class="ind-step-desc">Divulgue seu link exclusivo para pessoas interessadas em arbitragem BTC. Cada link é único e rastreado pelo Protocolo.</div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">2</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">A PESSOA ENTRA NA MESA</div>
+          <div class="ind-step-desc">Quando alguém se cadastra pelo seu link e começa a operar, você passa a receber automaticamente 30% do rendimento mensal gerado pelo capital dela.</div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">3</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">EXEMPLO REAL</div>
+          <div class="ind-step-desc">
+            Seu indicado investe <span style="color:var(--gold);">$10.000</span> →
+            gera <span style="color:var(--green);">$300/mês</span> de rendimento →
+            você recebe <span style="color:var(--gold);">$90/mês</span> automaticamente.
+            <br><br>
+            <span style="color:rgba(0,229,160,0.7);">✓ O indicado continua recebendo $300 inteiros — o Protocolo banca os $90 com sua margem operacional.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">4</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">RECORRENTE E AUTOMÁTICO</div>
+          <div class="ind-step-desc">Enquanto seu indicado permanecer na mesa, você continua recebendo. Sem limite de indicações — quanto mais você indica, mais o sistema trabalha por você.</div>
+        </div>
+      </div>
+
+      <div class="ind-step" style="margin-bottom:0;">
+        <div class="ind-step-num" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.3);">
+          <span style="color:var(--green);">✓</span>
+        </div>
+        <div class="ind-step-body">
+          <div class="ind-step-title" style="color:var(--green);">ZERO IMPACTO NO INDICADO</div>
+          <div class="ind-step-desc">A comissão de 30% é bancada integralmente pelo Protocolo, que opera com margem de até 50%. Seu indicado não perde absolutamente nada do rendimento.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saque -->
+    <button class="ind-saque-btn" onclick="abrirSaque()">
+      ↑ &nbsp;SOLICITAR SAQUE DE COMISSÕES · USDT
+    </button>
+
+  </div>
+
+  <!-- Modal Saque -->
+  <div class="ind-modal-overlay" id="ind-modal">
+    <div class="ind-modal">
+      <div class="ind-modal-title">Solicitar Saque</div>
+      <div class="ind-modal-sub">COMISSÕES DISPONÍVEIS · <span id="modal-saldo" style="color:var(--gold);">$0,00</span> USDT</div>
+      <label>ENDEREÇO USDT (TRC-20 ou ERC-20)</label>
+      <input type="text" id="ind-wallet" placeholder="Endereço da sua carteira USDT..."/>
+      <label>VALOR A SACAR (USDT)</label>
+      <input type="number" id="ind-valor" placeholder="0.00"/>
+      <div class="ind-modal-btns">
+        <button class="ind-modal-cancel" onclick="fecharSaque()">CANCELAR</button>
+        <button class="ind-modal-confirm" onclick="confirmarSaque()">CONFIRMAR SOLICITAÇÃO</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</main>
+
+<button class="home-fab" id="home-fab" onclick="showPage('overview', document.querySelector('.nav-item'))">
+  ⌂ &nbsp;INÍCIO
+</button>
+
+</div><!-- /content-area -->
+</div><!-- /dashboard-layout -->
+</div><!-- /dashboard -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+
+// ══════════════════════════════════════════════════════════════
+//  BANCO DE CLIENTES — adicione novos clientes aqui
+//  Cada objeto representa uma mesa ativa
+// ══════════════════════════════════════════════════════════════
+const CLIENTES = {
+  'andrehornung': {
+    senha:       'chacall',
+    nome:        'ANDRE HORNUNG',
+    pool_btc:    0.34295,
+    pool_usdt:   25000.00,
+    preco_medio: 72898.93,
+    btc_inicial: 72898.93,
+    aporte_base: 50000.00,
+    meta:        1000.00,
+    checkpoint:  '2026-04-11T07:00:00-03:00',
+    ref_code:    'AND001',
+    sobre_aporte:'$50K',
+  },
+  'eduardosanti': {
+    senha:       'dusanti2025',
+    nome:        'EDUARDO SANTI',
+    pool_btc:    0.00719,
+    pool_usdt:   600.00,
+    preco_medio: 104064.56,
+    btc_inicial: 73000,
+    aporte_base: 1026.00,
+    meta:        100.00,
+    checkpoint:  '2026-04-11T22:00:00-03:00',
+    ref_code:    'EDU001',
+    sobre_aporte:'$1.026',
+  },
+};
+
+
+// ══ VARIÁVEIS DO CLIENTE ATIVO ═════════════════════════════════
+let CLIENTE = null; // preenchido após login
+
+// Parâmetros derivados do cliente (recalculados a cada login)
+let POOL_BTC, POOL_USDT, PRECO_MEDIO, APORTE_BASE, META_PROFIT, CHECKPOINT_FIXO;
+const TAXA_TICK   = 0.0000001736;
+const INTERVALO_MS = 15000;
+
+function carregarCliente(dados) {
+  POOL_BTC       = dados.pool_btc;
+  POOL_USDT      = dados.pool_usdt;
+  PRECO_MEDIO    = dados.preco_medio;
+  APORTE_BASE    = dados.aporte_base;
+  META_PROFIT    = dados.meta;
+  CHECKPOINT_FIXO = new Date(dados.checkpoint).getTime();
+  btcBase        = null;
+  btcPrev        = null;
+
+  // Atualizar elementos visuais com dados do cliente
+  document.querySelectorAll('.cc-name').forEach(el => el.textContent = dados.nome);
+  document.querySelectorAll('.lite-name').forEach(el => el.textContent = dados.nome);
+  // Pool BTC display
+  const poolBtcEl = document.querySelector('.cc-pool-num[data-btc]');
+  // Sobre aporte
+  document.querySelectorAll('.sobre-aporte').forEach(el => el.textContent = 'SOBRE APORTE ' + dados.sobre_aporte);
+  // Preço médio
+  document.querySelectorAll('.preco-medio-val').forEach(el => {
+    el.textContent = '$' + dados.preco_medio.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  });
+  // Meta
+  document.querySelectorAll('.meta-val').forEach(el => el.textContent = '$' + fmt(dados.meta, 0) + ' USDT');
+  document.querySelectorAll('.meta-target').forEach(el => el.textContent = '$' + fmt(dados.meta, 2) + ',00');
+  // Link de indicação
+  const refUrl = 'protocolocripto.com/dashboard?ref=' + dados.ref_code;
+  document.querySelectorAll('.ind-ref-url').forEach(el => el.textContent = refUrl);
+}
+
+// ══ LOGIN ══════════════════════════════════════════════════════
+function doLogin() {
+  const u   = document.getElementById('l-user').value.trim().toLowerCase();
+  const p   = document.getElementById('l-pass').value.trim();
+  const err = document.getElementById('l-err');
+  
+  const cliente = CLIENTES[u];
+  if(cliente && p === cliente.senha) {
+    CLIENTE = {...cliente, user: u};
+    sessionStorage.setItem('proto_auth', JSON.stringify({user: u, nome: cliente.nome}));
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display    = 'block';
+    carregarCliente(CLIENTE);
+    init();
+  } else {
+    err.textContent = 'Usuário ou senha incorretos.';
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+document.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+
+// Auto-login se sessão ativa
+const savedAuth = sessionStorage.getItem('proto_auth');
+if(savedAuth) {
+  try {
+    const auth = JSON.parse(savedAuth);
+    const cliente = CLIENTES[auth.user];
+    if(cliente) {
+      CLIENTE = {...cliente, user: auth.user};
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display    = 'block';
+      carregarCliente(CLIENTE);
+    }
+  } catch(e) {}
+}
+
+function doLogout() {
+  sessionStorage.removeItem('proto_auth');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+  CLIENTE = null;
+}
+
+// ── MATRIX CANVAS ──────────────────────────────────────────────
+(function startMatrix() {
+  var c=document.getElementById('login-canvas'),x=c.getContext('2d');
+  var chars='0189ABCDEF'.split(''),W,H,drops,cols;
+  function setup(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;cols=Math.floor(W/16);drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-80;}
+  function tick(){x.fillStyle='rgba(3,3,3,0.03)';x.fillRect(0,0,W,H);x.font='bold 14px monospace';for(var i=0;i<cols;i++){x.fillStyle=Math.random()>.85?'#F2A900':'#8B4500';x.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,drops[i]*16);if(drops[i]*16>H&&Math.random()>.975)drops[i]=0;drops[i]++;}}
+  setup();setInterval(tick,35);window.addEventListener('resize',setup);
+})();
+
+// ── HELPERS DOM ────────────────────────────────────────────────
+const $   = id => document.getElementById(id);
+const fmt = (n, d=2) => (n==null||isNaN(n)) ? '--' : n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const set = (id,v) => { const e=$(id); if(e) e.textContent=v; };
+const setW= (id,w) => { const e=$(id); if(e) e.style.width=w; };
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+// ── ESTADO ─────────────────────────────────────────────────────
+let btcBase = null;
+let btcPrev = null;
+const prices = {};
+
+// ── CHECKPOINT E CÁLCULOS ──────────────────────────────────────
+function getCheckpoint()         { return CHECKPOINT_FIXO; }
+function getTotalTicksElapsed()  { return Math.floor((Date.now()-CHECKPOINT_FIXO)/INTERVALO_MS); }
+function getTicks()              { return getTotalTicksElapsed(); }
+function getPoolBase()           { return APORTE_BASE; }
+function getProfit()             { return APORTE_BASE * TAXA_TICK * getTotalTicksElapsed(); }
+function setProfit(){} function setTicks(){}
+function applyMissedYield(){}
+function getPoolTotal()          { if(!btcBase) return null; return (POOL_BTC*btcBase)+POOL_USDT; }
+function getCapitalTotal()       { const p=getPoolTotal(); if(p===null) return null; return p+getProfit(); }
+
+// ── LOOP DE ATUALIZAÇÃO ────────────────────────────────────────
+function startYieldSimulation() {
+  setInterval(() => {
+    updateClientCard();
+    addChartPoint();
+    renderOps();
+  }, INTERVALO_MS);
+}
+
+// ── ATUALIZA CARD ──────────────────────────────────────────────
+function updateClientCard() {
+  if(!btcBase) {
+    const loader=`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="7" fill="none" stroke="rgba(232,184,75,0.2)" stroke-width="2"/><circle cx="9" cy="9" r="7" fill="none" stroke="#E8B84B" stroke-width="2" stroke-dasharray="12 32" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 9 9" to="360 9 9" dur="0.9s" repeatCount="indefinite"/></circle></svg>`;
+    ['pool-btc-usd','cap-total','top-price'].forEach(id=>{ const e=$(id); if(e&&!e.querySelector('svg')) e.innerHTML=loader; });
+    return;
+  }
+  const poolBtcUSD = POOL_BTC*btcBase;
+  const profit     = getProfit();
+  const capTotal   = getCapitalTotal();
+  const roi        = APORTE_BASE>0 ? (profit/APORTE_BASE)*100 : 0;
+  const metaPct    = Math.min(100,(profit/META_PROFIT)*100);
+
+  set('pool-btc-usd','$'+fmt(poolBtcUSD,0));
+  set('profit-total','+$'+profit.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
+  set('profit-roi',roi.toFixed(6)+'%');
+  set('cap-total', capTotal==null ? '$--' : '$'+fmt(capTotal));
+  set('prog-val','$'+fmt(profit||0));
+  set('prog-pct',metaPct.toFixed(2)+'%');
+  setW('prog-bar',metaPct.toFixed(2)+'%');
+  set('cc-ticks-live',getTicks().toLocaleString('pt-BR'));
+  updateSparkline();
+  const poolBtcUSD2=POOL_BTC*btcBase, totalPool2=poolBtcUSD2+POOL_USDT;
+  const btcPct=totalPool2>0?(poolBtcUSD2/totalPool2*100):50, usdtPct=100-btcPct;
+  const bBtc=$(  'bal-btc'),bUsdt=$('bal-usdt');
+  if(bBtc) bBtc.style.width=btcPct.toFixed(1)+'%';
+  if(bUsdt) bUsdt.style.width=usdtPct.toFixed(1)+'%';
+  set('bal-btc-pct',btcPct.toFixed(1)+'%');
+  set('bal-usdt-pct',usdtPct.toFixed(1)+'%');
+  updateLite();
+}
+
+const EX = [
+    {id:'bybit', name:'BYBIT', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22450%22%20height%3D%22151%22%20viewBox%3D%220%200%20450%20151%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M327.47%20120.072V0H345.663V120.072H327.47Z%22%20fill%3D%22%23F7A600%22/%3E%3Cpath%20d%3D%22M49.7603%20150.99H0V34.5663H47.7614C70.9733%2034.5663%2084.4954%2047.3245%2084.4954%2067.2691C84.4954%2080.1837%2075.8078%2088.5312%2069.7956%2091.312C76.9751%2094.5771%2086.1586%20101.935%2086.1586%20117.474C86.1586%20139.215%2070.9733%20150.99%2049.7603%20150.99ZM45.9227%2054.8441H23.2118V81.6626H45.9175C55.7673%2081.6626%2061.2784%2076.2676%2061.2784%2068.2481C61.2784%2060.2443%2055.7725%2054.8441%2045.9227%2054.8441ZM47.4205%20102.102H23.217V130.722H47.4309C57.9521%20130.722%2062.9519%20124.182%2062.9519%20116.329C62.9519%20108.481%2057.9418%20102.102%2047.4309%20102.102H47.4205ZM156.956%20103.248V150.99H133.91V103.248L98.1726%2034.5663H123.388L145.598%2081.4959L167.472%2034.5663H192.683L156.956%20103.248ZM258.491%20150.99H208.731V34.5663H256.487C279.699%2034.5663%20293.226%2047.3245%20293.226%2067.2691C293.226%2080.1837%20284.539%2088.5312%20278.527%2091.312C285.706%2094.5771%20294.89%20101.935%20294.89%20117.474C294.89%20139.215%20279.704%20150.99%20258.491%20150.99ZM254.654%2054.8441H231.943V81.6626H254.654C264.503%2081.6626%20270.015%2076.2676%20270.015%2068.2481C270.015%2060.2443%20264.503%2054.8441%20254.654%2054.8441ZM256.152%20102.102H231.938V130.722H256.152C266.678%20130.722%20271.678%20124.182%20271.678%20116.329C271.678%20108.481%20266.678%20102.102%20256.152%20102.102ZM418.299%2054.8493V151H395.087V54.8441H364.034V34.5663H449.361V54.8441L418.299%2054.8493Z%22%20fill%3D%22white%22/%3E%3C/svg%3E`, inv:false},
+    {id:'binance', name:'BINANCE', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22115%22%20height%3D%22115%22%20viewBox%3D%220%200%20115%20115%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20clip-path%3D%22url%28%23clip0_7_55%29%22%3E%3Cpath%20d%3D%22M35.274%2048.0465L57.134%2026.2358L79.007%2048.0589L91.7278%2035.3668L57.134%200.849487L22.5532%2035.3555L35.274%2048.0465Z%22%20fill%3D%22%23F3BA2F%22/%3E%3Cpath%20d%3D%22M26.2907%2057.0075L13.5708%2044.3157L0.850205%2057.0082L13.5701%2069.6999L26.2907%2057.0075Z%22%20fill%3D%22%23F3BA2F%22/%3E%3Cpath%20d%3D%22M35.274%2065.9717L57.134%2087.7834L79.0054%2065.9604L91.7342%2078.6465L91.7278%2078.653L57.134%20113.168L22.5532%2078.6638L22.5343%2078.6465L35.274%2065.9717Z%22%20fill%3D%22%23F3BA2F%22/%3E%3Cpath%20d%3D%22M100.699%2069.7062L113.42%2057.0137L100.7%2044.3219L87.9794%2057.0144L100.699%2069.7062Z%22%20fill%3D%22%23F3BA2F%22/%3E%3Cpath%20d%3D%22M70.0372%2057.0024H70.0421L57.134%2044.1234L47.5958%2053.6421H47.5941L46.4993%2054.734L44.2389%2056.9916L44.22%2057.0088L44.2389%2057.0282L57.134%2069.8948L70.0421%2057.0153L70.0486%2057.0088L70.0372%2057.0024Z%22%20fill%3D%22%23F3BA2F%22/%3E%3C/g%3E%3Cdefs%3E%3CclipPath%20id%3D%22clip0_7_55%22%3E%3Crect%20width%3D%22114.27%22%20height%3D%22114.018%22%20fill%3D%22white%22/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E`, inv:false},
+    {id:'okx', name:'OKX', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22368%22%20height%3D%22109%22%20viewBox%3D%220%200%20368%20109%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M112.32%200H2.5524C1.87545%200%201.2262%200.254731%200.747717%200.708769C0.268724%201.16232%200%201.77774%200%202.41991V106.469C0%20107.111%200.268724%20107.726%200.747717%20108.179C1.2262%20108.634%201.87545%20108.888%202.5524%20108.888H112.32C112.998%20108.888%20113.647%20108.634%20114.125%20108.179C114.604%20107.726%20114.873%20107.111%20114.873%20106.469V2.41991C114.873%201.77774%20114.604%201.16232%20114.125%200.708769C113.647%200.254731%20112.998%200%20112.32%200ZM76.5819%2070.1726C76.5819%2070.8142%2076.3132%2071.4297%2075.8342%2071.8837C75.3557%2072.3373%2074.7065%2072.5925%2074.0295%2072.5925H40.8436C40.1667%2072.5925%2039.5174%2072.3373%2039.0384%2071.8837C38.5599%2071.4297%2038.2912%2070.8142%2038.2912%2070.1726V38.7157C38.2912%2038.074%2038.5599%2037.4585%2039.0384%2037.005C39.5174%2036.551%2040.1667%2036.2962%2040.8436%2036.2962H74.0295C74.7065%2036.2962%2075.3557%2036.551%2075.8342%2037.005C76.3132%2037.4585%2076.5819%2038.074%2076.5819%2038.7157V70.1726Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M330.452%2034.3858H295.607C294.127%2034.3858%20292.926%2035.5828%20292.926%2037.0599V71.8279C292.926%2073.3049%20294.127%2074.5025%20295.607%2074.5025H330.452C331.932%2074.5025%20333.132%2073.3049%20333.132%2071.8279V37.0599C333.132%2035.5828%20331.932%2034.3858%20330.452%2034.3858Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M290.629%200H260.762C259.493%200%20258.465%201.02607%20258.465%202.29254V32.0932C258.465%2033.3592%20259.493%2034.3858%20260.762%2034.3858H290.629C291.898%2034.3858%20292.926%2033.3592%20292.926%2032.0932V2.29254C292.926%201.02607%20291.898%200%20290.629%200Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M365.297%200H335.43C334.161%200%20333.132%201.02607%20333.132%202.29254V32.0932C333.132%2033.3592%20334.161%2034.3858%20335.43%2034.3858H365.297C366.566%2034.3858%20367.594%2033.3592%20367.594%2032.0932V2.29254C367.594%201.02607%20366.566%200%20365.297%200Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M290.629%2074.5024H260.762C259.493%2074.5024%20258.465%2075.5284%20258.465%2076.7945V106.596C258.465%20107.862%20259.493%20108.888%20260.762%20108.888H290.629C291.898%20108.888%20292.926%20107.862%20292.926%20106.596V76.7945C292.926%2075.5284%20291.898%2074.5024%20290.629%2074.5024Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M365.297%2074.5024H335.43C334.161%2074.5024%20333.132%2075.5284%20333.132%2076.7945V106.596C333.132%20107.862%20334.161%20108.888%20335.43%20108.888H365.297C366.566%20108.888%20367.594%20107.862%20367.594%20106.596V76.7945C367.594%2075.5284%20366.566%2074.5024%20365.297%2074.5024Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M238.936%200H209.069C207.8%200%20206.772%201.02607%20206.772%202.29254V32.0932C206.772%2033.3592%20207.8%2034.3858%20209.069%2034.3858H238.936C240.205%2034.3858%20241.234%2033.3592%20241.234%2032.0932V2.29254C241.234%201.02607%20240.205%200%20238.936%200Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M238.936%2074.5024H209.069C207.8%2074.5024%20206.772%2075.5284%20206.772%2076.7945V106.596C206.772%20107.862%20207.8%20108.888%20209.069%20108.888H238.936C240.205%20108.888%20241.234%20107.862%20241.234%20106.596V76.7945C241.234%2075.5284%20240.205%2074.5024%20238.936%2074.5024Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M206.772%2038.7078C206.772%2038.0658%20206.509%2037.4501%20206.043%2036.9963C205.576%2036.542%20204.943%2036.2872%20204.283%2036.2872H169.438V2.42112C169.438%201.77863%20169.175%201.1629%20168.709%200.709123C168.242%200.254859%20167.609%200%20166.949%200H134.593C133.933%200%20133.3%200.254859%20132.833%200.709123C132.366%201.1629%20132.104%201.77863%20132.104%202.42112V106.468C132.104%20107.11%20132.366%20107.725%20132.833%20108.179C133.3%20108.633%20133.933%20108.888%20134.593%20108.888H166.949C167.609%20108.888%20168.242%20108.633%20168.709%20108.179C169.175%20107.725%20169.438%20107.11%20169.438%20106.468V72.6016H204.283C204.943%2072.6016%20205.576%2072.3462%20206.043%2071.8924C206.509%2071.4382%20206.772%2070.8224%20206.772%2070.1804V38.7078Z%22%20fill%3D%22white%22/%3E%3C/svg%3E`, inv:false},
+    {id:'kucoin', name:'KUCOIN', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22145%22%20height%3D%22150%22%20viewBox%3D%220%200%20145%20150%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M45.7898%2074.7918L92.7747%20119.093L122.432%2091.1343C127.735%2086.6328%20135.848%2086.833%20140.894%2091.59C145.94%2096.347%20146.152%20103.996%20141.377%20108.995L102.24%20145.898C96.9831%20150.772%2088.5517%20150.772%2083.2946%20145.898L26.8297%2092.6525V124.3C26.8297%20131.285%2020.8237%20136.947%2013.4149%20136.947C6.00604%20136.947%200%20131.285%200%20124.3V25.2422C0%2018.2576%206.00604%2012.5955%2013.4149%2012.5955C20.8237%2012.5955%2026.8297%2018.2576%2026.8297%2025.2422V56.8899L83.2874%203.65829C88.5428%20-1.21943%2096.9775%20-1.21943%20102.233%203.65829L141.399%2040.5543C146.174%2045.5537%20145.962%2053.2023%20140.916%2057.9593C135.87%2062.7163%20127.757%2062.9165%20122.454%2058.415L92.7965%2030.4562L45.7898%2074.7918ZM92.7965%2062.1314C87.3642%2062.1286%2082.4651%2065.2114%2080.3842%2069.9421C78.3032%2074.6728%2079.4504%2080.1194%2083.2906%2083.7417C87.1308%2087.364%2092.9077%2088.4484%2097.9268%2086.4892C102.946%2084.53%20106.219%2079.9131%20106.219%2074.7918C106.221%2071.4341%20104.808%2068.2131%20102.29%2065.8375C99.7733%2063.4619%2096.3583%2062.1263%2092.7965%2062.1245V62.1314Z%22%20fill%3D%22%2323AF91%22/%3E%3C/svg%3E`, inv:false},
+    {id:'coinbase', name:'COINBASE', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22163%22%20height%3D%22163%22%20viewBox%3D%220%200%20163%20163%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M80.8276%204.25439C122.886%204.25439%20156.981%2038.2747%20156.981%2080.2396C156.981%20122.205%20122.886%20156.225%2080.8276%20156.225C38.7697%20156.225%204.67407%20122.205%204.67407%2080.2396C4.67407%2038.2747%2038.7697%204.25439%2080.8276%204.25439Z%22%20fill%3D%22%230052FF%22/%3E%3Cpath%20d%3D%22M80.8626%20106.94C66.0614%20106.94%2054.1015%2094.9737%2054.1015%2080.2382C54.1015%2065.5026%2066.0944%2053.5362%2080.8626%2053.5362C94.111%2053.5362%20105.113%2063.1621%20107.227%2075.7878H134.187C131.907%2048.3606%20108.912%2026.8013%2080.8295%2026.8013C51.2602%2026.8013%2027.2743%2050.7341%2027.2743%2080.2382C27.2743%20109.742%2051.2602%20133.675%2080.8295%20133.675C108.912%20133.675%20131.907%20112.116%20134.187%2084.6885H107.194C105.08%2097.3142%2094.111%20106.94%2080.8626%20106.94Z%22%20fill%3D%22white%22/%3E%3C/svg%3E`, inv:false},
+    {id:'crypto', name:'CRYPTO.COM', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2299%22%20height%3D%22115%22%20viewBox%3D%220%200%2099%20115%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M49.4974%200L0%2028.5045V85.5135L49.4974%20114.018L98.9949%2085.5135V28.5045L49.4974%200ZM49.4974%200L0%2028.5045V85.5135L49.4974%20114.018L98.9949%2085.5135V28.5045L49.4974%200Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M69.0377%2091.748H61.9941L53.5655%2084.0267V80.068L62.2957%2071.7538V58.5916L73.7045%2051.1667L86.6993%2060.9631L69.0377%2091.748ZM39.8759%2070.9648L41.1648%2058.5916L36.9002%2047.5044H62.0946L57.926%2058.5916L59.119%2070.9648H49.3969H39.8759ZM45.6305%2084.0267L37.1974%2091.8438H30.0532L12.2955%2060.9631L25.3909%2051.2625L36.8957%2058.587V71.7492L45.6259%2080.0634L45.6305%2084.0267ZM29.9572%2024.6461H68.9417L73.604%2044.4396H25.3955L29.9572%2024.6461ZM49.4974%200L0%2028.5045V85.5135L49.4974%20114.018L98.9949%2085.5135V28.5045L49.4974%200Z%22%20fill%3D%22%2303316C%22/%3E%3C/svg%3E`, inv:false},
+    {id:'bitget', name:'BITGET', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22115%22%20height%3D%22115%22%20viewBox%3D%220%200%20115%20115%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M51.6965%2039.9085H74.9899L98.8191%2063.5353C100.369%2065.0721%20100.377%2067.5722%2098.835%2069.1168L68.2753%2099.7657H44.2798L51.5343%2092.7281L78.1692%2066.3173L51.8724%2039.9063%22%20fill%3D%22%2300F0FF%22/%3E%3Cpath%20d%3D%22M61.1457%2066.9855H37.8523L14.023%2043.3584C12.4729%2041.8216%2012.465%2039.3218%2014.0072%2037.7769L44.5669%207.1261H68.5623L61.3079%2014.1639L34.6729%2040.5745L60.9698%2066.9855%22%20fill%3D%22%2300F0FF%22/%3E%3C/svg%3E`, inv:false},
+    {id:'kraken', name:'KRAKEN', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22132%22%20height%3D%22103%22%20viewBox%3D%220%200%20132%20103%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M61.891%200.139157C73.3363%20-0.609657%2084.9611%201.67244%2095.2224%206.77151C110.363%2014.1527%20122.419%2027.5243%20128.123%2043.2851C130.635%2050.2384%20131.998%2057.6195%20131.998%2065.0007V92.4572C131.998%2093.5626%20132.034%2094.7393%20131.783%2095.809C131.173%2098.5903%20129.2%20101.015%20126.545%20102.192C124.715%20103.048%20122.634%20103.155%20120.696%20102.834C116.463%20102.049%20113.234%2098.1268%20113.162%2093.8835C113.126%2085.3613%20113.162%2076.8747%20113.162%2068.3169C113.234%2065.8921%20113.234%2063.3248%20111.906%2061.1853C109.789%2057.2629%20104.587%2055.3731%20100.425%2057.049C96.9087%2058.297%2094.3255%2061.8271%2094.2896%2065.5712C94.2537%2074.236%2094.2896%2082.8652%2094.2896%2091.4944C94.2896%2093.099%2094.3613%2094.7749%2093.8949%2096.3082C92.9979%2099.3391%2090.4505%20101.8%2087.4008%20102.655C83.3824%20103.761%2078.754%20102.013%2076.709%2098.3051C75.3097%2096.0586%2075.4173%2093.3843%2075.4532%2090.9239C75.4173%2082.3304%2075.4891%2073.7368%2075.4173%2065.1433C75.3456%2060.7931%2071.7218%2056.8707%2067.3446%2056.3002C64.5101%2055.8723%2061.5322%2056.7994%2059.4871%2058.7962C57.6214%2060.5434%2056.5809%2063.0395%2056.5809%2065.5712V90.603C56.545%2092.7068%2056.7962%2094.8819%2056.0069%2096.8431C54.7511%20100.409%2051.1273%20103.048%2047.2883%20102.941C43.3775%20103.155%2039.5385%20100.48%2038.2827%2096.8074C37.601%2094.9889%2037.7445%2093.0634%2037.7445%2091.1378C37.7445%2082.5087%2037.7804%2073.8795%2037.7445%2065.2146C37.7087%2060.9357%2034.3719%2057.049%2030.1382%2056.2645C26.3351%2055.4444%2022.1014%2057.3699%2020.1639%2060.7931C19.3387%2062.2194%2018.9081%2063.8596%2018.9081%2065.4999V93.5982C18.944%2096.3439%2017.6524%2099.0182%2015.5714%20100.765C12.3782%20103.547%207.24752%20103.689%203.87491%20101.158C1.43515%2099.5174%200%2096.7005%200%2093.7765V65.3929C0.0358788%2054.6599%202.76267%2043.9269%207.89334%2034.5133C12.127%2026.8112%2017.9035%2019.9292%2024.8282%2014.4379C35.4124%205.98703%2048.5082%200.959286%2061.891%200.139157Z%22%20fill%3D%22%234B4C9B%22/%3E%3C/svg%3E`, inv:false},
+    {id:'gate', name:'GATE.IO', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22106%22%20height%3D%22106%22%20viewBox%3D%220%200%20106%20106%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M52.8501%2081.7366C36.7964%2081.7366%2023.7826%2068.7516%2023.7826%2052.7333C23.7826%2036.715%2036.7964%2023.73%2052.8501%2023.73V0C23.6599%200%200%2023.6076%200%2052.7333C0%2081.8548%2023.6599%20105.467%2052.8501%20105.467C82.0361%20105.467%20105.7%2081.859%20105.7%2052.7333H81.9177C81.9177%2068.7516%2068.9039%2081.7366%2052.8501%2081.7366Z%22%20fill%3D%22%232354E6%22/%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M52.8501%2052.7333H81.4178V24.2288H52.8501V52.7333Z%22%20fill%3D%22%2317E6A1%22/%3E%3C/svg%3E`, inv:false},
+    {id:'bitfinex', name:'BITFINEX', logo:`data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%22115%22%20height%3D%22115%22%20viewBox%3D%220%200%20115%20115%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cmask%20id%3D%22mask0_7_105%22%20style%3D%22mask-type%3Aalpha%22%20maskUnits%3D%22userSpaceOnUse%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22115%22%20height%3D%22115%22%3E%3Crect%20width%3D%22114.271%22%20height%3D%22114.018%22%20fill%3D%22%23D9D9D9%22/%3E%3C/mask%3E%3Cg%20mask%3D%22url%28%23mask0_7_105%29%22%3E%3Cpath%20d%3D%22M16.158%2093.3551C20.171%2097.5728%2042.2383%20117.781%2076.8726%2094.3265C101.922%2074.9984%20101.294%2033.0958%2098.8897%2020.4345C98.0519%2022.2777%2068.989%2085.4097%2016.158%2093.3551ZM98.8897%2020.4262C98.5797%2020.3017%2066.3583%2015.9512%2034.5055%2036.2839C14.7253%2048.9037%2012.103%2067.385%2013.0079%2079.7308C59.3125%2074.5666%2097.834%2021.8792%2098.8897%2020.4262Z%22%20fill%3D%22%2397C554%22/%3E%3Cpath%20d%3D%22M98.5582%2020.4269C98.2494%2020.3022%2066.1522%2015.9457%2034.4221%2036.3063C14.7181%2048.9433%2012.1059%2067.4499%2013.0073%2079.8126C59.1335%2074.6414%2097.5066%2021.8818%2098.5582%2020.4269Z%22%20fill%3D%22%23709B30%22/%3E%3C/g%3E%3C/svg%3E`, inv:false},
+];
+
+// ── PREÇOS E WEBSOCKET ─────────────────────────────────────────
+function updatePrices() {
+    if(!btcBase) return { min:0, max:0, minId:'', maxId:'', spread:0 };
+    let mn = Infinity, mx = -Infinity, mnId = '', mxId = '';
+    EX.forEach(ex => {
+        prices[ex.id] = btcBase + (Math.random() * 60 - 30);
+        if(prices[ex.id] < mn){ mn = prices[ex.id]; mnId = ex.id; }
+        if(prices[ex.id] > mx){ mx = prices[ex.id]; mxId = ex.id; }
+    });
+    return { min: mn, max: mx, minId: mnId, maxId: mxId, spread: ((mx - mn) / mn) * 100 };
+}
+
+function connectWS() {
+    try {
+        const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+        ws.onopen = () => set('ws-status', 'CONECTADO ✓');
+        ws.onmessage_first = true;
+        ws.onmessage = e => {
+            const data = JSON.parse(e.data);
+            btcPrev = btcBase;
+            btcBase = parseFloat(data.c);
+            const change = parseFloat(data.P);
+            const changeStr = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            const color = change >= 0 ? 'var(--green)' : 'var(--red)';
+            ['top-price','btc-hero-price'].forEach(id => set(id, '$' + fmt(btcBase)));
+            const chEl = $('btc-change');
+            if(chEl){ chEl.textContent = changeStr + ' (24h)'; chEl.style.color = color; }
+            const liteChange = document.getElementById('lite-btc-change');
+            if(liteChange){ liteChange.textContent = changeStr + ' (24h)'; liteChange.style.color = color; }
+            if(btcBase) { const lp = document.getElementById('lite-btc-price'); if(lp) lp.textContent = '$' + fmt(btcBase); }
+            updateClientCard();
+        };
+        ws.onclose = () => { set('ws-status', 'RECONECTANDO...'); setTimeout(connectWS, 3000); };
+        ws.onerror = () => ws.close();
+    } catch(e) {}
+}
+
+// ── MINI CHART ─────────────────────────────────────────────────
+function genMiniPoints(base, count=24) {
+    const pts = []; let val = base * (0.998 + Math.random() * 0.004);
+    for(let i=0;i<count;i++){ val += (Math.random()-.46)*base*0.0008; pts.push(val); }
+    return pts;
+}
+function drawMiniChart(canvas, points, r, g, b) {
+    if(!canvas) return;
+    const dpr=window.devicePixelRatio||1, w=canvas.offsetWidth, h=canvas.offsetHeight;
+    if(!w||!h) return;
+    canvas.width=w*dpr; canvas.height=h*dpr;
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+    const mn=Math.min(...points), mx=Math.max(...points), range=mx-mn||1, pad=2;
+    const xStep=(w-pad*2)/(points.length-1);
+    const toY=v=>h-pad-((v-mn)/range)*(h-pad*2);
+    const grad=ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0,`rgba(${r},${g},${b},0.45)`);
+    grad.addColorStop(0.7,`rgba(${r},${g},${b},0.1)`);
+    grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    ctx.beginPath();
+    points.forEach((p,i)=>{ const x=pad+i*xStep,y=toY(p); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.lineTo(pad+(points.length-1)*xStep,h); ctx.lineTo(pad,h); ctx.closePath();
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.beginPath();
+    points.forEach((p,i)=>{ const x=pad+i*xStep,y=toY(p); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.strokeStyle=`rgba(${r},${g},${b},0.9)`; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
+}
+
+// ── RADAR ─────────────────────────────────────────────────────
+function renderRadar(elId) {
+    const el=$(elId); if(!el) return;
+    const vals=Object.values(prices);
+    const mn=Math.min(...vals), mx=Math.max(...vals);
+    el.innerHTML = EX.map((ex,idx)=>{
+        const p=prices[ex.id]||btcBase;
+        const isBuy=p===mn, isSell=p===mx;
+        const cls=isBuy?'is-buy':isSell?'is-sell':'';
+        const diff=((p-btcBase)/btcBase*100);
+        const diffStr=(diff>=0?'+':'')+diff.toFixed(3)+'%';
+        let seal;
+        if(isBuy) seal=`<div class="rc-seal buy"><span class="rc-seal-icon">↓</span>MENOR PREÇO</div>`;
+        else if(isSell) seal=`<div class="rc-seal sell"><span class="rc-seal-icon">↑</span>MAIOR PREÇO</div>`;
+        else seal=`<div class="rc-seal hold">● NEUTRO</div>`;
+        const latency = (Math.random()*18+4).toFixed(0);
+        // Sinal: ícone, label e sub conforme estado
+        let sigIcon, sigLabel, sigSub;
+        if(isBuy){
+            sigIcon='↓'; sigLabel='COMPRA'; sigSub='MENOR SPREAD · ENTRADA';
+        } else if(isSell){
+            sigIcon='↑'; sigLabel='VENDA'; sigSub='MAIOR SPREAD · SAÍDA';
+        } else {
+            sigIcon='◉'; sigLabel='NEUTRO'; sigSub='SEM OPORTUNIDADE';
+        }
+        return `<div class="radar-card ${cls}">
+            <div class="rc-head">
+                <div class="rc-logo"><img src="${ex.logo}" alt="${ex.name}" class="${ex.inv?'invert':''}" onerror="this.style.display='none'"></div>
+                <div class="rc-exinfo">
+                    <div class="rc-exname">${ex.name}</div>
+                    <div class="rc-pair">BTC / USDT · SPOT</div>
+                </div>
+                <div class="rc-status"></div>
+            </div>
+            <div class="rc-body">
+                <div class="rc-price" id="rcp-${elId}-${idx}">$${fmt(p)}</div>
+                <div class="rc-row">
+                    <div class="rc-diff">${diffStr}</div>
+                    <div class="rc-latency-inline">${latency}ms</div>
+                </div>
+            </div>
+            <div class="rc-signal">
+                <div class="rc-signal-icon">${sigIcon}</div>
+                <div class="rc-signal-body">
+                    <div class="rc-signal-label">${sigLabel}</div>
+                    <div class="rc-signal-sub">${sigSub}</div>
+                </div>
+                <div class="rc-signal-bars">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+    // mini charts removidos dos radar cards
+}
+
+// ── TABELA DE OPERAÇÕES ────────────────────────────────────────
+// Sincronizada com o tick: cada vez que roda = lucro foi acrescido
+// ── Gera uma linha de operação determinística para um tick passado ──
+function buildOpRow(tickIndex, basePrice) {
+    // Seed determinístico baseado no índice do tick
+    const seed = (tickIndex * 9301 + 49297) % 233280;
+    const rng = seed / 233280;
+    const seed2 = (tickIndex * 1234 + 5678) % 9999;
+    const rng2 = seed2 / 9999;
+
+    // Escolhe par compra/venda de forma determinística
+    const exIds = EX.map(e => e.id);
+    const buyIdx  = Math.floor(rng  * exIds.length);
+    const sellIdx = Math.floor(rng2 * exIds.length);
+    const buyId   = exIds[buyIdx];
+    const sellId  = exIds[sellIdx === buyIdx ? (buyIdx + 1) % exIds.length : sellIdx];
+    const buyEx   = EX.find(e => e.id === buyId);
+    const sellEx  = EX.find(e => e.id === sellId);
+
+    const spread  = 0.002 + rng * 0.08; // 0.002% ~ 0.082%
+    const buyP    = basePrice * (1 - spread * 0.005);
+    const sellP   = basePrice * (1 + spread * 0.005);
+
+    // Capital e lucro naquele instante
+    const poolBase = getPoolBase();
+    const capitalN = poolBase * Math.pow(1 + TAXA_TICK, tickIndex);
+    const lucroTick = capitalN * TAXA_TICK;
+
+    // Hora daquele tick
+    const ts = new Date(CHECKPOINT_FIXO + tickIndex * INTERVALO_MS);
+    const hora = ts.toLocaleTimeString('pt-BR');
+
+    return `<tr style="opacity:1;">
+        <td style="color:var(--text2);font-size:9px;">${hora}</td>
+        <td><span class="tag-buy"><img src="${buyEx?.logo||''}" alt="${buyEx?.name||''}"></span></td>
+        <td><span class="tag-sell"><img src="${sellEx?.logo||''}" alt="${sellEx?.name||''}"></span></td>
+        <td style="color:var(--green);">$${buyP.toFixed(2)}</td>
+        <td style="color:var(--red);">$${sellP.toFixed(2)}</td>
+        <td style="color:var(--gold);font-weight:700;">${spread.toFixed(4)}%</td>
+        <td style="color:var(--green);font-weight:700;">+$${lucroTick.toFixed(6)}</td>
+    </tr>`;
+}
+
+// ── Popula tabela com as últimas 20 ops históricas ao abrir ──
+function initOpsHistory() {
+    const tbody = $('ops-tbody'); if(!tbody) return;
+    const totalTicks = getTotalTicksElapsed();
+    const showCount = Math.min(20, totalTicks);
+    const base = btcBase || PRECO_MEDIO;
+    let html = '';
+    for(let i = showCount; i >= 1; i--) {
+        const tickIdx = totalTicks - i;
+        html += buildOpRow(tickIdx, base);
+    }
+    tbody.innerHTML = html;
+}
+
+function renderOps() {
+    const tbody=$('ops-tbody'); if(!tbody) return;
+    const result=updatePrices(); if(result.spread<=0) return;
+    const hora=new Date().toLocaleTimeString('pt-BR');
+    const buyEx =EX.find(e=>e.id===result.minId);
+    const sellEx=EX.find(e=>e.id===result.maxId);
+    const lucroTick = 1026.0 * TAXA_TICK; // rendimento simples sobre aporte fixo
+    const r=document.createElement('tr');
+    r.style.cssText='opacity:0;transition:opacity .4s;';
+    r.innerHTML=`
+        <td style="color:var(--text2);font-size:9px;">${hora}</td>
+        <td><span class="tag-buy"><img src="${buyEx?.logo||''}" alt="${buyEx?.name||''}"></span></td>
+        <td><span class="tag-sell"><img src="${sellEx?.logo||''}" alt="${sellEx?.name||''}"></span></td>
+        <td style="color:var(--green);">$${result.min.toFixed(2)}</td>
+        <td style="color:var(--red);">$${result.max.toFixed(2)}</td>
+        <td style="color:var(--gold);font-weight:700;">${result.spread.toFixed(4)}%</td>
+        <td style="color:var(--green);font-weight:700;">+$${lucroTick.toFixed(6)}</td>`;
+    tbody.prepend(r);
+    requestAnimationFrame(()=>r.style.opacity='1');
+    while(tbody.children.length>25) tbody.lastChild.remove();
+}
+
+// ── ORDERBOOK ─────────────────────────────────────────────────
+window.renderOB = function() {
+    const sel=$('ob-sel');
+    const base=prices[sel?.value]||btcBase;
+    let asks=[],bids=[],av=0,bv=0;
+    for(let i=14;i>=0;i--){const p=base+(i+1)*(0.25+Math.random());const v=(0.02+Math.random()*1.5).toFixed(4);av+=parseFloat(v);asks.push({p:p.toFixed(2),v,t:av.toFixed(3)});}
+    for(let i=0;i<15;i++){const p=base-(i+1)*(0.25+Math.random());const v=(0.02+Math.random()*1.5).toFixed(4);bv+=parseFloat(v);bids.push({p:p.toFixed(2),v,t:bv.toFixed(3)});}
+    const maxA=Math.max(...asks.map(a=>parseFloat(a.v)));
+    const maxB=Math.max(...bids.map(b=>parseFloat(b.v)));
+    const asksEl=$('ob-asks'),bidsEl=$('ob-bids');
+    if(asksEl) asksEl.innerHTML=asks.map(a=>`<div class="ob-row"><span>${a.p}</span><span style="color:var(--text2)">${a.v}</span><span style="color:var(--text2)">${a.t}</span><div class="ob-depth" style="width:${(parseFloat(a.v)/maxA*100).toFixed(0)}%"></div></div>`).join('');
+    if(bidsEl) bidsEl.innerHTML=bids.map(b=>`<div class="ob-row"><span>${b.p}</span><span style="color:var(--text2)">${b.v}</span><span style="color:var(--text2)">${b.t}</span><div class="ob-depth" style="width:${(parseFloat(b.v)/maxB*100).toFixed(0)}%"></div></div>`).join('');
+    const sp=parseFloat(asks[asks.length-1].p)-parseFloat(bids[0].p);
+    set('ob-spread',`Spread: $${sp.toFixed(2)} (${(sp/base*100).toFixed(4)}%)`);
+    set('ob-bvol',bv.toFixed(2)+' BTC');set('ob-avol',av.toFixed(2)+' BTC');
+    const tot=bv+av,bp=(bv/tot*100).toFixed(1),ap=(av/tot*100).toFixed(1);
+    const pb=$('ob-pb');if(pb) pb.style.width=bp+'%';
+    set('ob-bpct',bp+'% compra');set('ob-apct',ap+'% venda');
+    const trades=$('ob-trades');
+    if(trades&&trades.children.length<15){
+        const isBuy=Math.random()>.5;const p=base+(Math.random()*2-1);const v=(0.005+Math.random()*0.3).toFixed(4);
+        const tr=document.createElement('tr');tr.style.cssText='opacity:0;transition:opacity .3s;';
+        tr.innerHTML=`<td style="color:${isBuy?'var(--green)':'var(--red)'};">$${p.toFixed(2)}</td><td style="color:var(--text2);">${v}</td><td style="font-weight:700;color:${isBuy?'var(--green)':'var(--red)'};">${isBuy?'BUY':'SELL'}</td><td style="color:var(--text2);font-size:9px;">${new Date().toLocaleTimeString('pt-BR')}</td>`;
+        trades.prepend(tr);requestAnimationFrame(()=>tr.style.opacity='1');
+        while(trades.children.length>12) trades.lastChild.remove();
+    }
+};
+
+// ── SPARKLINE CAPITAL TOTAL ────────────────────────────────────
+let sparkData = [];
+const SPARK_MAX = 40;
+
+function drawSparkline() {
+    const canvas = document.getElementById('sparkline-cap');
+    if(!canvas || sparkData.length < 2) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    if(!w || !h) return;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const mn = Math.min(...sparkData), mx = Math.max(...sparkData);
+    const range = mx - mn || 1;
+    const pad = 4;
+    const xStep = (w - pad*2) / (sparkData.length - 1);
+    const toY = v => h - pad - ((v - mn) / range) * (h - pad*2);
+
+    // Gradiente de preenchimento
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(232,184,75,0.3)');
+    grad.addColorStop(1, 'rgba(232,184,75,0.0)');
+
+    // Área preenchida
+    ctx.beginPath();
+    sparkData.forEach((v, i) => {
+        const x = pad + i * xStep, y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.lineTo(pad + (sparkData.length-1)*xStep, h);
+    ctx.lineTo(pad, h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Linha principal
+    ctx.beginPath();
+    sparkData.forEach((v, i) => {
+        const x = pad + i * xStep, y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#E8B84B';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(232,184,75,0.8)';
+    ctx.shadowBlur = 4;
+    ctx.stroke();
+
+    // Ponto final pulsante
+    const lastX = pad + (sparkData.length-1)*xStep;
+    const lastY = toY(sparkData[sparkData.length-1]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = '#E8B84B';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+}
+
+function updateSparkline() {
+    sparkData.push(getCapitalTotal());
+    if(sparkData.length > SPARK_MAX) sparkData.shift();
+    drawSparkline();
+}
+
+// ── GRÁFICO DE CRESCIMENTO ─────────────────────────────────────
+// Começa do zero (checkpoint = primeiro acesso)
+// Mostra evolução do profit desde o início
+let chartInstance = null;
+let chartLabels   = [];
+let chartProfit   = [];
+let chartPatrim   = [];
+
+function initChartData() {
+    // Gera histórico desde o checkpoint até agora (pontos a cada tick completo)
+    const cp    = getCheckpoint();
+    const agora = Date.now();
+    const totalTicks = Math.floor((agora - cp) / INTERVALO_MS);
+
+    const poolBase = getPoolBase();
+
+    chartLabels  = [];
+    chartProfit  = [];
+    chartPatrim  = [];
+
+    // Ponto inicial: zero
+    chartLabels.push(new Date(cp).toLocaleTimeString('pt-BR'));
+    chartProfit.push(0);
+    chartPatrim.push(parseFloat(poolBase.toFixed(2)));
+
+    // Reconstrói o crescimento composto tick a tick (amostramos a cada N ticks para não sobrecarregar)
+    const step = Math.max(1, Math.floor(totalTicks / 200)); // máx 200 pontos
+    let acc = 0;
+    for(let i = step; i <= totalTicks; i += step) {
+        // Juros compostos: capital(i) = poolBase × (1+r)^i
+        acc = 1026.0 * TAXA_TICK * i;
+        const capitalI = poolBase + acc;
+        const ts = new Date(cp + i * INTERVALO_MS);
+        chartLabels.push(ts.toLocaleTimeString('pt-BR'));
+        chartProfit.push(parseFloat(acc.toFixed(6)));
+        chartPatrim.push(parseFloat(capitalI.toFixed(2)));
+    }
+
+    // Garante que o último ponto é o profit atual real
+    const profitReal = getProfit();
+    if(chartProfit.length > 0) {
+        chartProfit[chartProfit.length-1] = parseFloat(profitReal.toFixed(6));
+        chartPatrim[chartPatrim.length-1] = parseFloat((poolBase + profitReal).toFixed(2));
+    }
+
+    // KPIs
+    const lucroTotal = profitReal;
+    const capitalAtual = poolBase + profitReal;
+    const roi = (lucroTotal / 1026.00) * 100;
+    const diasOp = Math.max(0, (agora - cp) / 86400000);
+    const opsTotal = totalTicks;
+
+    set('chart-inicial', '$' + fmt(poolBase));
+    set('chart-hoje',    '$' + fmt(capitalAtual));
+    set('chart-lucro',   '+$' + profitReal.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
+    set('chart-dias',    diasOp < 1 ? '< 1' : diasOp.toFixed(1));
+    set('chart-roi',     roi.toFixed(6) + '%');
+    set('chart-ops',     opsTotal.toLocaleString('pt-BR'));
+}
+
+function addChartPoint() {
+    if(!chartInstance) return;
+    const agora = new Date().toLocaleTimeString('pt-BR');
+    const profit = getProfit();
+    const poolBase = getPoolBase();
+
+    chartLabels.push(agora);
+    chartProfit.push(parseFloat(profit.toFixed(6)));
+    chartPatrim.push(parseFloat((poolBase + profit).toFixed(2)));
+
+    // Limita a 500 pontos para performance
+    if(chartLabels.length > 500) {
+        chartLabels.shift(); chartProfit.shift(); chartPatrim.shift();
+    }
+
+    chartInstance.data.labels = chartLabels;
+    chartInstance.data.datasets[0].data = chartPatrim;
+    chartInstance.data.datasets[1].data = chartPatrim.map(() => parseFloat(poolBase.toFixed(2)));
+    // Atualiza escala Y dinamicamente
+    const maxPat = Math.max(...chartPatrim);
+    const pft = maxPat - poolBase;
+    const pad = Math.max(pft * 0.8, 0.5);
+    chartInstance.options.scales.y.min = poolBase - pad * 0.3;
+    chartInstance.options.scales.y.max = maxPat + pad * 0.5;
+    chartInstance.update('none');
+
+    // Atualiza KPIs
+    const capital = poolBase + profit;
+    const roi = (profit / 1026.00) * 100;
+    set('chart-hoje',  '$' + fmt(capital));
+    set('chart-lucro', '+$' + profit.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
+    set('chart-roi',   roi.toFixed(6) + '%');
+    const cp = getCheckpoint();
+    const dias = Math.max(0,(Date.now()-cp)/86400000);
+    set('chart-dias', dias < 1 ? '< 1' : dias.toFixed(1));
+    set('chart-ops', getTicks().toLocaleString('pt-BR'));
+}
+
+function renderChart() {
+    const canvas=$('growth-chart'); if(!canvas) return;
+    initChartData();
+    const ctx=canvas.getContext('2d');
+    if(chartInstance){ chartInstance.destroy(); chartInstance=null; }
+
+    const h = canvas.offsetHeight || 300;
+    const poolBase = getPoolBase();
+
+    // Gradiente dourado — área de profit acima da base
+    const gradGold = ctx.createLinearGradient(0, 0, 0, h);
+    gradGold.addColorStop(0,   'rgba(232,184,75,0.45)');
+    gradGold.addColorStop(0.6, 'rgba(232,184,75,0.10)');
+    gradGold.addColorStop(1,   'rgba(232,184,75,0.00)');
+
+    // Gradiente verde sutil para linha de base
+    const gradBase = ctx.createLinearGradient(0, 0, 0, h);
+    gradBase.addColorStop(0, 'rgba(0,229,160,0.06)');
+    gradBase.addColorStop(1, 'rgba(0,229,160,0.00)');
+
+    // Linha de capital base (flat) — referência visual
+    const baseFlat = chartPatrim.map(() => parseFloat(poolBase.toFixed(2)));
+
+    // Min/Max para escala Y — zoom no profit (padding de 10% do profit)
+    const minPat = Math.min(...chartPatrim);
+    const maxPat = Math.max(...chartPatrim);
+    const profit = maxPat - poolBase;
+    const padding = Math.max(profit * 0.8, 0.5); // pelo menos $0.50 de padding
+    const yMin = poolBase - padding * 0.3;
+    const yMax = maxPat  + padding * 0.5;
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: [
+                // Dataset 1: Patrimônio — linha principal dourada
+                {
+                    label: 'Capital Total',
+                    data: chartPatrim,
+                    borderColor: '#E8B84B',
+                    borderWidth: 2.5,
+                    backgroundColor: gradGold,
+                    fill: '+1',   // preenche ATÉ o dataset abaixo (base)
+                    tension: 0.45,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: '#E8B84B',
+                    pointHoverBorderColor: '#111',
+                    pointHoverBorderWidth: 2,
+                    order: 1,
+                },
+                // Dataset 2: Capital base — linha de referência verde discreta
+                {
+                    label: 'Capital Base',
+                    data: baseFlat,
+                    borderColor: 'rgba(0,229,160,0.35)',
+                    borderWidth: 1,
+                    borderDash: [4, 4],
+                    backgroundColor: gradBase,
+                    fill: true,
+                    tension: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    order: 2,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(10,10,10,0.97)',
+                    borderColor: 'rgba(232,184,75,0.3)',
+                    borderWidth: 1,
+                    titleColor: '#4A4A5A',
+                    bodyColor: '#EEEEF5',
+                    titleFont: { family: "'JetBrains Mono'", size: 9 },
+                    bodyFont:  { family: "'JetBrains Mono'", size: 11 },
+                    padding: 14,
+                    displayColors: false,
+                    callbacks: {
+                        title: items => '  ' + items[0].label,
+                        label: item => {
+                            if(item.datasetIndex !== 0) return null;
+                            const v = item.parsed.y;
+                            const profit = v - poolBase;
+                            const roi = (profit / poolBase * 100);
+                            return [
+                                '  Capital  $' + v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),
+                                '  Profit  +$' + profit.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}),
+                                '  ROI      ' + roi.toFixed(6) + '%',
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.025)', drawBorder: false },
+                    ticks: {
+                        color: '#3A3A4A',
+                        font: { family: "'JetBrains Mono'", size: 9 },
+                        maxTicksLimit: 7,
+                        maxRotation: 0,
+                    },
+                    border: { display: false }
+                },
+                y: {
+                    position: 'right',
+                    min: yMin,
+                    max: yMax,
+                    grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                    ticks: {
+                        color: '#3A3A4A',
+                        font: { family: "'JetBrains Mono'", size: 9 },
+                        callback: v => {
+                            const diff = v - poolBase;
+                            if(Math.abs(diff) < 0.001) return '$' + (v/1000).toFixed(3) + 'k';
+                            return (diff >= 0 ? '+$' : '-$') + Math.abs(diff).toFixed(4);
+                        },
+                        maxTicksLimit: 6,
+                    },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+
+    // Animação sutil: ponto final pisca levemente
+    setInterval(() => {
+        if(!chartInstance || !chartPatrim.length) return;
+        const last = chartPatrim[chartPatrim.length - 1];
+        const noise = last * (Math.random() * 0.000002);
+        chartPatrim[chartPatrim.length - 1] = parseFloat((last + noise).toFixed(8));
+        chartInstance.data.datasets[0].data = chartPatrim;
+        chartInstance.update('none');
+    }, 3000);
+}
+
+// ── EXCHANGES PAGE ─────────────────────────────────────────────
+function renderExchanges() {
+    const el=$('ex-grid'); if(!el||el.dataset.done==='1') return;
+    el.dataset.done='1';
+    el.innerHTML=EX.map((ex,i)=>{
+        const latency=(Math.random()*18+8).toFixed(0);
+        const logoOk=`<img class="ex-logo${ex.inv?' invert':''}" src="${ex.logo}" alt="${ex.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                      <div class="ex-logo-fallback" style="display:none;">${ex.name.substring(0,3)}</div>`;
+        return `<div class="ex-card" style="animation:fadeUp .3s ease ${i*.05}s both;">
+            <div class="ex-seal">SYNC</div>
+            <div class="ex-logo-wrap">${logoOk}<div><div class="ex-name">${ex.name}</div><div class="ex-pair">BTC / USDT · SPOT</div></div></div>
+            <div class="ex-status-row"><div class="ex-live"><span class="pulse"></span>API ATIVA</div><div class="ex-latency">LATÊNCIA ${latency}ms</div></div>
+        </div>`;
+    }).join('');
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────
+
+// ══ TOGGLE LITE/PRO ════════════════════════════════════════════
+let currentMode = 'pro'; // sempre inicia no PRO
+
+function setMode(mode) {
+    currentMode = mode;
+    const body = document.body;
+    const btnL = document.getElementById('btn-lite');
+    const btnP = document.getElementById('btn-pro');
+    if(mode === 'lite') {
+        body.classList.add('lite-mode');
+        if(btnL){ btnL.style.background='var(--gold)'; btnL.style.color='#000'; }
+        if(btnP){ btnP.style.background='transparent'; btnP.style.color='var(--text2)'; }
+    } else {
+        body.classList.remove('lite-mode');
+        if(btnP){ btnP.style.background='var(--gold)'; btnP.style.color='#000'; }
+        if(btnL){ btnL.style.background='transparent'; btnL.style.color='var(--text2)'; }
+    }
+    updateLite();
+}
+function toggleMode() { setMode(currentMode === 'pro' ? 'lite' : 'pro'); }
+
+function updateLite() {
+    if(currentMode !== 'lite') return;
+    const profit  = getProfit();
+    const capTotal = getCapitalTotal();
+    const roi     = (profit / 1026.00) * 100;
+    const metaPct = Math.min(100, (profit / META_PROFIT) * 100);
+    const cp      = getCheckpoint();
+    const dias    = Math.max(0, (Date.now() - cp) / 86400000);
+
+    const set2 = (id, v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+    const setW2= (id, w) => { const e=document.getElementById(id); if(e) e.style.width=w; };
+
+    set2('lite-cap',      capTotal == null ? '$--' : '$' + fmt(capTotal));
+    set2('lite-profit',   '+$' + fmt(profit||0, 2));
+    set2('lite-roi',      roi.toFixed(2) + '%');
+    set2('lite-meta-pct', metaPct.toFixed(0) + '%');
+    set2('lite-meta-cur', '$' + fmt(profit||0, 2) + ' acumulado');
+    setW2('lite-meta-bar', metaPct.toFixed(2) + '%');
+    if(btcBase) {
+        set2('lite-btc-price', '$' + fmt(btcBase));
+        set2('lite-btc-pool-usd', '≈ $' + fmt(POOL_BTC * btcBase, 0));
+    }
+    // Sincronizar latência e ticks
+    const latEl = document.getElementById('lite-latency');
+    const proLat = document.getElementById('st-latency');
+    if(latEl && proLat) latEl.textContent = proLat.textContent;
+    set2('lite-ticks', getTicks().toLocaleString('pt-BR'));
+    set2('lite-ticks-bar', getTicks().toLocaleString('pt-BR'));
+}
+
+
+// ══ INDICAÇÕES ════════════════════════════════════════════════
+const IND_REF_CODE = 'EDU001';
+const IND_REF_URL  = 'protocolocripto.com/eduardo-santi?ref=' + IND_REF_CODE;
+const IND_COMISSAO_PCT = 0.30; // 30% do profit do indicado
+
+// Simulação: indicações ativas (em produção viria do servidor)
+const IND_ATIVAS = 0; // número de indicações ativas do cliente
+
+function updateIndicacoes() {
+    // Comissão simulada — em produção seria a soma de 30% dos profits dos indicados
+    // Por ora mostra 0 pois não há indicados registrados
+    const comissao = 0;
+    const el = document.getElementById('ind-total');
+    if(el) el.textContent = '$' + fmt(comissao, 2);
+    const el2 = document.getElementById('ind-count');
+    if(el2) el2.textContent = IND_ATIVAS;
+    const modal = document.getElementById('modal-saldo');
+    if(modal) modal.textContent = '$' + fmt(comissao, 2);
+}
+
+function copyIndLink() {
+    navigator.clipboard.writeText('https://' + IND_REF_URL).then(() => {
+        const btn = document.querySelector('.ind-copy-btn');
+        const orig = btn.textContent;
+        btn.textContent = '✓ COPIADO!';
+        btn.style.background = 'var(--green)';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+    }).catch(() => {
+        const el = document.getElementById('ind-link-url');
+        if(el) { const range = document.createRange(); range.selectNode(el); window.getSelection().removeAllRanges(); window.getSelection().addRange(range); }
+    });
+}
+
+function abrirSaque() {
+    updateIndicacoes();
+    document.getElementById('ind-modal').classList.add('show');
+}
+
+function fecharSaque() {
+    document.getElementById('ind-modal').classList.remove('show');
+    document.getElementById('ind-wallet').value = '';
+    document.getElementById('ind-valor').value  = '';
+}
+
+function confirmarSaque() {
+    const wallet = document.getElementById('ind-wallet').value.trim();
+    const valor  = parseFloat(document.getElementById('ind-valor').value);
+    if(!wallet) { alert('Informe o endereço da carteira.'); return; }
+    if(!valor || valor <= 0) { alert('Informe um valor válido.'); return; }
+    fecharSaque();
+    // Em produção: enviar solicitação para o servidor
+    setTimeout(() => {
+        alert('✓ Solicitação enviada!\n\nEm até 24h o Protocolo processará seu saque.\n\nEndereço: ' + wallet.substring(0,12) + '...');
+    }, 300);
+}
+
+function doLogout(){
+    sessionStorage.removeItem('andre_auth');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('l-user').value = '';
+    document.getElementById('l-pass').value = '';
+}
+
+function updateClock(){
+    set('clock', new Date().toLocaleTimeString('pt-BR'));
+    // Dias restantes para vencimento
+    const venc = new Date('2027-05-08T00:00:00-03:00');
+    const diff = Math.ceil((venc - new Date()) / 86400000);
+    set('dias-venc', diff > 0 ? diff + ' dias' : 'Vencido');
+}
+
+// ── NAVEGAÇÃO ──────────────────────────────────────────────────
+function showPage(page, el) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    const pg=$('page-'+page); if(pg) pg.classList.add('active');
+    if(el) el.classList.add('active');
+    if(page==='exchanges') renderExchanges();
+    if(page==='indicacoes') updateIndicacoes();
+    if(page==='chart') renderChart();
+    closeSidebar();
+}
+function isMobile(){ return window.innerWidth <= 899; }
+function toggleSidebar(){
+    if(!isMobile()) return;
+    const sb=$('sidebar'),hb=$('hamburger'),ov=$('overlay');
+    sb.classList.toggle('open');hb.classList.toggle('open');ov.classList.toggle('show');
+}
+function closeSidebar(){
+    if(!isMobile()) return;
+    $('sidebar').classList.remove('open');
+    $('hamburger').classList.remove('open');
+    $('overlay').classList.remove('show');
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+function init() {
+    // 1. Recupera rendimento gerado enquanto estava offline (juros compostos exatos)
+    applyMissedYield();
+
+    // 2. Inicializa preços e UI
+    updatePrices();
+    updateClientCard();
+    updateSparkline();
+    initOpsHistory();
+    renderRadar('radar');
+    renderRadar('radar-btc');
+    renderOB();
+    connectWS();
+
+    // 3. Loop de atualização de radar e orderbook (4s)
+    setInterval(()=>{
+        updatePrices();
+        renderRadar('radar');
+        renderRadar('radar-btc');
+        renderOB();
+        updateClientCard();
+        // Latência simulada realista
+        const lat = (Math.random()*18+4).toFixed(0);
+        set('st-latency', lat + 'ms');
+        updateLite();
+    }, 4000);
+
+    setInterval(updateClock, 1000);
+
+    // 4. Loop principal de rendimento: 1 tick a cada 15s
+    //    renderOps() é chamado dentro do tick para sincronizar
+    startYieldSimulation();
+}
+
+
+
+// ── INIT ───────────────────────────────────────────────────────
+function init() {
+  applyMissedYield();
+  updatePrices();
+  updateClientCard();
+  updateSparkline();
+  initOpsHistory();
+  renderRadar('radar');
+  renderRadar('radar-btc');
+  renderOB();
+  connectWS();
+  setInterval(()=>{
+    updatePrices();
+    renderRadar('radar');
+    renderRadar('radar-btc');
+    renderOB();
+    updateClientCard();
+    const lat=(Math.random()*18+4).toFixed(0);
+    set('st-latency',lat+'ms');
+    updateLite();
+  },4000);
+  setInterval(updateClock,1000);
+  startYieldSimulation();
+  setMode('pro');
+}
+
+if(savedAuth) {
+  try {
+    const auth = JSON.parse(savedAuth);
+    if(CLIENTES[auth.user]) init();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
