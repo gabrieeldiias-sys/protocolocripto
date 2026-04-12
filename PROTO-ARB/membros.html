@@ -2251,8 +2251,8 @@ function mostrarDashboard(dados) {
 }
 
 function doLogin() {
-  const u   = document.getElementById('l-user').value.trim().toLowerCase().replace(/\s/g,'');
-  const p   = document.getElementById('l-pass').value.trim().toLowerCase();
+  const u   = document.getElementById('l-user').value.trim().toLowerCase();
+  const p   = document.getElementById('l-pass').value.trim();
   const err = document.getElementById('l-err');
   const cliente = CLIENTES[u];
   if(cliente && p === cliente.senha) {
