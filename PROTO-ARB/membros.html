@@ -2468,7 +2468,7 @@ function renderOps() {
     const hora=new Date().toLocaleTimeString('pt-BR');
     const buyEx =EX.find(e=>e.id===result.minId);
     const sellEx=EX.find(e=>e.id===result.maxId);
-    const lucroTick = 1026.0 * TAXA_TICK; // rendimento simples sobre aporte fixo
+    const lucroTick = APORTE_BASE * TAXA_TICK; // rendimento simples sobre aporte fixo
     const r=document.createElement('tr');
     r.style.cssText='opacity:0;transition:opacity .4s;';
     r.innerHTML=`
@@ -2609,7 +2609,7 @@ function initChartData() {
     let acc = 0;
     for(let i = step; i <= totalTicks; i += step) {
         // Juros compostos: capital(i) = poolBase × (1+r)^i
-        acc = 1026.0 * TAXA_TICK * i;
+        acc = APORTE_BASE * TAXA_TICK * i;
         const capitalI = poolBase + acc;
         const ts = new Date(cp + i * INTERVALO_MS);
         chartLabels.push(ts.toLocaleTimeString('pt-BR'));
@@ -2627,7 +2627,7 @@ function initChartData() {
     // KPIs
     const lucroTotal = profitReal;
     const capitalAtual = poolBase + profitReal;
-    const roi = (lucroTotal / 1026.00) * 100;
+    const roi = (lucroTotal / APORTE_BASE) * 100;
     const diasOp = Math.max(0, (agora - cp) / 86400000);
     const opsTotal = totalTicks;
 
@@ -2667,7 +2667,7 @@ function addChartPoint() {
 
     // Atualiza KPIs
     const capital = poolBase + profit;
-    const roi = (profit / 1026.00) * 100;
+    const roi = (profit / APORTE_BASE) * 100;
     set('chart-hoje',  '$' + fmt(capital));
     set('chart-lucro', '+$' + profit.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
     set('chart-roi',   roi.toFixed(6) + '%');
@@ -2863,7 +2863,7 @@ function updateLite() {
     if(currentMode !== 'lite') return;
     const profit  = getProfit();
     const capTotal = getCapitalTotal();
-    const roi     = (profit / 1026.00) * 100;
+    const roi     = (profit / APORTE_BASE) * 100;
     const metaPct = Math.min(100, (profit / META_PROFIT) * 100);
     const cp      = getCheckpoint();
     const dias    = Math.max(0, (Date.now() - cp) / 86400000);
