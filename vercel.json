@@ -1,12 +1,14 @@
 {
   "rewrites": [
-    { "source": "/kassem", "destination": "/kassem.html" },
-    { "source": "/acesso-kassem", "destination": "/acesso_kassem.html" },
-    { "source": "/ali-ataya", "destination": "/aliataya.html" },
-    { "source": "/felipe-campos", "destination": "/felipecampos.html" },
-    { "source": "/felipe-vaz", "destination": "/felipevaz.html" },
-    { "source": "/andre-hornung", "destination": "/andrehornung.html" },
-    { "source": "/eduardo-santi", "destination": "/eduardosanti.html" },
     { "source": "/membros", "destination": "/PROTO-ARB/membros.html" }
+  ],
+  "redirects": [
+    { "source": "/kassem", "destination": "/membros", "permanent": false },
+    { "source": "/acesso-kassem", "destination": "/membros", "permanent": false },
+    { "source": "/ali-ataya", "destination": "/membros", "permanent": false },
+    { "source": "/felipe-campos", "destination": "/membros", "permanent": false },
+    { "source": "/felipe-vaz", "destination": "/membros", "permanent": false },
+    { "source": "/andre-hornung", "destination": "/membros", "permanent": false },
+    { "source": "/eduardo-santi", "destination": "/membros", "permanent": false }
   ]
 }
