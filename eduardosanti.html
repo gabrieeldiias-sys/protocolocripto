@@ -1583,7 +1583,7 @@ const prices = {};
 
 // ── HELPERS DOM ────────────────────────────────────────────────
 const $   = id => document.getElementById(id);
-const fmt = (n, d=2) => n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+const fmt = (n, d=2) => (n == null || isNaN(n)) ? '--' : n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
 const set = (id, v)  => { const e=$(id); if(e) e.textContent=v; };
 const setW= (id, w)  => { const e=$(id); if(e) e.style.width=w; };
 
@@ -1676,12 +1676,12 @@ function updateClientCard() {
     set('pool-btc-usd', '$' + fmt(poolBtcUSD, 0));
 
     // Linha 2
-    set('profit-total', '+$' + profit.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
+    set('profit-total', '+$' + (profit||0).toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6}));
     set('profit-roi',   roi.toFixed(6) + '%');   // card ROI dedicado
-    set('cap-total',    '$' + fmt(capTotal));
+    set('cap-total', capTotal == null ? '$--' : '$' + fmt(capTotal));
 
     // Progress bar meta $500
-    set('prog-val', '$' + fmt(profit));
+    set('prog-val', '$' + fmt(profit||0));
     set('prog-pct', metaPct.toFixed(2) + '%');
     setW('prog-bar', metaPct.toFixed(2) + '%');
     set('cc-ticks-live', getTicks().toLocaleString('pt-BR'));
