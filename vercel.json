@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/membros", "destination": "/PROTO-ARB/membros.html" }
+    { "source": "/membros", "destination": "/PROTO-ARB/membros.html" },
+    { "source": "/cadastre-se", "destination": "/cadastre-se.html" }
   ],
   "redirects": [
     { "source": "/kassem", "destination": "/membros", "permanent": false },
