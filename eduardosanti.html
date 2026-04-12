@@ -515,6 +515,116 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   vertical-align:middle;
   display:inline-block;
 }
+
+/* ══ LITE MODE ══ */
+.lite-view{ display:none; }
+.pro-view{ display:block; }
+body.lite-mode .pro-view{ display:none !important; }
+body.lite-mode .lite-view{ display:block !important; }
+body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:none; }
+
+/* Card Lite */
+.lite-card{
+  border-radius:20px;
+  background:linear-gradient(135deg,#101010,#0d0d0d);
+  border:1px solid rgba(232,184,75,0.14);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  padding:36px 32px;
+  margin-bottom:18px;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.lite-card::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,184,75,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.lite-greeting{
+  font-family:var(--mono);font-size:9px;color:var(--text2);
+  letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-name{
+  font-family:'Orbitron',sans-serif;font-size:clamp(20px,3vw,32px);
+  font-weight:900;color:#fff;margin-bottom:32px;
+}
+.lite-patrimonio-label{
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-patrimonio-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(36px,6vw,64px);
+  color:var(--gold);letter-spacing:-2px;line-height:1;
+  text-shadow:0 0 40px rgba(232,184,75,0.3);
+  margin-bottom:6px;
+}
+.lite-patrimonio-sub{
+  font-family:var(--mono);font-size:9px;color:var(--text2);
+  margin-bottom:32px;
+}
+.lite-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:16px;margin-bottom:32px;
+}
+.lite-stat{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:18px 12px;
+}
+.lite-stat-label{
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  letter-spacing:1.5px;margin-bottom:8px;text-transform:uppercase;
+}
+.lite-stat-val{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(16px,2.5vw,22px);color:var(--text);
+  line-height:1;
+}
+/* Meta Lite */
+.lite-meta{margin-top:4px;}
+.lite-meta-header{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:9px;margin-bottom:10px;
+}
+.lite-meta-label{color:var(--text2);letter-spacing:1px;}
+.lite-meta-pct{color:var(--green);font-weight:700;}
+.lite-meta-track{
+  height:10px;background:rgba(255,255,255,0.06);
+  border-radius:5px;overflow:hidden;position:relative;
+}
+.lite-meta-fill{
+  height:100%;border-radius:5px;
+  background:linear-gradient(90deg,rgba(232,184,75,0.5),var(--gold),#FFD54F);
+  box-shadow:0 0 12px rgba(232,184,75,0.4);
+  transition:width 1.8s cubic-bezier(.4,0,.2,1);
+}
+.lite-meta-footer{
+  display:flex;justify-content:space-between;
+  font-family:var(--mono);font-size:8px;color:var(--text2);
+  margin-top:6px;
+}
+/* BTC Lite */
+.lite-btc{
+  background:rgba(232,184,75,0.04);
+  border:1px solid rgba(232,184,75,0.12);
+  border-radius:14px;padding:20px 24px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.lite-btc-left{ text-align:left; }
+.lite-btc-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px;}
+.lite-btc-price{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--gold);}
+.lite-btc-change{font-family:var(--mono);font-size:10px;margin-top:4px;}
+.lite-status{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:9px;color:var(--green);
+  letter-spacing:1px;
+}
+@media(max-width:600px){
+  .lite-stats{grid-template-columns:1fr 1fr;}
+  .lite-patrimonio-val{font-size:clamp(28px,8vw,44px);}
+}
+
 /* ── SECTION HEADER ── */
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .sec-title{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
@@ -1013,8 +1123,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <canvas id="login-canvas"></canvas>
     <div class="login-wrap">
         <div class="login-top">
-            <div class="login-logo-txt">[ PROTOCOLO CRIPTO ]</div>
-            <div class="login-brand">PROTOCOLO CRIPTO</div>
+            <div class="login-brand"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
+            <div class="login-logo-txt" style="font-family:var(--mono);font-size:9px;letter-spacing:4px;color:rgba(232,184,75,0.5);">ARBITRAGE BTC</div>
             <div class="login-sub">&gt;_ ACESSO RESTRITO &middot; CLIENTES</div>
         </div>
         <div class="login-box">
@@ -1073,6 +1183,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   </div>
   <div class="sid-foot">
     <div class="sid-status"><span class="pulse"></span>SISTEMA ATIVO · LIVE</div>
+    <button onclick="doLogout()" style="
+      margin-top:12px;width:100%;
+      background:rgba(255,77,106,0.06);
+      border:1px solid rgba(255,77,106,0.2);
+      border-radius:7px;padding:8px;cursor:pointer;
+      font-family:var(--mono);font-size:8px;font-weight:700;
+      color:rgba(255,77,106,0.7);letter-spacing:1.5px;
+      transition:all .2s;
+    " onmouseover="this.style.background='rgba(255,77,106,0.12)';this.style.color='#FF4D6A'"
+       onmouseout="this.style.background='rgba(255,77,106,0.06)';this.style.color='rgba(255,77,106,0.7)'">
+      ⏻ &nbsp;SAIR
+    </button>
   </div>
 </nav>
 
@@ -1082,6 +1204,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <!-- TOPBAR -->
 <header class="topbar">
   <span class="topbar-clock" id="clock">--:--:--</span>
+  <!-- TOGGLE LITE/PRO -->
+  <button id="mode-toggle" onclick="toggleMode()" style="
+    background:rgba(232,184,75,0.08);border:1px solid rgba(232,184,75,0.25);
+    border-radius:20px;padding:5px 14px;cursor:pointer;
+    font-family:var(--mono);font-size:9px;font-weight:700;
+    color:var(--gold);letter-spacing:1.5px;
+    display:flex;align-items:center;gap:7px;transition:all .2s;
+  ">
+    <span id="mode-icon" style="font-size:11px;">⊞</span>
+    <span id="mode-label">LITE</span>
+  </button>
   <div class="topbar-right">
     <div class="btc-live-badge">
       <span class="btc-live-label">BTC/USDT</span>
@@ -1097,6 +1230,66 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <!-- ══ OVERVIEW ══ -->
   <div class="page active" id="page-overview">
 
+
+    <!-- ══ LITE VIEW ══ -->
+    <div class="lite-view">
+
+      <!-- Card principal -->
+      <div class="lite-card">
+        <div class="lite-greeting">● SISTEMA ATIVO · OPERANDO AO VIVO</div>
+        <div class="lite-name">EDUARDO SANTI</div>
+
+        <div class="lite-patrimonio-label">Seu patrimônio hoje</div>
+        <div class="lite-patrimonio-val" id="lite-cap">$--</div>
+        <div class="lite-patrimonio-sub">Atualizado em tempo real · BTC + USDT + Lucro</div>
+
+        <div class="lite-stats">
+          <div class="lite-stat">
+            <div class="lite-stat-label">Lucro acumulado</div>
+            <div class="lite-stat-val" style="color:var(--green);" id="lite-profit">+$--</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Rendimento</div>
+            <div class="lite-stat-val" style="color:var(--gold);" id="lite-roi">--%</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Dias operando</div>
+            <div class="lite-stat-val" id="lite-dias">--</div>
+          </div>
+        </div>
+
+        <div class="lite-meta">
+          <div class="lite-meta-header">
+            <span class="lite-meta-label">◆ META DO CICLO · $100 USDT</span>
+            <span class="lite-meta-pct" id="lite-meta-pct">0%</span>
+          </div>
+          <div class="lite-meta-track">
+            <div class="lite-meta-fill" id="lite-meta-bar" style="width:0%"></div>
+          </div>
+          <div class="lite-meta-footer">
+            <span id="lite-meta-cur">$0,00 acumulado</span>
+            <span>Meta: $100,00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BTC ao vivo -->
+      <div class="lite-btc">
+        <div class="lite-btc-left">
+          <div class="lite-btc-label">BITCOIN · PREÇO AO VIVO</div>
+          <div class="lite-btc-price" id="lite-btc-price">$--</div>
+          <div class="lite-btc-change" id="lite-btc-change" style="color:var(--green);">carregando...</div>
+        </div>
+        <div class="lite-status">
+          <span class="pulse"></span>AO VIVO
+        </div>
+      </div>
+
+    </div>
+    <!-- /LITE VIEW -->
+
+    <!-- ══ PRO VIEW ══ -->
+    <div class="pro-view">
     <!-- CLIENT CARD — OKX/BYBIT STYLE -->
     <div class="client-card">
 
@@ -1256,6 +1449,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       </div>
 
     </div>
+
+    </div><!-- /PRO VIEW -->
 
     <!-- RADAR -->
     <div class="sec-hdr">
@@ -1740,6 +1935,9 @@ function connectWS() {
             ['top-price','btc-hero-price'].forEach(id => set(id, '$' + fmt(btcBase)));
             const chEl = $('btc-change');
             if(chEl){ chEl.textContent = changeStr + ' (24h)'; chEl.style.color = color; }
+            const liteChange = document.getElementById('lite-btc-change');
+            if(liteChange){ liteChange.textContent = changeStr + ' (24h)'; liteChange.style.color = color; }
+            if(btcBase) { const lp = document.getElementById('lite-btc-price'); if(lp) lp.textContent = '$' + fmt(btcBase); }
             updateClientCard();
         };
         ws.onclose = () => { set('ws-status', 'RECONECTANDO...'); setTimeout(connectWS, 3000); };
@@ -2263,6 +2461,57 @@ function renderExchanges() {
 }
 
 // ── CLOCK ──────────────────────────────────────────────────────
+
+// ══ TOGGLE LITE/PRO ════════════════════════════════════════════
+let currentMode = 'pro';
+
+function toggleMode() {
+    currentMode = currentMode === 'pro' ? 'lite' : 'pro';
+    const body = document.body;
+    const label = document.getElementById('mode-label');
+    const icon  = document.getElementById('mode-icon');
+    if(currentMode === 'lite') {
+        body.classList.add('lite-mode');
+        label.textContent = 'PRO';
+        icon.textContent  = '⊟';
+    } else {
+        body.classList.remove('lite-mode');
+        label.textContent = 'LITE';
+        icon.textContent  = '⊞';
+    }
+    updateLite();
+}
+
+function updateLite() {
+    if(currentMode !== 'lite') return;
+    const profit  = getProfit();
+    const capTotal = getCapitalTotal();
+    const roi     = (profit / 1026.00) * 100;
+    const metaPct = Math.min(100, (profit / META_PROFIT) * 100);
+    const cp      = getCheckpoint();
+    const dias    = Math.max(0, (Date.now() - cp) / 86400000);
+
+    const set2 = (id, v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+    const setW2= (id, w) => { const e=document.getElementById(id); if(e) e.style.width=w; };
+
+    set2('lite-cap',      capTotal == null ? '$--' : '$' + fmt(capTotal));
+    set2('lite-profit',   '+$' + fmt(profit||0, 2));
+    set2('lite-roi',      roi.toFixed(2) + '%');
+    set2('lite-dias',     dias < 1 ? '< 1 dia' : Math.floor(dias) + ' dias');
+    set2('lite-meta-pct', metaPct.toFixed(0) + '%');
+    set2('lite-meta-cur', '$' + fmt(profit||0, 2) + ' acumulado');
+    setW2('lite-meta-bar', metaPct.toFixed(2) + '%');
+    if(btcBase) set2('lite-btc-price', '$' + fmt(btcBase));
+}
+
+function doLogout(){
+    sessionStorage.removeItem('andre_auth');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('l-user').value = '';
+    document.getElementById('l-pass').value = '';
+}
+
 function updateClock(){
     set('clock', new Date().toLocaleTimeString('pt-BR'));
     // Dias restantes para vencimento
@@ -2319,6 +2568,7 @@ function init() {
         // Latência simulada realista
         const lat = (Math.random()*18+4).toFixed(0);
         set('st-latency', lat + 'ms');
+        updateLite();
     }, 4000);
 
     setInterval(updateClock, 1000);
