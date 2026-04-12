@@ -28,11 +28,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ══ LOGIN SCREEN ══ */
 #login-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
 #login-canvas{position:absolute;inset:0;opacity:.55;pointer-events:none;}
-.login-wrap{position:relative;z-index:2;width:100%;max-width:400px;margin:20px;animation:fadeUp .5s ease;}
-.login-top{text-align:center;margin-bottom:28px;}
-.login-logo-txt{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:6px;}
-.login-brand{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:6px;}
-.login-sub{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
+.login-wrap{position:relative;z-index:2;width:100%;max-width:420px;margin:20px;animation:fadeUp .5s ease;}
+.login-top{text-align:center;margin-bottom:32px;}
+.login-logo-txt{font-family:var(--mono);font-size:9px;color:rgba(232,184,75,0.45);letter-spacing:5px;margin-bottom:0;}
+.login-brand{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:0;line-height:1;}
+.login-sub{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:3px;}
+.login-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(232,184,75,0.3),transparent);margin:18px 0;}
+.login-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2);
+  border-radius:20px;padding:5px 14px;margin-bottom:20px;
+  font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:2px;font-weight:700;
+}
 .login-box{background:linear-gradient(145deg,#111111,#0a0a0a);border:1px solid var(--bordergold);border-radius:16px;padding:32px 28px;}
 .lf{margin-bottom:16px;}
 .lf label{display:block;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2px;margin-bottom:7px;text-transform:uppercase;}
@@ -1123,9 +1130,27 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
     <canvas id="login-canvas"></canvas>
     <div class="login-wrap">
         <div class="login-top">
-            <div class="login-brand"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
-            <div class="login-logo-txt" style="font-family:var(--mono);font-size:9px;letter-spacing:4px;color:rgba(232,184,75,0.5);">ARBITRAGE BTC</div>
-            <div class="login-sub">&gt;_ ACESSO RESTRITO &middot; CLIENTES</div>
+          <!-- Logo SVG animado — anel dourado girando -->
+          <div style="margin-bottom:16px;">
+            <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(232,184,75,0.1)" stroke-width="2"/>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#E8B84B" stroke-width="2"
+                stroke-dasharray="50 140" stroke-linecap="round">
+                <animateTransform attributeName="transform" type="rotate"
+                  from="0 36 36" to="360 36 36" dur="3s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="36" cy="36" r="22" fill="none" stroke="rgba(232,184,75,0.06)" stroke-width="1"/>
+              <!-- B do BTC -->
+              <text x="36" y="44" text-anchor="middle"
+                font-family="'Orbitron',sans-serif" font-size="22" font-weight="900"
+                fill="#E8B84B">B</text>
+            </svg>
+          </div>
+          <div class="login-brand"><span style="color:#fff;">PROTO-</span><span style="color:#FFD84D;">ARB</span></div>
+          <div class="login-logo-txt" style="margin-top:6px;">ARBITRAGE BTC</div>
+          <div class="login-divider"></div>
+          <div class="login-badge"><span class="pulse" style="width:5px;height:5px;"></span>SISTEMA ATIVO · ACESSO RESTRITO</div>
+          <div class="login-sub">Área exclusiva de clientes</div>
         </div>
         <div class="login-box">
             <div class="lf"><label>Usu&aacute;rio</label><input type="text" id="l-user" placeholder="seu usu&aacute;rio" autocomplete="off"></div>
