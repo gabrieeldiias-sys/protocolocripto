@@ -30,9 +30,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #login-canvas{position:absolute;inset:0;opacity:.55;pointer-events:none;}
 .login-wrap{position:relative;z-index:2;width:100%;max-width:420px;margin:20px;animation:fadeUp .5s ease;}
 .login-top{text-align:center;margin-bottom:32px;}
-.login-logo-txt{font-family:var(--mono);font-size:9px;color:rgba(232,184,75,0.45);letter-spacing:5px;margin-bottom:0;}
+.login-logo-txt{font-family:var(--mono);font-size:11px;color:rgba(232,184,75,0.7);letter-spacing:5px;margin-bottom:0;font-weight:700;}
 .login-brand{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:0;line-height:1;}
-.login-sub{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:3px;}
+.login-sub{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:3px;}
 .login-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(232,184,75,0.3),transparent);margin:18px 0;}
 .login-badge{
   display:inline-flex;align-items:center;gap:6px;
@@ -528,7 +528,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .pro-view{ display:block; }
 body.lite-mode .pro-view{ display:none !important; }
 body.lite-mode .lite-view{ display:block !important; }
-body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:none; }
+
 
 /* Card Lite */
 .lite-card{
@@ -571,8 +571,8 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
   margin-bottom:32px;
 }
 .lite-stats{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:16px;margin-bottom:32px;
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:14px;margin-bottom:28px;
 }
 .lite-stat{
   background:rgba(255,255,255,0.03);
@@ -630,6 +630,116 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
 @media(max-width:600px){
   .lite-stats{grid-template-columns:1fr 1fr;}
   .lite-patrimonio-val{font-size:clamp(28px,8vw,44px);}
+}
+
+
+/* ══ INDICAÇÕES ══ */
+.ind-hero{
+  background:linear-gradient(135deg,rgba(232,184,75,0.08),rgba(232,184,75,0.02));
+  border:1px solid rgba(232,184,75,0.2);
+  border-radius:20px;padding:32px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.ind-hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(232,184,75,0.1) 0%,transparent 70%);
+}
+.ind-hero-label{font-family:var(--mono);font-size:8px;color:rgba(232,184,75,0.5);letter-spacing:3px;margin-bottom:8px;}
+.ind-hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(18px,2.5vw,26px);font-weight:900;color:#fff;margin-bottom:6px;}
+.ind-hero-sub{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.6;max-width:600px;}
+
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.ind-card{
+  background:#0e0e0e;border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+}
+.ind-card-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
+.ind-card-val{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1;}
+.ind-card-sub{font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:6px;}
+
+.ind-link-box{
+  background:#0e0e0e;border:1px solid rgba(232,184,75,0.2);
+  border-radius:14px;padding:20px 24px;margin-bottom:18px;
+}
+.ind-link-label{font-family:var(--mono);font-size:8px;color:rgba(232,184,75,0.5);letter-spacing:2px;margin-bottom:10px;}
+.ind-link-row{display:flex;align-items:center;gap:10px;}
+.ind-link-url{
+  flex:1;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--gold);background:rgba(232,184,75,0.05);
+  border:1px solid rgba(232,184,75,0.15);border-radius:8px;
+  padding:10px 14px;letter-spacing:.3px;word-break:break-all;
+}
+.ind-copy-btn{
+  flex-shrink:0;background:var(--gold);border:none;border-radius:8px;
+  padding:10px 18px;cursor:pointer;font-family:var(--mono);
+  font-size:9px;font-weight:700;color:#000;letter-spacing:1.5px;
+  transition:all .2s;
+}
+.ind-copy-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,184,75,0.3);}
+
+.ind-como{
+  background:#0e0e0e;border:1px solid var(--border);
+  border-radius:16px;padding:28px;margin-bottom:18px;
+}
+.ind-como-title{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:20px;font-weight:700;}
+.ind-step{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+.ind-step:last-child{margin-bottom:0;}
+.ind-step-num{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(232,184,75,0.1);border:1px solid rgba(232,184,75,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);
+}
+.ind-step-body{}
+.ind-step-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:.5px;}
+.ind-step-desc{font-family:var(--mono);font-size:9px;color:var(--text2);line-height:1.6;}
+
+.ind-saque-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(45deg,rgba(0,229,160,0.1),rgba(0,229,160,0.05));
+  border:1px solid rgba(0,229,160,0.3);border-radius:10px;
+  cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;
+  color:var(--green);letter-spacing:2px;transition:all .2s;
+}
+.ind-saque-btn:hover{background:rgba(0,229,160,0.15);transform:translateY(-1px);}
+
+/* Modal saque */
+.ind-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.ind-modal-overlay.show{display:flex;}
+.ind-modal{
+  background:#111;border:1px solid rgba(232,184,75,0.2);
+  border-radius:20px;padding:32px;width:100%;max-width:440px;margin:20px;
+}
+.ind-modal-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#fff;margin-bottom:6px;}
+.ind-modal-sub{font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:24px;letter-spacing:1px;}
+.ind-modal label{display:block;font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:7px;}
+.ind-modal input{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:12px 14px;color:#fff;font-family:var(--mono);font-size:12px;
+  outline:none;transition:border-color .3s;margin-bottom:16px;
+}
+.ind-modal input:focus{border-color:rgba(0,229,160,0.4);}
+.ind-modal-btns{display:flex;gap:10px;}
+.ind-modal-confirm{
+  flex:1;padding:13px;background:linear-gradient(45deg,var(--green),#00C880);
+  border:none;border-radius:8px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:#000;letter-spacing:1.5px;
+}
+.ind-modal-cancel{
+  padding:13px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;
+}
+
+@media(max-width:600px){
+  .ind-grid{grid-template-columns:1fr;}
+  .ind-link-row{flex-direction:column;}
+  .ind-copy-btn{width:100%;}
+  .lite-stats{grid-template-columns:1fr 1fr !important;}
 }
 
 /* ── SECTION HEADER ── */
@@ -1205,6 +1315,9 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
         </svg>
       </span>CRESCIMENTO
     </div>
+    <div class="nav-item" onclick="showPage('indicacoes',this)" style="color:var(--gold);border-left-color:transparent;">
+      <span class="nav-icon">◎</span>INDICAÇÕES
+    </div>
   </div>
   <div class="sid-foot">
     <div class="sid-status"><span class="pulse"></span>SISTEMA ATIVO · LIVE</div>
@@ -1230,16 +1343,27 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
 <header class="topbar">
   <span class="topbar-clock" id="clock">--:--:--</span>
   <!-- TOGGLE LITE/PRO -->
-  <button id="mode-toggle" onclick="toggleMode()" style="
-    background:rgba(232,184,75,0.08);border:1px solid rgba(232,184,75,0.25);
-    border-radius:20px;padding:5px 14px;cursor:pointer;
-    font-family:var(--mono);font-size:9px;font-weight:700;
-    color:var(--gold);letter-spacing:1.5px;
-    display:flex;align-items:center;gap:7px;transition:all .2s;
+  <div style="
+    display:flex;align-items:center;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:20px;padding:3px;gap:2px;
   ">
-    <span id="mode-icon" style="font-size:11px;">⊞</span>
-    <span id="mode-label">LITE</span>
-  </button>
+    <button id="btn-lite" onclick="setMode('lite')" style="
+      background:var(--gold);color:#000;
+      border:none;border-radius:16px;
+      padding:5px 14px;cursor:pointer;
+      font-family:var(--mono);font-size:9px;font-weight:700;
+      letter-spacing:1.5px;transition:all .2s;
+    ">LITE</button>
+    <button id="btn-pro" onclick="setMode('pro')" style="
+      background:transparent;color:var(--text2);
+      border:none;border-radius:16px;
+      padding:5px 14px;cursor:pointer;
+      font-family:var(--mono);font-size:9px;font-weight:700;
+      letter-spacing:1.5px;transition:all .2s;
+    ">PRO</button>
+  </div>
   <div class="topbar-right">
     <div class="btc-live-badge">
       <span class="btc-live-label">BTC/USDT</span>
@@ -1261,14 +1385,52 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
 
       <!-- Card principal -->
       <div class="lite-card">
-        <div class="lite-greeting">● SISTEMA ATIVO · OPERANDO AO VIVO</div>
-        <div class="lite-name">EDUARDO SANTI</div>
 
-        <div class="lite-patrimonio-label">Seu patrimônio hoje</div>
-        <div class="lite-patrimonio-val" id="lite-cap">$--</div>
-        <div class="lite-patrimonio-sub">Atualizado em tempo real · BTC + USDT + Lucro</div>
+        <!-- Topo: nome + tags de status -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <div style="text-align:left;">
+            <div class="lite-greeting">● SISTEMA ATIVO</div>
+            <div class="lite-name" style="text-align:left;">EDUARDO SANTI</div>
+          </div>
+          <!-- Tags status -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;">
+            <div class="cc-status-pill">
+              <span class="cc-status-dot"></span>
+              <span>LAT</span>
+              <span id="lite-latency" class="cc-status-val" style="color:var(--green);">--ms</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+              <span>240/H</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--blue);box-shadow:0 0 4px var(--blue);animation:none;"></span>
+              <span>99.9%</span>
+            </div>
+            <div class="cc-status-pill">
+              <span class="cc-status-dot" style="background:var(--gold);box-shadow:0 0 4px var(--gold);"></span>
+              <span>TICK</span>
+              <span id="lite-ticks" class="cc-status-val" style="color:var(--gold);">0</span>
+            </div>
+          </div>
+        </div>
 
-        <div class="lite-stats">
+        <!-- Patrimônio -->
+        <div style="margin-bottom:28px;">
+          <div class="lite-patrimonio-label">Seu patrimônio hoje</div>
+          <div class="lite-patrimonio-val" id="lite-cap">$--</div>
+          <div class="lite-patrimonio-sub">Atualizado em tempo real · BTC + USDT + Lucro</div>
+        </div>
+
+        <!-- Live bar ticks -->
+        <div class="cc-live-bar" style="margin-bottom:20px;">
+          <span class="pulse" style="width:5px;height:5px;"></span>
+          <span class="cc-live-bar-txt">OPERANDO · <span id="lite-ticks-bar" style="color:var(--gold);">0</span> TICKS</span>
+          <div class="cc-live-bar-line"><div class="cc-live-bar-fill"></div></div>
+        </div>
+
+        <!-- Stats: Lucro + ROI + Pools -->
+        <div class="lite-stats" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:28px;">
           <div class="lite-stat">
             <div class="lite-stat-label">Lucro acumulado</div>
             <div class="lite-stat-val" style="color:var(--green);" id="lite-profit">+$--</div>
@@ -1278,11 +1440,17 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
             <div class="lite-stat-val" style="color:var(--gold);" id="lite-roi">--%</div>
           </div>
           <div class="lite-stat">
-            <div class="lite-stat-label">Dias operando</div>
-            <div class="lite-stat-val" id="lite-dias">--</div>
+            <div class="lite-stat-label">Pool BTC</div>
+            <div class="lite-stat-val" style="color:var(--gold);font-size:clamp(13px,2vw,18px);">0.00719 <span style="font-size:.6em;opacity:.5;">BTC</span></div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text2);margin-top:4px;" id="lite-btc-pool-usd">≈ $--</div>
+          </div>
+          <div class="lite-stat">
+            <div class="lite-stat-label">Pool USDT</div>
+            <div class="lite-stat-val" style="color:var(--blue);font-size:clamp(13px,2vw,18px);">$600 <span style="font-size:.6em;opacity:.5;">USDT</span></div>
           </div>
         </div>
 
+        <!-- Meta -->
         <div class="lite-meta">
           <div class="lite-meta-header">
             <span class="lite-meta-label">◆ META DO CICLO · $100 USDT</span>
@@ -1701,6 +1869,120 @@ body.lite-mode .sidebar .nav-item:not([data-lite]){ opacity:0.3; pointer-events:
       <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;"><span class="pulse"></span>10 CEX · ATIVAS</div>
     </div>
     <div class="ex-grid" id="ex-grid"></div>
+  </div>
+
+
+  <!-- ══ INDICAÇÕES ══ -->
+  <div class="page" id="page-indicacoes">
+
+    <!-- Hero -->
+    <div class="ind-hero">
+      <div class="ind-hero-label">◎ PROGRAMA DE INDICAÇÃO · PROTOCOLO ARB</div>
+      <div class="ind-hero-title">Indique e ganhe automaticamente</div>
+      <div class="ind-hero-sub">
+        Compartilhe seu link exclusivo. Para cada pessoa que entrar na mesa através de você,
+        o Protocolo repassa <strong style="color:var(--gold);">30% do rendimento mensal</strong> gerado pelo capital do indicado —
+        direto para sua conta, sem afetar nada para quem você indicou.
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="ind-grid">
+      <div class="ind-card" style="border-color:rgba(232,184,75,0.15);">
+        <div class="ind-card-label">Comissões acumuladas</div>
+        <div class="ind-card-val" style="color:var(--gold);" id="ind-total">$0,00</div>
+        <div class="ind-card-sub">USDT disponível</div>
+      </div>
+      <div class="ind-card">
+        <div class="ind-card-label">Indicações ativas</div>
+        <div class="ind-card-val" style="color:var(--green);" id="ind-count">0</div>
+        <div class="ind-card-sub">mesas operando pelo seu link</div>
+      </div>
+    </div>
+
+    <!-- Link exclusivo -->
+    <div class="ind-link-box">
+      <div class="ind-link-label">SEU LINK EXCLUSIVO DE INDICAÇÃO</div>
+      <div class="ind-link-row">
+        <div class="ind-link-url" id="ind-link-url">protocolocripto.com/eduardo-santi?ref=EDU001</div>
+        <button class="ind-copy-btn" onclick="copyIndLink()">COPIAR</button>
+      </div>
+    </div>
+
+    <!-- Como funciona -->
+    <div class="ind-como">
+      <div class="ind-como-title">◈ COMO FUNCIONA O SISTEMA POOL-TO-POOL</div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">1</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">COMPARTILHE SEU LINK</div>
+          <div class="ind-step-desc">Divulgue seu link exclusivo para pessoas interessadas em arbitragem BTC. Cada link é único e rastreado pelo Protocolo.</div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">2</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">A PESSOA ENTRA NA MESA</div>
+          <div class="ind-step-desc">Quando alguém se cadastra pelo seu link e começa a operar, você passa a receber automaticamente 30% do rendimento mensal gerado pelo capital dela.</div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">3</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">EXEMPLO REAL</div>
+          <div class="ind-step-desc">
+            Seu indicado investe <span style="color:var(--gold);">$10.000</span> →
+            gera <span style="color:var(--green);">$300/mês</span> de rendimento →
+            você recebe <span style="color:var(--gold);">$90/mês</span> automaticamente.
+            <br><br>
+            <span style="color:rgba(0,229,160,0.7);">✓ O indicado continua recebendo $300 inteiros — o Protocolo banca os $90 com sua margem operacional.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-step">
+        <div class="ind-step-num">4</div>
+        <div class="ind-step-body">
+          <div class="ind-step-title">RECORRENTE E AUTOMÁTICO</div>
+          <div class="ind-step-desc">Enquanto seu indicado permanecer na mesa, você continua recebendo. Sem limite de indicações — quanto mais você indica, mais o sistema trabalha por você.</div>
+        </div>
+      </div>
+
+      <div class="ind-step" style="margin-bottom:0;">
+        <div class="ind-step-num" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.3);">
+          <span style="color:var(--green);">✓</span>
+        </div>
+        <div class="ind-step-body">
+          <div class="ind-step-title" style="color:var(--green);">ZERO IMPACTO NO INDICADO</div>
+          <div class="ind-step-desc">A comissão de 30% é bancada integralmente pelo Protocolo, que opera com margem de até 50%. Seu indicado não perde absolutamente nada do rendimento.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saque -->
+    <button class="ind-saque-btn" onclick="abrirSaque()">
+      ↑ &nbsp;SOLICITAR SAQUE DE COMISSÕES · USDT
+    </button>
+
+  </div>
+
+  <!-- Modal Saque -->
+  <div class="ind-modal-overlay" id="ind-modal">
+    <div class="ind-modal">
+      <div class="ind-modal-title">Solicitar Saque</div>
+      <div class="ind-modal-sub">COMISSÕES DISPONÍVEIS · <span id="modal-saldo" style="color:var(--gold);">$0,00</span> USDT</div>
+      <label>ENDEREÇO USDT (TRC-20 ou ERC-20)</label>
+      <input type="text" id="ind-wallet" placeholder="Endereço da sua carteira USDT..."/>
+      <label>VALOR A SACAR (USDT)</label>
+      <input type="number" id="ind-valor" placeholder="0.00"/>
+      <div class="ind-modal-btns">
+        <button class="ind-modal-cancel" onclick="fecharSaque()">CANCELAR</button>
+        <button class="ind-modal-confirm" onclick="confirmarSaque()">CONFIRMAR SOLICITAÇÃO</button>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -2490,22 +2772,23 @@ function renderExchanges() {
 // ══ TOGGLE LITE/PRO ════════════════════════════════════════════
 let currentMode = 'pro';
 
-function toggleMode() {
-    currentMode = currentMode === 'pro' ? 'lite' : 'pro';
+function setMode(mode) {
+    currentMode = mode;
     const body = document.body;
-    const label = document.getElementById('mode-label');
-    const icon  = document.getElementById('mode-icon');
-    if(currentMode === 'lite') {
+    const btnL = document.getElementById('btn-lite');
+    const btnP = document.getElementById('btn-pro');
+    if(mode === 'lite') {
         body.classList.add('lite-mode');
-        label.textContent = 'PRO';
-        icon.textContent  = '⊟';
+        if(btnL){ btnL.style.background='var(--gold)'; btnL.style.color='#000'; }
+        if(btnP){ btnP.style.background='transparent'; btnP.style.color='var(--text2)'; }
     } else {
         body.classList.remove('lite-mode');
-        label.textContent = 'LITE';
-        icon.textContent  = '⊞';
+        if(btnP){ btnP.style.background='var(--gold)'; btnP.style.color='#000'; }
+        if(btnL){ btnL.style.background='transparent'; btnL.style.color='var(--text2)'; }
     }
     updateLite();
 }
+function toggleMode() { setMode(currentMode === 'pro' ? 'lite' : 'pro'); }
 
 function updateLite() {
     if(currentMode !== 'lite') return;
@@ -2522,11 +2805,76 @@ function updateLite() {
     set2('lite-cap',      capTotal == null ? '$--' : '$' + fmt(capTotal));
     set2('lite-profit',   '+$' + fmt(profit||0, 2));
     set2('lite-roi',      roi.toFixed(2) + '%');
-    set2('lite-dias',     dias < 1 ? '< 1 dia' : Math.floor(dias) + ' dias');
     set2('lite-meta-pct', metaPct.toFixed(0) + '%');
     set2('lite-meta-cur', '$' + fmt(profit||0, 2) + ' acumulado');
     setW2('lite-meta-bar', metaPct.toFixed(2) + '%');
-    if(btcBase) set2('lite-btc-price', '$' + fmt(btcBase));
+    if(btcBase) {
+        set2('lite-btc-price', '$' + fmt(btcBase));
+        set2('lite-btc-pool-usd', '≈ $' + fmt(POOL_BTC * btcBase, 0));
+    }
+    // Sincronizar latência e ticks
+    const latEl = document.getElementById('lite-latency');
+    const proLat = document.getElementById('st-latency');
+    if(latEl && proLat) latEl.textContent = proLat.textContent;
+    set2('lite-ticks', getTicks().toLocaleString('pt-BR'));
+    set2('lite-ticks-bar', getTicks().toLocaleString('pt-BR'));
+}
+
+
+// ══ INDICAÇÕES ════════════════════════════════════════════════
+const IND_REF_CODE = 'EDU001';
+const IND_REF_URL  = 'protocolocripto.com/eduardo-santi?ref=' + IND_REF_CODE;
+const IND_COMISSAO_PCT = 0.30; // 30% do profit do indicado
+
+// Simulação: indicações ativas (em produção viria do servidor)
+const IND_ATIVAS = 0; // número de indicações ativas do cliente
+
+function updateIndicacoes() {
+    // Comissão simulada — em produção seria a soma de 30% dos profits dos indicados
+    // Por ora mostra 0 pois não há indicados registrados
+    const comissao = 0;
+    const el = document.getElementById('ind-total');
+    if(el) el.textContent = '$' + fmt(comissao, 2);
+    const el2 = document.getElementById('ind-count');
+    if(el2) el2.textContent = IND_ATIVAS;
+    const modal = document.getElementById('modal-saldo');
+    if(modal) modal.textContent = '$' + fmt(comissao, 2);
+}
+
+function copyIndLink() {
+    navigator.clipboard.writeText('https://' + IND_REF_URL).then(() => {
+        const btn = document.querySelector('.ind-copy-btn');
+        const orig = btn.textContent;
+        btn.textContent = '✓ COPIADO!';
+        btn.style.background = 'var(--green)';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+    }).catch(() => {
+        const el = document.getElementById('ind-link-url');
+        if(el) { const range = document.createRange(); range.selectNode(el); window.getSelection().removeAllRanges(); window.getSelection().addRange(range); }
+    });
+}
+
+function abrirSaque() {
+    updateIndicacoes();
+    document.getElementById('ind-modal').classList.add('show');
+}
+
+function fecharSaque() {
+    document.getElementById('ind-modal').classList.remove('show');
+    document.getElementById('ind-wallet').value = '';
+    document.getElementById('ind-valor').value  = '';
+}
+
+function confirmarSaque() {
+    const wallet = document.getElementById('ind-wallet').value.trim();
+    const valor  = parseFloat(document.getElementById('ind-valor').value);
+    if(!wallet) { alert('Informe o endereço da carteira.'); return; }
+    if(!valor || valor <= 0) { alert('Informe um valor válido.'); return; }
+    fecharSaque();
+    // Em produção: enviar solicitação para o servidor
+    setTimeout(() => {
+        alert('✓ Solicitação enviada!\n\nEm até 24h o Protocolo processará seu saque.\n\nEndereço: ' + wallet.substring(0,12) + '...');
+    }, 300);
 }
 
 function doLogout(){
@@ -2552,6 +2900,7 @@ function showPage(page, el) {
     const pg=$('page-'+page); if(pg) pg.classList.add('active');
     if(el) el.classList.add('active');
     if(page==='exchanges') renderExchanges();
+    if(page==='indicacoes') updateIndicacoes();
     if(page==='chart') renderChart();
     closeSidebar();
 }
